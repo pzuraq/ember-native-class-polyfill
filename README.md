@@ -1,7 +1,11 @@
+[![Build Status](https://travis-ci.org/pzuraq/ember-native-class-polyfill.svg?branch=master)](https://travis-ci.org/pzuraq/ember-native-class-polyfill)
+
 ember-native-class-polyfill
 ==============================================================================
 
-[Short description of the addon.]
+This addon provides a polyfill for the native class behavior that was proposed
+in Ember RFCs [#240](https://emberjs.github.io/rfcs/0240-es-classes.html) and
+[#337](https://emberjs.github.io/rfcs/0337-native-class-constructor-update.html).
 
 Installation
 ------------------------------------------------------------------------------
@@ -14,7 +18,56 @@ ember install ember-native-class-polyfill
 Usage
 ------------------------------------------------------------------------------
 
-[Longer description of how to use the addon in apps.]
+With this polyfill installed, you can extend from any Ember class using native
+class syntax:
+
+```js
+import Component from '@ember/component';
+
+class ButtonComponent extends Component {}
+```
+
+## Init vs Constructor
+
+Although it was possible to use native classes before the RFCs, there were some
+subtle changes to behavior made to classes as part of the RFCs. Most notably,
+`constructor` code will occur _before_ `init`:
+
+```js
+import Component from '@ember/component';
+
+class ButtonComponent extends Component {
+  constructor() {
+    super();
+    console.log('first');
+  }
+
+  init() {
+    super.init(...arguments);
+    console.log('second');
+  }
+}
+```
+
+This behavior change was made in preparation for class fields, since they occur
+during construction. The subtleties of these methods can be confusing, and as
+such, it is recommended that you continue to use `init` instead of `constructor`
+for any initialization code in your classes.
+
+## Class Fileds and Decorators
+
+Note that this polyfill does _not_ enable the usage of class field or
+decorators, and does _not_ include any decorators. Ember has not yet added first
+class support for these features, and support for them will need to be added in
+future RFCs. This polyfill, and the behaviors shipped in the native class RFCs,
+solidify the behavior of classes so that we can prepare for both class fields
+and decorators separately.
+
+If you would like to use these features, you can check out the
+[ember-decorators](https://github.com/ember-decorators/ember-decorators)
+project. The project is _stable_ and committed to providing a stable API to
+build on, but cannot provide guarantees on changes to the behavior of decorators
+and class fields themselves.
 
 
 Contributing
