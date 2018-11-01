@@ -22,7 +22,7 @@ env:
 jobs:
   fail_fast: true
   allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-canary
+    - env: EMBER_TRY_SCENARIO=ember-beta
 
   include:
     # runs linting and tests with current locked deps
@@ -40,15 +40,15 @@ jobs:
       script:
         - yarn test
 
-    # we recommend new addons test the current and previous LTS
-    # as well as latest stable release (bonus points to beta/canary)
     - stage: "Additional Tests"
-      env: EMBER_TRY_SCENARIO=ember-lts-2.16
-    - env: EMBER_TRY_SCENARIO=ember-lts-2.18
+      env: EMBER_TRY_SCENARIO=ember-lts-3.4
+    - env: EMBER_TRY_SCENARIO=ember-3.5
     - env: EMBER_TRY_SCENARIO=ember-release
     - env: EMBER_TRY_SCENARIO=ember-beta
-    - env: EMBER_TRY_SCENARIO=ember-canary
-    - env: EMBER_TRY_SCENARIO=ember-default-with-jquery
+    - env: INCLUDE_IE=true EMBER_TRY_SCENARIO=ember-lts-3.4
+    - env: INCLUDE_IE=true EMBER_TRY_SCENARIO=ember-3.5
+    - env: INCLUDE_IE=true EMBER_TRY_SCENARIO=ember-release
+    - env: INCLUDE_IE=true EMBER_TRY_SCENARIO=ember-beta
 
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash

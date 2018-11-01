@@ -1303,6 +1303,14 @@ browserslist@^3.2.6:
     caniuse-lite "^1.0.30000844"
     electron-to-chromium "^1.3.47"
 
+browserslist@^4.3.4:
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.3.4.tgz#4477b737db6a1b07077275b24791e680d4300425"
+  dependencies:
+    caniuse-lite "^1.0.30000899"
+    electron-to-chromium "^1.3.82"
+    node-releases "^1.0.1"
+
 bser@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/bser/-/bser-2.0.0.tgz#9ac78d3ed5d915804fd87acb158bc797147a1719"
@@ -1414,6 +1422,10 @@ can-symlink@^1.0.0:
 caniuse-lite@^1.0.30000844:
   version "1.0.30000902"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000902.tgz#74eaf6ed7f1d31e5148725081c9df60051c5e2b3"
+
+caniuse-lite@^1.0.30000899:
+  version "1.0.30000903"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000903.tgz#86d46227759279b3db345ddbe778335dbba9e858"
 
 capture-exit@^1.2.0:
   version "1.2.0"
@@ -1930,7 +1942,7 @@ ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
-electron-to-chromium@^1.3.47:
+electron-to-chromium@^1.3.47, electron-to-chromium@^1.3.82:
   version "1.3.82"
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.82.tgz#7d13ae4437d2a783de3f4efba96b186c540b67b1"
 
@@ -2270,9 +2282,9 @@ ember-source-channel-url@^1.0.1, ember-source-channel-url@^1.1.0:
   dependencies:
     got "^8.0.1"
 
-ember-source@~3.5.0:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/ember-source/-/ember-source-3.5.1.tgz#fed88dc675f031b499642dd19819f7f4d558d3fd"
+"ember-source@https://s3.amazonaws.com/builds.emberjs.com/release/shas/faa9b05c491bed29556c23060f597e1fcd2b73ce.tgz":
+  version "3.4.4-release"
+  resolved "https://s3.amazonaws.com/builds.emberjs.com/release/shas/faa9b05c491bed29556c23060f597e1fcd2b73ce.tgz#80f4246e711fe7479132eb605b8b17f3802d5e19"
   dependencies:
     broccoli-funnel "^2.0.1"
     broccoli-merge-trees "^2.0.0"
@@ -4600,6 +4612,12 @@ node-pre-gyp@^0.10.0:
     semver "^5.3.0"
     tar "^4"
 
+node-releases@^1.0.1:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.0.2.tgz#27c296d9fca3b659c64f7d43ea47a31ad2a90e4b"
+  dependencies:
+    semver "^5.3.0"
+
 nopt@^3.0.6:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/nopt/-/nopt-3.0.6.tgz#c6465dbf08abcd4db359317f79ac68a646b28ff9"
@@ -5402,7 +5420,7 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-"semver@2 || 3 || 4 || 5", semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0:
+"semver@2 || 3 || 4 || 5", semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0, semver@^5.6.0:
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.6.0.tgz#7e74256fbaa49c75aa7c7a205cc22799cac80004"
 

@@ -1,11 +1,11 @@
 {
   "name": "ember-native-class-polyfill",
   "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "Polyfill for Ember native classes",
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": "https://github.com/pzuraq/ember-native-class-polyfill",
   "license": "MIT",
   "author": "",
   "directories": {
@@ -21,7 +21,12 @@
     "test:all": "ember try:each"
   },
   "dependencies": {
-    "ember-cli-babel": "^6.16.0"
+    "broccoli-debug": "^0.6.5",
+    "broccoli-funnel": "^2.0.1",
+    "browserslist": "^4.3.4",
+    "ember-cli-babel": "^6.16.0",
+    "ember-cli-version-checker": "^2.1.2",
+    "semver": "^5.6.0"
   },
   "devDependencies": {
     "@ember/optional-features": "^0.6.3",
@@ -42,7 +47,7 @@
     "ember-maybe-import-regenerator": "^0.1.6",
     "ember-qunit": "^3.4.1",
     "ember-resolver": "^5.0.1",
-    "ember-source": "~3.5.0",
+    "ember-source": "https://s3.amazonaws.com/builds.emberjs.com/release/shas/faa9b05c491bed29556c23060f597e1fcd2b73ce.tgz",
     "ember-source-channel-url": "^1.1.0",
     "ember-try": "^1.0.0",
     "eslint-plugin-ember": "^5.2.0",
@@ -54,6 +59,7 @@
     "node": "6.* || 8.* || >= 10.*"
   },
   "ember-addon": {
-    "configPath": "tests/dummy/config"
+    "configPath": "tests/dummy/config",
+    "after": "ember-source"
   }
 }
