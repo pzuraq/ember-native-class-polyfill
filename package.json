@@ -1,11 +1,11 @@
 {
   "name": "ember-native-class-polyfill",
   "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "Polyfill for Ember native classes",
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": "https://github.com/pzuraq/ember-native-class-polyfill",
   "license": "MIT",
   "author": "",
   "directories": {
