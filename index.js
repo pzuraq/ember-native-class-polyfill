@@ -39,7 +39,7 @@ module.exports = {
         const browsers = browserslist(this.project.targets.browsers);
 
         if (browsers.find(browser => browser.includes('ie'))) {
-          this._polyfillPath += '-ie'
+          this._polyfillPath += '/ie'
         }
       }
     } else {

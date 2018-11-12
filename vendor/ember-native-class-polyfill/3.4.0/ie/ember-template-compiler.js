@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.5.1-ember-native-class-polyfill-3-5+1d50d6a6
+ * @version   3.4.6-ember-native-class-polyfill-3-4+14b33dc1
  */
 
 /*globals process */
@@ -7783,7 +7783,7 @@ enifed('ember-utils', ['exports'], function (exports) {
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.5.1-ember-native-class-polyfill-3-5+1d50d6a6";
+  exports.default = "3.4.6-ember-native-class-polyfill-3-4+14b33dc1";
 });
 enifed("handlebars", ["exports"], function (exports) {
   "use strict";
