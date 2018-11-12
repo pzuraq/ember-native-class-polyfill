@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.4.6-ember-native-class-polyfill-3-4+c124663c
+ * @version   3.5.1-ember-native-class-polyfill-3-5+f1af53df
  */
 
 /*globals process */
@@ -27874,6 +27874,9 @@ enifed('ember-meta/lib/meta', ['exports', 'ember-babel', '@ember/debug', 'ember-
                 } else {
                     // update own listener
                     listener.kind = kind;
+                    // TODO: Remove this when removing REMOVE_ALL, it won't be necessary
+                    listener.target = target;
+                    listener.method = method;
                 }
             }
         };
@@ -29006,7 +29009,7 @@ enifed('ember-metal', ['exports', 'ember-babel', '@ember/polyfills', 'ember-util
       }));
       ```
     
-      @private
+      @public
       @method defineProperty
       @static
       @for @ember/object
@@ -30920,33 +30923,44 @@ enifed('ember-metal', ['exports', 'ember-babel', '@ember/polyfills', 'ember-util
 
             var meta$$1 = (0, _emberMeta.meta)(obj);
             if (meta$$1.peekWatching(keyName) > 0) {
-                addDependentKeys(this, obj, keyName, meta$$1);
+                this.consume(obj, keyName, meta$$1);
             }
         };
 
         AliasedProperty.prototype.teardown = function teardown(obj, keyName, meta$$1) {
-            if (meta$$1.peekWatching(keyName) > 0) {
-                removeDependentKeys(this, obj, keyName, meta$$1);
-            }
+            this.unconsume(obj, keyName, meta$$1);
         };
 
         AliasedProperty.prototype.willWatch = function willWatch(obj, keyName, meta$$1) {
-            addDependentKeys(this, obj, keyName, meta$$1);
+            this.consume(obj, keyName, meta$$1);
         };
 
         AliasedProperty.prototype.didUnwatch = function didUnwatch(obj, keyName, meta$$1) {
-            removeDependentKeys(this, obj, keyName, meta$$1);
+            this.unconsume(obj, keyName, meta$$1);
         };
 
         AliasedProperty.prototype.get = function get(obj, keyName) {
             var ret = _get(obj, this.altKey);
+            this.consume(obj, keyName, (0, _emberMeta.meta)(obj));
+            return ret;
+        };
+
+        AliasedProperty.prototype.unconsume = function unconsume(obj, keyName, meta$$1) {
+            var wasConsumed = getCachedValueFor(obj, keyName) === CONSUMED;
+            if (wasConsumed || meta$$1.peekWatching(keyName) > 0) {
+                removeDependentKeys(this, obj, keyName, meta$$1);
+            }
+            if (wasConsumed) {
+                getCacheFor(obj).delete(keyName);
+            }
+        };
+
+        AliasedProperty.prototype.consume = function consume(obj, keyName, meta$$1) {
             var cache = getCacheFor(obj);
             if (cache.get(keyName) !== CONSUMED) {
-                var meta$$1 = (0, _emberMeta.meta)(obj);
                 cache.set(keyName, CONSUMED);
                 addDependentKeys(this, obj, keyName, meta$$1);
             }
-            return ret;
         };
 
         AliasedProperty.prototype.set = function set(obj, _keyName, value) {
@@ -33548,8 +33562,30 @@ enifed('ember-routing/lib/services/router', ['exports', '@ember/service', '@embe
   'use strict';
 
   /**
-     The Router service is the public API that provides component/view layer
-     access to the router.
+     The Router service is the public API that provides access to the router.
+  
+     The immediate benefit of the Router service is that you can inject it into components, 
+     giving them a friendly way to initiate transitions and ask questions about the current 
+     global router state.
+  
+     In this example, the Router service is injected into a component to initiate a transition 
+     to a dedicated route:
+     ```javascript
+     import Component from '@ember/component';
+     import { inject as service } from '@ember/service';
+  
+     export default Component.extend({
+       router: service(),
+  
+       actions: {
+         next() {
+           this.get('router').transitionTo('other.route');
+         }
+       }
+     });
+     ```
+  
+     Like any service, it can also be injected into helpers, routes, etc.
   
      @public
      @class RouterService
@@ -33875,11 +33911,11 @@ enifed('ember-routing/lib/system/dsl', ['exports', 'ember-babel', '@ember/polyfi
           return true;
         }
 
-        return ['array', 'basic', 'object', 'application'].indexOf(name) === -1;
+        return ['basic', 'application'].indexOf(name) === -1;
       }()) && (0, _debug.assert)('\'' + name + '\' cannot be used as a route name.', function () {
         if (options.overrideNameAssertion === true) {
           return true;
-        }return ['array', 'basic', 'object', 'application'].indexOf(name) === -1;
+        }return ['basic', 'application'].indexOf(name) === -1;
       }()));
       (true && !(name.indexOf(':') === -1) && (0, _debug.assert)('\'' + name + '\' is not a valid route name. It cannot contain a \':\'. You may want to use the \'path\' option instead.', name.indexOf(':') === -1));
 
@@ -36133,14 +36169,14 @@ enifed('ember-routing/lib/system/router', ['exports', 'ember-owner', '@ember/pol
       var handlerInfoLength = handlerInfos.length;
       var leafRouteName = handlerInfos[handlerInfoLength - 1].name;
       var cached = this._qpCache[leafRouteName];
-      if (cached) {
+      if (cached !== undefined) {
         return cached;
       }
 
       var shouldCache = true;
-      var qpsByUrlKey = {};
       var map = {};
       var qps = [];
+      var qpsByUrlKey = true ? {} : null;
 
       for (var i = 0; i < handlerInfoLength; ++i) {
         var qpMeta = this._getQPMeta(handlerInfos[i]);
@@ -36153,15 +36189,17 @@ enifed('ember-routing/lib/system/router', ['exports', 'ember-owner', '@ember/pol
         // Loop over each QP to make sure we don't have any collisions by urlKey
         for (var _i = 0; _i < qpMeta.qps.length; _i++) {
           var qp = qpMeta.qps[_i];
-          var urlKey = qp.urlKey;
-          var qpOther = qpsByUrlKey[urlKey];
 
-          if (qpOther && qpOther.controllerName !== qp.controllerName) {
-            var otherQP = qpsByUrlKey[urlKey];
-            (true && !(false) && (0, _debug.assert)('You\'re not allowed to have more than one controller property map to the same query param key, but both `' + otherQP.scopedPropertyName + '` and `' + qp.scopedPropertyName + '` map to `' + urlKey + '`. You can fix this by mapping one of the controller properties to a different query param key via the `as` config option, e.g. `' + otherQP.prop + ': { as: \'other-' + otherQP.prop + '\' }`', false));
+          if (true) {
+            var urlKey = qp.urlKey;
+
+            var qpOther = qpsByUrlKey[urlKey];
+            if (qpOther && qpOther.controllerName !== qp.controllerName) {
+              (true && !(false) && (0, _debug.assert)('You\'re not allowed to have more than one controller property map to the same query param key, but both `' + qpOther.scopedPropertyName + '` and `' + qp.scopedPropertyName + '` map to `' + urlKey + '`. You can fix this by mapping one of the controller properties to a different query param key via the `as` config option, e.g. `' + qpOther.prop + ': { as: \'other-' + qpOther.prop + '\' }`', false));
+            }
+            qpsByUrlKey[urlKey] = qp;
           }
 
-          qpsByUrlKey[urlKey] = qp;
           qps.push(qp);
         }
 
@@ -38619,11 +38657,11 @@ enifed('ember-runtime/lib/mixins/array', ['exports', '@ember/deprecated-features
       return this;
     },
     removeObjects: function (objects) {
-      (0, _emberMetal.beginPropertyChanges)(this);
+      (0, _emberMetal.beginPropertyChanges)();
       for (var i = objects.length - 1; i >= 0; i--) {
         this.removeObject(objects[i]);
       }
-      (0, _emberMetal.endPropertyChanges)(this);
+      (0, _emberMetal.endPropertyChanges)();
       return this;
     },
     addObject: function (obj) {
@@ -38638,11 +38676,11 @@ enifed('ember-runtime/lib/mixins/array', ['exports', '@ember/deprecated-features
     addObjects: function (objects) {
       var _this2 = this;
 
-      (0, _emberMetal.beginPropertyChanges)(this);
+      (0, _emberMetal.beginPropertyChanges)();
       objects.forEach(function (obj) {
         return _this2.addObject(obj);
       });
-      (0, _emberMetal.endPropertyChanges)(this);
+      (0, _emberMetal.endPropertyChanges)();
       return this;
     }
   });
@@ -45969,7 +46007,7 @@ enifed('ember/index', ['exports', 'require', 'ember-environment', 'node-module',
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.4.6-ember-native-class-polyfill-3-4+c124663c";
+  exports.default = "3.5.1-ember-native-class-polyfill-3-5+f1af53df";
 });
 /*global enifed, module */
 enifed('node-module', ['exports'], function(_exports) {

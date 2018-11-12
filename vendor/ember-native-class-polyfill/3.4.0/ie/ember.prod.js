@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.4.6-ember-native-class-polyfill-3-4+c124663c
+ * @version   3.4.6-ember-native-class-polyfill-3-4+14b33dc1
  */
 
 /*globals process */
@@ -27260,6 +27260,9 @@ enifed('ember-meta/lib/meta', ['exports', 'ember-babel', '@ember/debug', 'ember-
                 } else {
                     // update own listener
                     listener.kind = kind;
+                    // TODO: Remove this when removing REMOVE_ALL, it won't be necessary
+                    listener.target = target;
+                    listener.method = method;
                 }
             }
         };
@@ -43135,7 +43138,7 @@ enifed('ember/index', ['exports', 'require', 'ember-environment', 'node-module',
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.4.6-ember-native-class-polyfill-3-4+c124663c";
+  exports.default = "3.4.6-ember-native-class-polyfill-3-4+14b33dc1";
 });
 /*global enifed, module */
 enifed('node-module', ['exports'], function(_exports) {

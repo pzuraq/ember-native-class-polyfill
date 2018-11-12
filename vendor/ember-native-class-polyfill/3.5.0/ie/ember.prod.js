@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.5.1-ember-native-class-polyfill-3-5+1d50d6a6
+ * @version   3.5.1-ember-native-class-polyfill-3-5+f1af53df
  */
 
 /*globals process */
@@ -26820,7 +26820,7 @@ enifed('ember-meta/lib/meta', ['exports', 'ember-babel', '@ember/debug', 'ember-
         function Meta(obj) {
 
             this._listenersVersion = 1;
-            this._inheritedEnd = 0;
+            this._inheritedEnd = -1;
             this._flattenedVersion = 0;
 
             this._parent = undefined;
@@ -27260,8 +27260,28 @@ enifed('ember-meta/lib/meta', ['exports', 'ember-babel', '@ember/debug', 'ember-
                 } else {
                     // update own listener
                     listener.kind = kind;
+                    // TODO: Remove this when removing REMOVE_ALL, it won't be necessary
+                    listener.target = target;
+                    listener.method = method;
                 }
             }
+        };
+
+        Meta.prototype.writableListeners = function () {
+            // Check if we need to invalidate and reflatten. We need to do this if we
+            // have already flattened (flattened version is the current version) and
+            // we are either writing to a prototype meta OR we have never inherited, and
+            // may have cached the parent's listeners.
+            if (this._flattenedVersion === currentListenerVersion && (this.source === this.proto || this._inheritedEnd === -1)) {
+                currentListenerVersion++;
+            }
+            // Inherited end has not been set, then we have never created our own
+            // listeners, but may have cached the parent's
+            if (this._inheritedEnd === -1) {
+                this._inheritedEnd = 0;
+                this._listeners = [];
+            }
+            return this._listeners;
         };
         /**
           Flattening is based on a global revision counter. If the revision has
@@ -27275,47 +27295,10 @@ enifed('ember-meta/lib/meta', ['exports', 'ember-babel', '@ember/debug', 'ember-
           be updated very often in practice.
         */
 
-        Meta.prototype._shouldFlatten = function () {
-            return this._flattenedVersion < currentListenerVersion;
-        };
-
-        Meta.prototype._isFlattened = function () {
-            // A meta is flattened _only_ if the saved version is equal to the current
-            // version. Otherwise, it will flatten again the next time
-            // `flattenedListeners` is called, so there is no reason to bump the global
-            // version again.
-            return this._flattenedVersion === currentListenerVersion;
-        };
-
-        Meta.prototype._setFlattened = function () {
-            this._flattenedVersion = currentListenerVersion;
-        };
-
-        Meta.prototype.writableListeners = function () {
-            var listeners = this._listeners;
-            if (listeners === undefined) {
-                listeners = this._listeners = [];
-            }
-            // Check if the meta is owned by a prototype. If so, our listeners are
-            // inheritable so check the meta has been flattened. If it has, children
-            // have inherited its listeners, so bump the global version counter to
-            // invalidate.
-            if (this.source === this.proto && this._isFlattened()) {
-                currentListenerVersion++;
-            }
-            return listeners;
-        };
-
         Meta.prototype.flattenedListeners = function () {
             var parent, parentListeners, listeners, i, listener, index;
 
-            // If this instance doesn't have any of its own listeners (writableListeners
-            // has never been called) then we don't need to do any flattening, return
-            // the parent's listeners instead.
-            if (this._listeners === undefined) {
-                return this.parent !== null ? this.parent.flattenedListeners() : undefined;
-            }
-            if (this._shouldFlatten()) {
+            if (this._flattenedVersion < currentListenerVersion) {
                 parent = this.parent;
 
                 if (parent !== null) {
@@ -27323,50 +27306,55 @@ enifed('ember-meta/lib/meta', ['exports', 'ember-babel', '@ember/debug', 'ember-
                     parentListeners = parent.flattenedListeners();
 
                     if (parentListeners !== undefined) {
-                        listeners = this._listeners;
+                        if (this._listeners === undefined) {
+                            this._listeners = parentListeners;
+                        } else {
+                            listeners = this._listeners;
 
-                        if (listeners === undefined) {
-                            listeners = this._listeners = [];
-                        }
-                        if (this._inheritedEnd > 0) {
-                            listeners.splice(0, this._inheritedEnd);
-                            this._inheritedEnd = 0;
-                        }
-                        for (i = 0; i < parentListeners.length; i++) {
-                            listener = parentListeners[i];
-                            index = indexOfListener(listeners, listener.event, listener.target, listener.method);
+                            if (this._inheritedEnd > 0) {
+                                listeners.splice(0, this._inheritedEnd);
+                                this._inheritedEnd = 0;
+                            }
+                            for (i = 0; i < parentListeners.length; i++) {
+                                listener = parentListeners[i];
+                                index = indexOfListener(listeners, listener.event, listener.target, listener.method);
 
-                            if (index === -1) {
-                                listeners.unshift(listener);
-                                this._inheritedEnd++;
+                                if (index === -1) {
+                                    listeners.unshift(listener);
+                                    this._inheritedEnd++;
+                                }
                             }
                         }
                     }
                 }
-                this._setFlattened();
+                this._flattenedVersion = currentListenerVersion;
             }
             return this._listeners;
         };
 
         Meta.prototype.matchingListeners = function (eventName) {
             var listeners = this.flattenedListeners(),
-                result,
                 index,
                 listener;
-            if (listeners !== undefined) {
-                result = [];
+            var result = void 0;
 
+            if (listeners !== undefined) {
                 for (index = 0; index < listeners.length; index++) {
                     listener = listeners[index];
                     // REMOVE and REMOVE_ALL listeners are placeholders that tell us not to
                     // inherit, so they never match. Only ADD and ONCE can match.
 
                     if (listener.event === eventName && (listener.kind === 0 /* ADD */ || listener.kind === 1 /* ONCE */)) {
+                        if (result === undefined) {
+                            // we create this array only after we've found a listener that
+                            // matches to avoid allocations when no matches are found.
+                            result = [];
+                        }
                         result.push(listener.target, listener.method, listener.kind === 1 /* ONCE */);
                     }
                 }
-                return result.length === 0 ? undefined : result;
             }
+            return result;
         };
 
         (0, _emberBabel.createClass)(Meta, [{
@@ -43170,7 +43158,7 @@ enifed('ember/index', ['exports', 'require', 'ember-environment', 'node-module',
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.5.1-ember-native-class-polyfill-3-5+1d50d6a6";
+  exports.default = "3.5.1-ember-native-class-polyfill-3-5+f1af53df";
 });
 /*global enifed, module */
 enifed('node-module', ['exports'], function(_exports) {
