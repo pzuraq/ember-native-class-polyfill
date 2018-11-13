@@ -58,7 +58,7 @@ module.exports = {
       return tree;
     }
 
-    return new BroccoliFunnel(`vendor/ember-native-class-polyfill/${this._polyfillPath}`, {
+    return new BroccoliFunnel(`${this.root}/vendor/ember-native-class-polyfill/${this._polyfillPath}`, {
       destDir: 'ember'
     });
   },
