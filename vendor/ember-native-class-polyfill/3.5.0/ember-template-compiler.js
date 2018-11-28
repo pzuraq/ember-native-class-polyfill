@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.5.1-ember-native-class-polyfill-3-5+f1af53df
+ * @version   3.5.1-ember-native-class-polyfill-3-5+f56b8abf
  */
 
 /*globals process */
@@ -141,7 +141,7 @@ enifed('@ember/canary-features/index', ['exports', '@ember/polyfills', 'ember-en
       @public
     */
     function (feature) {
-        var featureValue = FEATURES[feature];
+        let featureValue = FEATURES[feature];
         if (featureValue === true || featureValue === false) {
             return featureValue;
         } else if (_emberEnvironment.ENV.ENABLE_OPTIONAL_FEATURES) {
@@ -155,7 +155,7 @@ enifed('@ember/canary-features/index', ['exports', '@ember/polyfills', 'ember-en
      @module ember/canary-features
      @private
     */
-    var DEFAULT_FEATURES = exports.DEFAULT_FEATURES = {
+    const DEFAULT_FEATURES = exports.DEFAULT_FEATURES = {
         EMBER_LIBRARIES_ISREGISTERED: false,
         EMBER_IMPROVED_INSTRUMENTATION: false,
         EMBER_GLIMMER_NAMED_ARGUMENTS: true,
@@ -180,7 +180,7 @@ enifed('@ember/canary-features/index', ['exports', '@ember/polyfills', 'ember-en
       @since 1.1.0
       @public
     */
-    var FEATURES = exports.FEATURES = (0, _polyfills.assign)(DEFAULT_FEATURES, _emberEnvironment.ENV.FEATURES);
+    const FEATURES = exports.FEATURES = (0, _polyfills.assign)(DEFAULT_FEATURES, _emberEnvironment.ENV.FEATURES);
     function featureValue(value) {
         if (_emberEnvironment.ENV.ENABLE_OPTIONAL_FEATURES && value === null) {
             return true;
@@ -228,18 +228,18 @@ enifed('@ember/debug/index', ['exports', '@ember/debug/lib/warn', '@ember/debug/
     });
 
     // These are the default production build versions:
-    var noop = function () {};
-    var assert = noop;
-    var info = noop;
-    var warn = noop;
-    var debug = noop;
-    var deprecate = noop;
-    var debugSeal = noop;
-    var debugFreeze = noop;
-    var runInDebug = noop;
-    var setDebugFunction = noop;
-    var getDebugFunction = noop;
-    var deprecateFunc = function () {
+    const noop = () => {};
+    let assert = noop;
+    let info = noop;
+    let warn = noop;
+    let debug = noop;
+    let deprecate = noop;
+    let debugSeal = noop;
+    let debugFreeze = noop;
+    let runInDebug = noop;
+    let setDebugFunction = noop;
+    let getDebugFunction = noop;
+    let deprecateFunc = function () {
         return arguments[arguments.length - 1];
     };
 
@@ -321,7 +321,7 @@ enifed('@ember/debug/index', ['exports', '@ember/debug/lib/warn', '@ember/debug/
     */
     setDebugFunction('assert', function (desc, test) {
         if (!test) {
-            throw new _error.default('Assertion Failed: ' + desc);
+            throw new _error.default(`Assertion Failed: ${desc}`);
         }
     });
     /**
@@ -342,9 +342,9 @@ enifed('@ember/debug/index', ['exports', '@ember/debug/lib/warn', '@ember/debug/
     setDebugFunction('debug', function (message) {
         /* eslint-disable no-console */
         if (console.debug) {
-            console.debug('DEBUG: ' + message);
+            console.debug(`DEBUG: ${message}`);
         } else {
-            console.log('DEBUG: ' + message);
+            console.log(`DEBUG: ${message}`);
         }
         /* eslint-ensable no-console */
     });
@@ -357,9 +357,7 @@ enifed('@ember/debug/index', ['exports', '@ember/debug/lib/warn', '@ember/debug/
       @private
     */
     setDebugFunction('info', function () {
-        var _console;
-
-        (_console = console).info.apply(_console, arguments); /* eslint-disable-line no-console */
+        console.info(...arguments); /* eslint-disable-line no-console */
     });
     /**
      @module @ember/application
@@ -385,28 +383,18 @@ enifed('@ember/debug/index', ['exports', '@ember/debug/lib/warn', '@ember/debug/
       @return {Function} A new function that wraps the original function with a deprecation warning
       @private
     */
-    setDebugFunction('deprecateFunc', function () {
-        var _len, args, _key, message, options, func, _message, _func;
-
-        for (_len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
+    setDebugFunction('deprecateFunc', function (...args) {
         if (args.length === 3) {
-            message = args[0], options = args[1], func = args[2];
-
-
+            let [message, options, func] = args;
             return function () {
                 deprecate(message, false, options);
                 return func.apply(this, arguments);
             };
         } else {
-            _message = args[0], _func = args[1];
-
-
+            let [message, func] = args;
             return function () {
-                deprecate(_message);
-                return _func.apply(this, arguments);
+                deprecate(message);
+                return func.apply(this, arguments);
             };
         }
     });
@@ -449,20 +437,18 @@ enifed('@ember/debug/index', ['exports', '@ember/debug/lib/warn', '@ember/debug/
     setDebugFunction('deprecate', _deprecate2.default);
     setDebugFunction('warn', _warn2.default);
 
+    let _warnIfUsingStrippedFeatureFlags;
     if (true && !(0, _testing.isTesting)()) {
         if (typeof window !== 'undefined' && (_emberBrowserEnvironment.isFirefox || _emberBrowserEnvironment.isChrome) && window.addEventListener) {
-            window.addEventListener('load', function () {
-                var downloadURL;
-
+            window.addEventListener('load', () => {
                 if (document.documentElement && document.documentElement.dataset && !document.documentElement.dataset.emberExtension) {
-                    downloadURL = void 0;
-
+                    let downloadURL;
                     if (_emberBrowserEnvironment.isChrome) {
                         downloadURL = 'https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi';
                     } else if (_emberBrowserEnvironment.isFirefox) {
                         downloadURL = 'https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/';
                     }
-                    debug('For more advanced debugging, install the Ember Inspector from ' + downloadURL);
+                    debug(`For more advanced debugging, install the Ember Inspector from ${downloadURL}`);
                 }
             }, false);
         }
@@ -478,7 +464,7 @@ enifed('@ember/debug/index', ['exports', '@ember/debug/lib/warn', '@ember/debug/
     exports.deprecateFunc = deprecateFunc;
     exports.setDebugFunction = setDebugFunction;
     exports.getDebugFunction = getDebugFunction;
-    exports._warnIfUsingStrippedFeatureFlags = void 0;
+    exports._warnIfUsingStrippedFeatureFlags = _warnIfUsingStrippedFeatureFlags;
 });
 enifed('@ember/debug/lib/deprecate', ['exports', '@ember/deprecated-features', 'ember-environment', '@ember/debug/index', '@ember/debug/lib/handlers'], function (exports, _deprecatedFeatures, _emberEnvironment, _index, _handlers) {
     'use strict';
@@ -527,139 +513,130 @@ enifed('@ember/debug/lib/deprecate', ['exports', '@ember/deprecated-features', '
       @param handler {Function} A function to handle deprecation calls.
       @since 2.1.0
     */
-    var registerHandler = function () {};
-    var missingOptionsDeprecation = void 0;
-    var missingOptionsIdDeprecation = void 0;
-    var missingOptionsUntilDeprecation = void 0;
-    var deprecate = function () {};
-
-    exports.registerHandler = registerHandler = function (handler) {
-        (0, _handlers.registerHandler)('deprecate', handler);
-    };
-    var formatMessage = function (_message, options) {
-        var message = _message;
-        if (options && options.id) {
-            message = message + (' [deprecation id: ' + options.id + ']');
-        }
-        if (options && options.url) {
-            message += ' See ' + options.url + ' for more details.';
-        }
-        return message;
-    };
-    registerHandler(function (message, options) {
-        var updatedMessage = formatMessage(message, options);
-        console.warn('DEPRECATION: ' + updatedMessage); // eslint-disable-line no-console
-    });
-    var captureErrorForStack = void 0;
-    if (new Error().stack) {
-        captureErrorForStack = function () {
-            return new Error();
+    let registerHandler = () => {};
+    let missingOptionsDeprecation;
+    let missingOptionsIdDeprecation;
+    let missingOptionsUntilDeprecation;
+    let deprecate = () => {};
+    {
+        exports.registerHandler = registerHandler = function (handler) {
+            (0, _handlers.registerHandler)('deprecate', handler);
         };
-    } else {
-        captureErrorForStack = function () {
-            try {
-                __fail__.fail();
-            } catch (e) {
-                return e;
+        let formatMessage = function (_message, options) {
+            let message = _message;
+            if (options && options.id) {
+                message = message + ` [deprecation id: ${options.id}]`;
             }
+            if (options && options.url) {
+                message += ` See ${options.url} for more details.`;
+            }
+            return message;
+        };
+        registerHandler(function (message, options) {
+            let updatedMessage = formatMessage(message, options);
+            console.warn(`DEPRECATION: ${updatedMessage}`); // eslint-disable-line no-console
+        });
+        let captureErrorForStack;
+        if (new Error().stack) {
+            captureErrorForStack = () => new Error();
+        } else {
+            captureErrorForStack = () => {
+                try {
+                    __fail__.fail();
+                } catch (e) {
+                    return e;
+                }
+            };
+        }
+        registerHandler(function (message, options, next) {
+            if (_emberEnvironment.ENV.LOG_STACKTRACE_ON_DEPRECATION) {
+                let stackStr = '';
+                let error = captureErrorForStack();
+                let stack;
+                if (error.stack) {
+                    if (error['arguments']) {
+                        // Chrome
+                        stack = error.stack.replace(/^\s+at\s+/gm, '').replace(/^([^\(]+?)([\n$])/gm, '{anonymous}($1)$2').replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}($1)').split('\n');
+                        stack.shift();
+                    } else {
+                        // Firefox
+                        stack = error.stack.replace(/(?:\n@:0)?\s+$/m, '').replace(/^\(/gm, '{anonymous}(').split('\n');
+                    }
+                    stackStr = `\n    ${stack.slice(2).join('\n    ')}`;
+                }
+                let updatedMessage = formatMessage(message, options);
+                console.warn(`DEPRECATION: ${updatedMessage}${stackStr}`); // eslint-disable-line no-console
+            } else {
+                next(message, options);
+            }
+        });
+        registerHandler(function (message, options, next) {
+            if (_emberEnvironment.ENV.RAISE_ON_DEPRECATION) {
+                let updatedMessage = formatMessage(message);
+                throw new Error(updatedMessage);
+            } else {
+                next(message, options);
+            }
+        });
+        exports.missingOptionsDeprecation = missingOptionsDeprecation = 'When calling `deprecate` you ' + 'must provide an `options` hash as the third parameter.  ' + '`options` should include `id` and `until` properties.';
+        exports.missingOptionsIdDeprecation = missingOptionsIdDeprecation = 'When calling `deprecate` you must provide `id` in options.';
+        exports.missingOptionsUntilDeprecation = missingOptionsUntilDeprecation = 'When calling `deprecate` you must provide `until` in options.';
+        /**
+         @module @ember/application
+         @public
+         */
+        /**
+          Display a deprecation warning with the provided message and a stack trace
+          (Chrome and Firefox only).
+             * In a production build, this method is defined as an empty function (NOP).
+          Uses of this method in Ember itself are stripped from the ember.prod.js build.
+             @method deprecate
+          @for @ember/application/deprecations
+          @param {String} message A description of the deprecation.
+          @param {Boolean} test A boolean. If falsy, the deprecation will be displayed.
+          @param {Object} options
+          @param {String} options.id A unique id for this deprecation. The id can be
+            used by Ember debugging tools to change the behavior (raise, log or silence)
+            for that specific deprecation. The id should be namespaced by dots, e.g.
+            "view.helper.select".
+          @param {string} options.until The version of Ember when this deprecation
+            warning will be removed.
+          @param {String} [options.url] An optional url to the transition guide on the
+            emberjs.com website.
+          @static
+          @public
+          @since 1.0.0
+        */
+        deprecate = function deprecate(message, test, options) {
+            if (_emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT !== true) {
+                (0, _index.assert)(missingOptionsDeprecation, !!(options && (options.id || options.until)));
+                (0, _index.assert)(missingOptionsIdDeprecation, !!options.id);
+                (0, _index.assert)(missingOptionsUntilDeprecation, !!options.until);
+            }
+            if (_deprecatedFeatures.DEPRECATE_OPTIONS_MISSING && (!options || !options.id && !options.until) && _emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT === true) {
+                deprecate(missingOptionsDeprecation, false, {
+                    id: 'ember-debug.deprecate-options-missing',
+                    until: '3.0.0',
+                    url: 'https://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
+                });
+            }
+            if (_deprecatedFeatures.DEPRECATE_ID_MISSING && options && !options.id && _emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT === true) {
+                deprecate(missingOptionsIdDeprecation, false, {
+                    id: 'ember-debug.deprecate-id-missing',
+                    until: '3.0.0',
+                    url: 'https://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
+                });
+            }
+            if (_deprecatedFeatures.DEPRECATE_UNTIL_MISSING && options && !options.until && _emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT === true) {
+                deprecate(missingOptionsUntilDeprecation, !!(options && options.until), {
+                    id: 'ember-debug.deprecate-until-missing',
+                    until: '3.0.0',
+                    url: 'https://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
+                });
+            }
+            (0, _handlers.invoke)('deprecate', message, test, options);
         };
     }
-    registerHandler(function (message, options, next) {
-        var stackStr, error, stack, updatedMessage;
-
-        if (_emberEnvironment.ENV.LOG_STACKTRACE_ON_DEPRECATION) {
-            stackStr = '';
-            error = captureErrorForStack();
-            stack = void 0;
-
-            if (error.stack) {
-                if (error['arguments']) {
-                    // Chrome
-                    stack = error.stack.replace(/^\s+at\s+/gm, '').replace(/^([^\(]+?)([\n$])/gm, '{anonymous}($1)$2').replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}($1)').split('\n');
-                    stack.shift();
-                } else {
-                    // Firefox
-                    stack = error.stack.replace(/(?:\n@:0)?\s+$/m, '').replace(/^\(/gm, '{anonymous}(').split('\n');
-                }
-                stackStr = '\n    ' + stack.slice(2).join('\n    ');
-            }
-            updatedMessage = formatMessage(message, options);
-
-            console.warn('DEPRECATION: ' + updatedMessage + stackStr); // eslint-disable-line no-console
-        } else {
-            next(message, options);
-        }
-    });
-    registerHandler(function (message, options, next) {
-        var updatedMessage;
-
-        if (_emberEnvironment.ENV.RAISE_ON_DEPRECATION) {
-            updatedMessage = formatMessage(message);
-
-            throw new Error(updatedMessage);
-        } else {
-            next(message, options);
-        }
-    });
-    exports.missingOptionsDeprecation = missingOptionsDeprecation = 'When calling `deprecate` you ' + 'must provide an `options` hash as the third parameter.  ' + '`options` should include `id` and `until` properties.';
-    exports.missingOptionsIdDeprecation = missingOptionsIdDeprecation = 'When calling `deprecate` you must provide `id` in options.';
-    exports.missingOptionsUntilDeprecation = missingOptionsUntilDeprecation = 'When calling `deprecate` you must provide `until` in options.';
-    /**
-     @module @ember/application
-     @public
-     */
-    /**
-      Display a deprecation warning with the provided message and a stack trace
-      (Chrome and Firefox only).
-         * In a production build, this method is defined as an empty function (NOP).
-      Uses of this method in Ember itself are stripped from the ember.prod.js build.
-         @method deprecate
-      @for @ember/application/deprecations
-      @param {String} message A description of the deprecation.
-      @param {Boolean} test A boolean. If falsy, the deprecation will be displayed.
-      @param {Object} options
-      @param {String} options.id A unique id for this deprecation. The id can be
-        used by Ember debugging tools to change the behavior (raise, log or silence)
-        for that specific deprecation. The id should be namespaced by dots, e.g.
-        "view.helper.select".
-      @param {string} options.until The version of Ember when this deprecation
-        warning will be removed.
-      @param {String} [options.url] An optional url to the transition guide on the
-        emberjs.com website.
-      @static
-      @public
-      @since 1.0.0
-    */
-    deprecate = function deprecate(message, test, options) {
-        if (_emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT !== true) {
-            (0, _index.assert)(missingOptionsDeprecation, !!(options && (options.id || options.until)));
-            (0, _index.assert)(missingOptionsIdDeprecation, !!options.id);
-            (0, _index.assert)(missingOptionsUntilDeprecation, !!options.until);
-        }
-        if (_deprecatedFeatures.DEPRECATE_OPTIONS_MISSING && (!options || !options.id && !options.until) && _emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT === true) {
-            deprecate(missingOptionsDeprecation, false, {
-                id: 'ember-debug.deprecate-options-missing',
-                until: '3.0.0',
-                url: 'https://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
-            });
-        }
-        if (_deprecatedFeatures.DEPRECATE_ID_MISSING && options && !options.id && _emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT === true) {
-            deprecate(missingOptionsIdDeprecation, false, {
-                id: 'ember-debug.deprecate-id-missing',
-                until: '3.0.0',
-                url: 'https://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
-            });
-        }
-        if (_deprecatedFeatures.DEPRECATE_UNTIL_MISSING && options && !options.until && _emberEnvironment.ENV._ENABLE_DEPRECATION_OPTIONS_SUPPORT === true) {
-            deprecate(missingOptionsUntilDeprecation, !!(options && options.until), {
-                id: 'ember-debug.deprecate-until-missing',
-                until: '3.0.0',
-                url: 'https://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
-            });
-        }
-        (0, _handlers.invoke)('deprecate', message, test, options);
-    };
-
     exports.default = deprecate;
     exports.registerHandler = registerHandler;
     exports.missingOptionsDeprecation = missingOptionsDeprecation;
@@ -669,13 +646,13 @@ enifed('@ember/debug/lib/deprecate', ['exports', '@ember/deprecated-features', '
 enifed('@ember/debug/lib/handlers', ['exports'], function (exports) {
     'use strict';
 
-    var HANDLERS = exports.HANDLERS = {};
-    var registerHandler = function () {};
-    var invoke = function () {};
+    let HANDLERS = exports.HANDLERS = {};
+    let registerHandler = () => {};
+    let invoke = () => {};
 
     exports.registerHandler = registerHandler = function (type, callback) {
-        var nextHandler = HANDLERS[type] || function () {};
-        HANDLERS[type] = function (message, options) {
+        let nextHandler = HANDLERS[type] || (() => {});
+        HANDLERS[type] = (message, options) => {
             callback(message, options, nextHandler);
         };
     };
@@ -683,7 +660,7 @@ enifed('@ember/debug/lib/handlers', ['exports'], function (exports) {
         if (test) {
             return;
         }
-        var handlerForType = HANDLERS[type];
+        let handlerForType = HANDLERS[type];
         if (handlerForType) {
             handlerForType(message, options);
         }
@@ -699,7 +676,7 @@ enifed("@ember/debug/lib/testing", ["exports"], function (exports) {
     exports.setTesting = function (value) {
         testing = !!value;
     };
-    var testing = false;
+    let testing = false;
     function isTesting() {
         return testing;
     }
@@ -709,10 +686,10 @@ enifed('@ember/debug/lib/warn', ['exports', 'ember-environment', '@ember/debug/i
 
     exports.missingOptionsDeprecation = exports.missingOptionsIdDeprecation = exports.registerHandler = undefined;
 
-    var registerHandler = function () {};
-    var warn = function () {};
-    var missingOptionsDeprecation = void 0;
-    var missingOptionsIdDeprecation = void 0;
+    let registerHandler = () => {};
+    let warn = () => {};
+    let missingOptionsDeprecation;
+    let missingOptionsIdDeprecation;
     /**
     @module @ember/debug
     */
@@ -748,7 +725,7 @@ enifed('@ember/debug/lib/warn', ['exports', 'ember-environment', '@ember/debug/i
     };
     registerHandler(function (message) {
         /* eslint-disable no-console */
-        console.warn('WARNING: ' + message);
+        console.warn(`WARNING: ${message}`);
         if (console.trace) {
             console.trace();
         }
@@ -829,46 +806,37 @@ enifed('@ember/deprecated-features/index', ['exports'], function (exports) {
   exports.ORDERED_SET = !!'3.3.0-beta.1';
 });
 enifed("@ember/error/index", ["exports"], function (exports) {
-    "use strict";
+  "use strict";
 
-    /**
-     @module @ember/error
-    */
+  exports.default = EmberError;
+  /**
+    A subclass of the JavaScript Error object for use in Ember.
+  
+    @class Error
+    @namespace Ember
+    @extends Error
+    @constructor
+    @public
+  */
+  function EmberError(message) {
+    if (!(this instanceof EmberError)) {
+      return new EmberError(message);
+    }
 
-    function ExtendBuiltin(klass) {
-        function ExtendableBuiltin() {
-            klass.apply(this, arguments);
-        }
-        ExtendableBuiltin.prototype = Object.create(klass.prototype);
-        ExtendableBuiltin.prototype.constructor = ExtendableBuiltin;
-        return ExtendableBuiltin;
-    }
-    /**
-      A subclass of the JavaScript Error object for use in Ember.
-    
-      @class EmberError
-      @extends Error
-      @constructor
-      @public
-    */
-    class EmberError extends ExtendBuiltin(Error) {
-        constructor(message) {
-            super();
-            if (!(this instanceof EmberError)) {
-                return new EmberError(message);
-            }
-            var error = Error.call(this, message);
-            this.stack = error.stack;
-            this.description = error.description;
-            this.fileName = error.fileName;
-            this.lineNumber = error.lineNumber;
-            this.message = error.message;
-            this.name = error.name;
-            this.number = error.number;
-            this.code = error.code;
-        }
-    }
-    exports.default = EmberError;
+    let error = Error.call(this, message);
+
+    this.stack = error.stack;
+    this.description = error.description;
+    this.fileName = error.fileName;
+    this.lineNumber = error.lineNumber;
+    this.message = error.message;
+    this.name = error.name;
+    this.number = error.number;
+    this.code = error.code;
+  }
+
+  EmberError.prototype = Object.create(Error.prototype);
+  EmberError.prototype.constructor = EmberError;
 });
 enifed('@ember/polyfills/index', ['exports', '@ember/polyfills/lib/assign', '@ember/polyfills/lib/merge'], function (exports, _assign, _merge) {
   'use strict';
@@ -920,19 +888,14 @@ enifed("@ember/polyfills/lib/assign", ["exports"], function (exports) {
       @static
     */
     function assign(target) {
-        var i, arg, updates, _i, prop;
-
-        for (i = 1; i < arguments.length; i++) {
-            arg = arguments[i];
-
+        for (let i = 1; i < arguments.length; i++) {
+            let arg = arguments[i];
             if (!arg) {
                 continue;
             }
-            updates = Object.keys(arg);
-
-            for (_i = 0; _i < updates.length; _i++) {
-                prop = updates[_i];
-
+            let updates = Object.keys(arg);
+            for (let i = 0; i < updates.length; i++) {
+                let prop = updates[i];
                 target[prop] = arg[prop];
             }
         }
@@ -942,7 +905,7 @@ enifed("@ember/polyfills/lib/assign", ["exports"], function (exports) {
     //       that the babel plugin does not
     //       transform it.
     // https://www.npmjs.com/package/babel-plugin-transform-object-assign
-    var _assign = Object.assign;
+    const { assign: _assign } = Object;
     exports.default = _assign || assign;
 });
 enifed('@ember/polyfills/lib/merge', ['exports'], function (exports) {
@@ -976,10 +939,9 @@ enifed('@ember/polyfills/lib/merge', ['exports'], function (exports) {
     if (updates === null || typeof updates !== 'object') {
       return original;
     }
-    var props = Object.keys(updates),
-        i;
-    var prop = void 0;
-    for (i = 0; i < props.length; i++) {
+    let props = Object.keys(updates);
+    let prop;
+    for (let i = 0; i < props.length; i++) {
       prop = props[i];
       original[prop] = updates[prop];
     }
@@ -996,11 +958,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             return new ProgramSymbolTable();
         }
         child(locals) {
-            var _this = this;
-
-            var symbols = locals.map(function (name) {
-                return _this.allocate(name);
-            });
+            let symbols = locals.map(name => this.allocate(name));
             return new BlockSymbolTable(this, locals, symbols);
         }
     }
@@ -1025,16 +983,16 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             return [];
         }
         allocateNamed(name) {
-            var named = this.named[name];
+            let named = this.named[name];
             if (!named) {
                 named = this.named[name] = this.allocate(name);
             }
             return named;
         }
         allocateBlock(name) {
-            var block = this.blocks[name];
+            let block = this.blocks[name];
             if (!block) {
-                block = this.blocks[name] = this.allocate('&' + name);
+                block = this.blocks[name] = this.allocate(`&${name}`);
             }
             return block;
         }
@@ -1054,23 +1012,17 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             return this.symbols.indexOf(name) !== -1 || this.parent.has(name);
         }
         get(name) {
-            var slot = this.symbols.indexOf(name);
+            let slot = this.symbols.indexOf(name);
             return slot === -1 ? this.parent.get(name) : this.slots[slot];
         }
         getLocalsMap() {
-            var _this2 = this;
-
-            var dict$$1 = this.parent.getLocalsMap();
-            this.symbols.forEach(function (symbol) {
-                return dict$$1[symbol] = _this2.get(symbol);
-            });
+            let dict$$1 = this.parent.getLocalsMap();
+            this.symbols.forEach(symbol => dict$$1[symbol] = this.get(symbol));
             return dict$$1;
         }
         getEvalInfo() {
-            var locals = this.getLocalsMap();
-            return Object.keys(locals).map(function (symbol) {
-                return locals[symbol];
-            });
+            let locals = this.getLocalsMap();
+            return Object.keys(locals).map(symbol => locals[symbol]);
         }
         allocateNamed(name) {
             return this.parent.allocateNamed(name);
@@ -1155,18 +1107,15 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
         }
         // Traversal methods
         Program(program) {
-            var _actions, i;
-
             this.programDepth++;
-            var parentFrame = this.getCurrentFrame();
-            var programFrame = this.pushFrame();
+            let parentFrame = this.getCurrentFrame();
+            let programFrame = this.pushFrame();
             if (!parentFrame) {
                 program['symbols'] = SymbolTable.top();
             } else {
                 program['symbols'] = parentFrame.symbols.child(program.blockParams);
             }
-            var startType = void 0,
-                endType = void 0;
+            let startType, endType;
             if (this.programDepth === 0) {
                 startType = 'startProgram';
                 endType = 'endProgram';
@@ -1180,7 +1129,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             programFrame.blankChildTextNodes = [];
             programFrame.actions.push([endType, [program, this.programDepth]]);
             programFrame.symbols = program['symbols'];
-            for (i = program.body.length - 1; i >= 0; i--) {
+            for (let i = program.body.length - 1; i >= 0; i--) {
                 programFrame.childIndex = i;
                 this.visit(program.body[i]);
             }
@@ -1191,29 +1140,27 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             if (parentFrame) {
                 parentFrame.childTemplateCount++;
             }
-            (_actions = this.actions).push.apply(_actions, programFrame.actions.reverse());
+            this.actions.push(...programFrame.actions.reverse());
         }
         ElementNode(element) {
-            var _parentFrame$actions, i, _i;
-
-            var parentFrame = this.currentFrame;
-            var elementFrame = this.pushFrame();
+            let parentFrame = this.currentFrame;
+            let elementFrame = this.pushFrame();
             elementFrame.parentNode = element;
             elementFrame.children = element.children;
             elementFrame.childCount = element.children.length;
             elementFrame.mustacheCount += element.modifiers.length;
             elementFrame.blankChildTextNodes = [];
             elementFrame.symbols = element['symbols'] = parentFrame.symbols.child(element.blockParams);
-            var actionArgs = [element, parentFrame.childIndex, parentFrame.childCount];
+            let actionArgs = [element, parentFrame.childIndex, parentFrame.childCount];
             elementFrame.actions.push(['closeElement', actionArgs]);
-            for (i = element.attributes.length - 1; i >= 0; i--) {
+            for (let i = element.attributes.length - 1; i >= 0; i--) {
                 this.visit(element.attributes[i]);
             }
-            for (_i = element.children.length - 1; _i >= 0; _i--) {
-                elementFrame.childIndex = _i;
-                this.visit(element.children[_i]);
+            for (let i = element.children.length - 1; i >= 0; i--) {
+                elementFrame.childIndex = i;
+                this.visit(element.children[i]);
             }
-            var open = ['openElement', [].concat(actionArgs, [elementFrame.mustacheCount, elementFrame.blankChildTextNodes.reverse()])];
+            let open = ['openElement', [...actionArgs, elementFrame.mustacheCount, elementFrame.blankChildTextNodes.reverse()]];
             elementFrame.actions.push(open);
             this.popFrame();
             // Propagate the element's frame state to the parent frame
@@ -1221,7 +1168,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
                 parentFrame.mustacheCount++;
             }
             parentFrame.childTemplateCount += elementFrame.childTemplateCount;
-            (_parentFrame$actions = parentFrame.actions).push.apply(_parentFrame$actions, elementFrame.actions);
+            parentFrame.actions.push(...elementFrame.actions);
         }
         AttrNode(attr) {
             if (attr.value.type !== 'TextNode') {
@@ -1229,14 +1176,14 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             }
         }
         TextNode(text) {
-            var frame = this.currentFrame;
+            let frame = this.currentFrame;
             if (text.chars === '') {
                 frame.blankChildTextNodes.push(domIndexOf(frame.children, text));
             }
             frame.actions.push(['text', [text, frame.childIndex, frame.childCount]]);
         }
         BlockStatement(node) {
-            var frame = this.currentFrame;
+            let frame = this.currentFrame;
             frame.mustacheCount++;
             frame.actions.push(['block', [node, frame.childIndex, frame.childCount]]);
             if (node.inverse) {
@@ -1247,19 +1194,19 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             }
         }
         PartialStatement(node) {
-            var frame = this.currentFrame;
+            let frame = this.currentFrame;
             frame.mustacheCount++;
             frame.actions.push(['mustache', [node, frame.childIndex, frame.childCount]]);
         }
         CommentStatement(text) {
-            var frame = this.currentFrame;
+            let frame = this.currentFrame;
             frame.actions.push(['comment', [text, frame.childIndex, frame.childCount]]);
         }
         MustacheCommentStatement() {
             // Intentional empty: Handlebars comments should not affect output.
         }
         MustacheStatement(mustache) {
-            var frame = this.currentFrame;
+            let frame = this.currentFrame;
             frame.mustacheCount++;
             frame.actions.push(['mustache', [mustache, frame.childIndex, frame.childCount]]);
         }
@@ -1271,7 +1218,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             return this.frameStack[this.frameStack.length - 1];
         }
         pushFrame() {
-            var frame = new Frame();
+            let frame = new Frame();
             this.frameStack.push(frame);
             return frame;
         }
@@ -1282,12 +1229,9 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
     // Returns the index of `domNode` in the `nodes` array, skipping
     // over any nodes which do not represent DOM nodes.
     function domIndexOf(nodes, domNode) {
-        var index = -1,
-            i,
-            node;
-        for (i = 0; i < nodes.length; i++) {
-            node = nodes[i];
-
+        let index = -1;
+        for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
             if (node.type !== 'TextNode' && node.type !== 'ElementNode') {
                 continue;
             } else {
@@ -1372,14 +1316,10 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             }
         }
         toJSON() {
-            var args = this.arguments;
-            var keys = args.map(function (arg) {
-                return arg[1];
-            });
-            var values = args.map(function (arg) {
-                return arg[2];
-            });
-            var block = this.selfClosing ? null : {
+            let args = this.arguments;
+            let keys = args.map(arg => arg[1]);
+            let values = args.map(arg => arg[2]);
+            let block = this.selfClosing ? null : {
                 statements: this.statements,
                 parameters: this.table.slots
             };
@@ -1403,35 +1343,31 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.options = options;
         }
         static process(opcodes, symbols, options) {
-            var compiler = new JavaScriptCompiler(opcodes, symbols, options);
+            let compiler = new JavaScriptCompiler(opcodes, symbols, options);
             return compiler.process();
         }
         get currentBlock() {
             return this.blocks.current;
         }
         process() {
-            var _this3 = this;
-
-            this.opcodes.forEach(function (op) {
-                var opcode = op[0];
-                var arg = op[1];
-                if (!_this3[opcode]) {
-                    throw new Error('unimplemented ' + opcode + ' on JavaScriptCompiler');
+            this.opcodes.forEach(op => {
+                let opcode = op[0];
+                let arg = op[1];
+                if (!this[opcode]) {
+                    throw new Error(`unimplemented ${opcode} on JavaScriptCompiler`);
                 }
-                _this3[opcode](arg);
+                this[opcode](arg);
             });
             return this.template;
         }
         /// Nesting
         startBlock(program) {
-            var block = new InlineBlock(program['symbols']);
+            let block = new InlineBlock(program['symbols']);
             this.blocks.push(block);
         }
         endBlock() {
-            var template = this.template,
-                blocks = this.blocks;
-
-            var block = blocks.pop();
+            let { template, blocks } = this;
+            let block = blocks.pop();
             template.block.blocks.push(block.toJSON());
         }
         startProgram() {
@@ -1449,38 +1385,34 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.push([_wireFormat.Ops.Comment, value]);
         }
         modifier(name) {
-            var params = this.popValue();
-            var hash = this.popValue();
+            let params = this.popValue();
+            let hash = this.popValue();
             this.push([_wireFormat.Ops.Modifier, name, params, hash]);
         }
-        block(_ref) {
-            var name = _ref[0],
-                template = _ref[1],
-                inverse = _ref[2];
-
-            var params = this.popValue();
-            var hash = this.popValue();
-            var blocks = this.template.block.blocks;
+        block([name, template, inverse]) {
+            let params = this.popValue();
+            let hash = this.popValue();
+            let blocks = this.template.block.blocks;
 
             this.push([_wireFormat.Ops.Block, name, params, hash, blocks[template], blocks[inverse]]);
         }
         openComponent(element) {
-            var tag = this.options && this.options.customizeComponentName ? this.options.customizeComponentName(element.tag) : element.tag;
-            var component = new ComponentBlock(tag, element['symbols'], element.selfClosing);
+            let tag = this.options && this.options.customizeComponentName ? this.options.customizeComponentName(element.tag) : element.tag;
+            let component = new ComponentBlock(tag, element['symbols'], element.selfClosing);
             this.blocks.push(component);
         }
         openSplattedElement(element) {
-            var tag = element.tag;
+            let tag = element.tag;
             if (element.blockParams.length > 0) {
-                throw new Error('Compile Error: <' + element.tag + '> is not a component and doesn\'t support block parameters');
+                throw new Error(`Compile Error: <${element.tag}> is not a component and doesn't support block parameters`);
             } else {
                 this.push([_wireFormat.Ops.OpenSplattedElement, tag]);
             }
         }
         openElement(element) {
-            var tag = element.tag;
+            let tag = element.tag;
             if (element.blockParams.length > 0) {
-                throw new Error('Compile Error: <' + element.tag + '> is not a component and doesn\'t support block parameters');
+                throw new Error(`Compile Error: <${element.tag}> is not a component and doesn't support block parameters`);
             } else {
                 this.push([_wireFormat.Ops.OpenElement, tag]);
             }
@@ -1489,56 +1421,38 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.push([_wireFormat.Ops.FlushElement]);
         }
         closeComponent() {
-            var _endComponent = this.endComponent(),
-                tag = _endComponent[0],
-                attrs = _endComponent[1],
-                args = _endComponent[2],
-                block = _endComponent[3];
-
+            let [tag, attrs, args, block] = this.endComponent();
             this.push([_wireFormat.Ops.Component, tag, attrs, args, block]);
         }
         closeDynamicComponent() {
-            var _endComponent2 = this.endComponent(),
-                attrs = _endComponent2[1],
-                args = _endComponent2[2],
-                block = _endComponent2[3];
-
+            let [, attrs, args, block] = this.endComponent();
             this.push([_wireFormat.Ops.DynamicComponent, this.popValue(), attrs, args, block]);
         }
         closeElement() {
             this.push([_wireFormat.Ops.CloseElement]);
         }
-        staticAttr(_ref2) {
-            var name = _ref2[0],
-                namespace = _ref2[1];
-
-            var value = this.popValue();
+        staticAttr([name, namespace]) {
+            let value = this.popValue();
             this.push([_wireFormat.Ops.StaticAttr, name, value, namespace]);
         }
-        dynamicAttr(_ref3) {
-            var name = _ref3[0],
-                namespace = _ref3[1];
-
-            var value = this.popValue();
+        dynamicAttr([name, namespace]) {
+            let value = this.popValue();
             this.push([_wireFormat.Ops.DynamicAttr, name, value, namespace]);
         }
-        trustingAttr(_ref4) {
-            var name = _ref4[0],
-                namespace = _ref4[1];
-
-            var value = this.popValue();
+        trustingAttr([name, namespace]) {
+            let value = this.popValue();
             this.push([_wireFormat.Ops.TrustingAttr, name, value, namespace]);
         }
         staticArg(name) {
-            var value = this.popValue();
+            let value = this.popValue();
             this.push([_wireFormat.Ops.StaticArg, name, value]);
         }
         dynamicArg(name) {
-            var value = this.popValue();
+            let value = this.popValue();
             this.push([_wireFormat.Ops.DynamicArg, name, value]);
         }
         yield(to) {
-            var params = this.popValue();
+            let params = this.popValue();
             this.push([_wireFormat.Ops.Yield, to, params]);
         }
         attrSplat(to) {
@@ -1555,7 +1469,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.pushValue([_wireFormat.Ops.HasBlockParams, name]);
         }
         partial(evalInfo) {
-            var params = this.popValue();
+            let params = this.popValue();
             this.push([_wireFormat.Ops.Partial, params[0], evalInfo]);
             this.template.block.hasEval = true;
         }
@@ -1570,10 +1484,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
         unknown(name) {
             this.pushValue([_wireFormat.Ops.Unknown, name]);
         }
-        get(_ref5) {
-            var head = _ref5[0],
-                path = _ref5[1];
-
+        get([head, path]) {
             this.pushValue([_wireFormat.Ops.Get, head, path]);
         }
         maybeLocal(path) {
@@ -1583,25 +1494,23 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.pushValue([_wireFormat.Ops.Concat, this.popValue()]);
         }
         helper(name) {
-            var params = this.popValue();
-            var hash = this.popValue();
+            let params = this.popValue();
+            let hash = this.popValue();
             this.pushValue([_wireFormat.Ops.Helper, name, params, hash]);
         }
         /// Stack Management Opcodes
         prepareArray(size) {
-            var values = [],
-                i;
-            for (i = 0; i < size; i++) {
+            let values = [];
+            for (let i = 0; i < size; i++) {
                 values.push(this.popValue());
             }
             this.pushValue(values);
         }
         prepareObject(size) {
 
-            var keys = new Array(size),
-                i;
-            var values = new Array(size);
-            for (i = 0; i < size; i++) {
+            let keys = new Array(size);
+            let values = new Array(size);
+            for (let i = 0; i < size; i++) {
                 keys[i] = this.popValue();
                 values[i] = this.popValue();
             }
@@ -1609,7 +1518,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
         }
         /// Utilities
         endComponent() {
-            var component = this.blocks.pop();
+            let component = this.blocks.pop();
 
             return component.toJSON();
         }
@@ -1641,10 +1550,10 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
     // with no special meaning:
     //
     // > No other namespaced attribute can be expressed in the HTML syntax.
-    var XLINK = 'http://www.w3.org/1999/xlink';
-    var XML = 'http://www.w3.org/XML/1998/namespace';
-    var XMLNS = 'http://www.w3.org/2000/xmlns/';
-    var WHITELIST = {
+    const XLINK = 'http://www.w3.org/1999/xlink';
+    const XML = 'http://www.w3.org/XML/1998/namespace';
+    const XMLNS = 'http://www.w3.org/2000/xmlns/';
+    const WHITELIST = {
         'xlink:actuate': XLINK,
         'xlink:arcrole': XLINK,
         'xlink:href': XLINK,
@@ -1668,16 +1577,11 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.symbolStack = new _util.Stack();
         }
         process() {
-            var out = [],
-                i,
-                op,
-                result;
-            var ops = this.ops;
-
-            for (i = 0; i < ops.length; i++) {
-                op = ops[i];
-                result = this.dispatch(op);
-
+            let out = [];
+            let { ops } = this;
+            for (let i = 0; i < ops.length; i++) {
+                let op = ops[i];
+                let result = this.dispatch(op);
                 if (result === undefined) {
                     out.push(op);
                 } else {
@@ -1687,8 +1591,8 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             return out;
         }
         dispatch(op) {
-            var name = op[0];
-            var operand = op[1];
+            let name = op[0];
+            let operand = op[1];
             return this[name](operand);
         }
         get symbols() {
@@ -1722,47 +1626,35 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             return ['attrSplat', this.symbols.allocateBlock('attrs')];
         }
         get(op) {
-            var name = op[0],
-                rest = op[1],
-                head,
-                _head;
-
+            let [name, rest] = op;
             if (name === 0) {
                 return ['get', [0, rest]];
             }
             if (isLocal(name, this.symbols)) {
-                head = this.symbols.get(name);
-
+                let head = this.symbols.get(name);
                 return ['get', [head, rest]];
             } else if (name[0] === '@') {
-                _head = this.symbols.allocateNamed(name);
-
-                return ['get', [_head, rest]];
+                let head = this.symbols.allocateNamed(name);
+                return ['get', [head, rest]];
             } else {
-                return ['maybeLocal', [name].concat(rest)];
+                return ['maybeLocal', [name, ...rest]];
             }
         }
         maybeGet(op) {
-            var name = op[0],
-                rest = op[1],
-                head,
-                _head2;
-
+            let [name, rest] = op;
             if (name === 0) {
                 return ['get', [0, rest]];
             }
             if (isLocal(name, this.symbols)) {
-                head = this.symbols.get(name);
-
+                let head = this.symbols.get(name);
                 return ['get', [head, rest]];
             } else if (name[0] === '@') {
-                _head2 = this.symbols.allocateNamed(name);
-
-                return ['get', [_head2, rest]];
+                let head = this.symbols.allocateNamed(name);
+                return ['get', [head, rest]];
             } else if (rest.length === 0) {
                 return ['unknown', name];
             } else {
-                return ['maybeLocal', [name].concat(rest)];
+                return ['maybeLocal', [name, ...rest]];
             }
         }
         yield(op) {
@@ -1825,38 +1717,29 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.includeMeta = false;
         }
         static compile(ast, options) {
-            var templateVisitor = new TemplateVisitor();
+            let templateVisitor = new TemplateVisitor();
             templateVisitor.visit(ast);
-            var compiler = new TemplateCompiler();
-            var opcodes = compiler.process(templateVisitor.actions);
-            var symbols = new SymbolAllocator(opcodes).process();
+            let compiler = new TemplateCompiler();
+            let opcodes = compiler.process(templateVisitor.actions);
+            let symbols = new SymbolAllocator(opcodes).process();
             return JavaScriptCompiler.process(symbols, ast['symbols'], options);
         }
         process(actions) {
-            var _this4 = this;
-
-            actions.forEach(function (_ref6) {
-                var name = _ref6[0],
-                    args = _ref6.slice(1);
-
-                if (!_this4[name]) {
-                    throw new Error('Unimplemented ' + name + ' on TemplateCompiler');
+            actions.forEach(([name, ...args]) => {
+                if (!this[name]) {
+                    throw new Error(`Unimplemented ${name} on TemplateCompiler`);
                 }
-                _this4[name].apply(_this4, args);
+                this[name](...args);
             });
             return this.opcodes;
         }
-        startProgram(_ref7) {
-            var program = _ref7[0];
-
+        startProgram([program]) {
             this.opcode(['startProgram', program], program);
         }
         endProgram() {
             this.opcode(['endProgram', null], null);
         }
-        startBlock(_ref8) {
-            var program = _ref8[0];
-
+        startBlock([program]) {
             this.templateId++;
             this.opcode(['startBlock', program], program);
         }
@@ -1864,44 +1747,25 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.templateIds.push(this.templateId - 1);
             this.opcode(['endBlock', null], null);
         }
-        text(_ref9) {
-            var action = _ref9[0];
-
+        text([action]) {
             this.opcode(['text', action.chars], action);
         }
-        comment(_ref10) {
-            var action = _ref10[0];
-
+        comment([action]) {
             this.opcode(['comment', action.value], action);
         }
-        openElement(_ref11) {
-            var action = _ref11[0],
-                i,
-                attr,
-                head,
-                rest,
-                _action$tag$split,
-                _i2,
-                _i3;
-
-            var attributes = action.attributes;
-            var hasSplat = void 0;
-            for (i = 0; i < attributes.length; i++) {
-                attr = attributes[i];
-
+        openElement([action]) {
+            let attributes = action.attributes;
+            let hasSplat;
+            for (let i = 0; i < attributes.length; i++) {
+                let attr = attributes[i];
                 if (attr.name === '...attributes') {
                     hasSplat = attr;
                     break;
                 }
             }
             if (isDynamicComponent(action)) {
-                head = void 0, rest = void 0;
-                _action$tag$split = action.tag.split('.');
-
-
-                head = _action$tag$split[0];
-                rest = _action$tag$split.slice(1);
-
+                let head, rest;
+                [head, ...rest] = action.tag.split('.');
                 if (head === 'this') {
                     head = 0;
                 }
@@ -1914,26 +1778,24 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             } else {
                 this.opcode(['openElement', action], action);
             }
-            var typeAttr = null;
-            var attrs = action.attributes;
-            for (_i2 = 0; _i2 < attrs.length; _i2++) {
-                if (attrs[_i2].name === 'type') {
-                    typeAttr = attrs[_i2];
+            let typeAttr = null;
+            let attrs = action.attributes;
+            for (let i = 0; i < attrs.length; i++) {
+                if (attrs[i].name === 'type') {
+                    typeAttr = attrs[i];
                     continue;
                 }
-                this.attribute([attrs[_i2]]);
+                this.attribute([attrs[i]]);
             }
             if (typeAttr) {
                 this.attribute([typeAttr]);
             }
-            for (_i3 = 0; _i3 < action.modifiers.length; _i3++) {
-                this.modifier([action.modifiers[_i3]]);
+            for (let i = 0; i < action.modifiers.length; i++) {
+                this.modifier([action.modifiers[i]]);
             }
             this.opcode(['flushElement', action], null);
         }
-        closeElement(_ref12) {
-            var action = _ref12[0];
-
+        closeElement([action]) {
             if (isDynamicComponent(action)) {
                 this.opcode(['closeDynamicComponent', action], action);
             } else if (isComponent(action)) {
@@ -1942,14 +1804,10 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
                 this.opcode(['closeElement', action], action);
             }
         }
-        attribute(_ref13) {
-            var action = _ref13[0],
-                isTrusting;
-            var name = action.name,
-                value = action.value;
-
-            var namespace = getAttrNamespace(name);
-            var isStatic = this.prepareAttributeValue(value);
+        attribute([action]) {
+            let { name, value } = action;
+            let namespace = getAttrNamespace(name);
+            let isStatic = this.prepareAttributeValue(value);
             if (name.charAt(0) === '@') {
                 // Arguments
                 if (isStatic) {
@@ -1960,8 +1818,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
                     this.opcode(['dynamicArg', name], action);
                 }
             } else {
-                isTrusting = isTrustedValue(value);
-
+                let isTrusting = isTrustedValue(value);
                 if (isStatic && name === '...attributes') {
                     this.opcode(['attrSplat', null], action);
                 } else if (isStatic) {
@@ -1975,31 +1832,22 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
                 }
             }
         }
-        modifier(_ref14) {
-            var action = _ref14[0];
-
+        modifier([action]) {
             assertIsSimplePath(action.path, action.loc, 'modifier');
-            var parts = action.path.parts;
-
+            let { path: { parts } } = action;
             this.prepareHelper(action);
             this.opcode(['modifier', parts[0]], action);
         }
-        mustache(_ref15) {
-            var action = _ref15[0],
-                to,
-                params;
-            var path = action.path;
-
+        mustache([action]) {
+            let { path } = action;
             if ((0, _syntax.isLiteral)(path)) {
                 this.mustacheExpression(action);
                 this.opcode(['append', !action.escaped], action);
             } else if (isYield(path)) {
-                to = assertValidYield(action);
-
+                let to = assertValidYield(action);
                 this.yield(to, action);
             } else if (isPartial(path)) {
-                params = assertValidPartial(action);
-
+                let params = assertValidPartial(action);
                 this.partial(params, action);
             } else if (isDebugger(path)) {
                 assertValidDebuggerUsage(action);
@@ -2009,30 +1857,19 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
                 this.opcode(['append', !action.escaped], action);
             }
         }
-        block(_ref16) {
-            var action /*, index, count*/ = _ref16[0];
-
+        block([action /*, index, count*/]) {
             this.prepareHelper(action);
-            var templateId = this.templateIds.pop();
-            var inverseId = action.inverse === null ? null : this.templateIds.pop();
+            let templateId = this.templateIds.pop();
+            let inverseId = action.inverse === null ? null : this.templateIds.pop();
             this.opcode(['block', [action.path.parts[0], templateId, inverseId]], action);
         }
         /// Internal actions, not found in the original processed actions
-        arg(_ref17) {
-            var path = _ref17[0];
-
-            var _path$parts = path.parts,
-                head = _path$parts[0],
-                rest = _path$parts.slice(1);
-
-            this.opcode(['get', ['@' + head, rest]], path);
+        arg([path]) {
+            let { parts: [head, ...rest] } = path;
+            this.opcode(['get', [`@${head}`, rest]], path);
         }
         mustacheExpression(expr) {
-            var path = expr.path,
-                _path$parts2,
-                head,
-                parts;
-
+            let { path } = expr;
             if ((0, _syntax.isLiteral)(path)) {
                 this.opcode(['literal', path.value], expr);
             } else if (isBuiltInHelper(path)) {
@@ -2045,9 +1882,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             } else if (path.this) {
                 this.opcode(['get', [0, path.parts]], expr);
             } else {
-                _path$parts2 = path.parts, head = _path$parts2[0], parts = _path$parts2.slice(1);
-
-
+                let [head, ...parts] = path.parts;
                 this.opcode(['maybeGet', [head, parts]], expr);
             }
             // } else if (isLocal(path, this.symbols)) {
@@ -2078,18 +1913,13 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.opcode(['partial', null], action);
         }
         builtInHelper(expr) {
-            var path = expr.path,
-                name,
-                _name2;
-
+            let { path } = expr;
             if (isHasBlock(path)) {
-                name = assertValidHasBlockUsage(expr.path.original, expr);
-
+                let name = assertValidHasBlockUsage(expr.path.original, expr);
                 this.hasBlock(name, expr);
             } else if (isHasBlockParams(path)) {
-                _name2 = assertValidHasBlockUsage(expr.path.original, expr);
-
-                this.hasBlockParams(_name2, expr);
+                let name = assertValidHasBlockUsage(expr.path.original, expr);
+                this.hasBlockParams(name, expr);
             }
         }
         /// Expressions, invoked recursively from prepareParams and prepareHash
@@ -2102,14 +1932,10 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             }
         }
         PathExpression(expr) {
-            var _expr$parts, head, rest;
-
             if (expr.data) {
                 this.arg([expr]);
             } else {
-                _expr$parts = expr.parts, head = _expr$parts[0], rest = _expr$parts.slice(1);
-
-
+                let [head, ...rest] = expr.parts;
                 if (expr.this) {
                     this.opcode(['get', [0, expr.parts]], expr);
                 } else {
@@ -2133,9 +1959,7 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             this.opcode(['literal', action.value], action);
         }
         /// Utilities
-        opcode(opcode) {
-            var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
+        opcode(opcode, action = null) {
             // TODO: This doesn't really work
             if (this.includeMeta && action) {
                 opcode.push(this.meta(action));
@@ -2144,40 +1968,30 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
         }
         prepareHelper(expr) {
             assertIsSimplePath(expr.path, expr.loc, 'helper');
-            var params = expr.params,
-                hash = expr.hash;
-
+            let { params, hash } = expr;
             this.prepareHash(hash);
             this.prepareParams(params);
         }
         prepareParams(params) {
-            var i, param;
-
             if (!params.length) {
                 this.opcode(['literal', null], null);
                 return;
             }
-            for (i = params.length - 1; i >= 0; i--) {
-                param = params[i];
-
+            for (let i = params.length - 1; i >= 0; i--) {
+                let param = params[i];
 
                 this[param.type](param);
             }
             this.opcode(['prepareArray', params.length], null);
         }
         prepareHash(hash) {
-            var pairs = hash.pairs,
-                i,
-                _pairs$i,
-                key,
-                value;
+            let pairs = hash.pairs;
             if (!pairs.length) {
                 this.opcode(['literal', null], null);
                 return;
             }
-            for (i = pairs.length - 1; i >= 0; i--) {
-                _pairs$i = pairs[i], key = _pairs$i.key, value = _pairs$i.value;
-
+            for (let i = pairs.length - 1; i >= 0; i--) {
+                let { key, value } = pairs[i];
 
                 this[value.type](value);
                 this.opcode(['literal', key], null);
@@ -2200,11 +2014,8 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             }
         }
         prepareConcatParts(parts) {
-            var i, part;
-
-            for (i = parts.length - 1; i >= 0; i--) {
-                part = parts[i];
-
+            for (let i = parts.length - 1; i >= 0; i--) {
+                let part = parts[i];
                 if (part.type === 'MustacheStatement') {
                     this.attributeMustache([part]);
                 } else if (part.type === 'TextNode') {
@@ -2213,29 +2024,22 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
             }
             this.opcode(['prepareArray', parts.length], null);
         }
-        attributeMustache(_ref18) {
-            var action = _ref18[0];
-
+        attributeMustache([action]) {
             this.mustacheExpression(action);
         }
         meta(node) {
-            var loc = node.loc;
+            let loc = node.loc;
             if (!loc) {
                 return [];
             }
-            var source = loc.source,
-                start = loc.start,
-                end = loc.end;
-
+            let { source, start, end } = loc;
             return ['loc', [source || null, [start.line, start.column], [end.line, end.column]]];
         }
     }
     function isHelperInvocation(mustache) {
         return mustache.params && mustache.params.length > 0 || mustache.hash && mustache.hash.pairs.length > 0;
     }
-    function isSimplePath(_ref19) {
-        var parts = _ref19.parts;
-
+    function isSimplePath({ parts }) {
         return parts.length === 1;
     }
     function isYield(path) {
@@ -2260,33 +2064,30 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
         return !!path['data'];
     }
     function isDynamicComponent(element) {
-        var open = element.tag.charAt(0);
+        let open = element.tag.charAt(0);
+        let [maybeLocal] = element.tag.split('.');
 
-        var _element$tag$split = element.tag.split('.'),
-            maybeLocal = _element$tag$split[0];
-
-        var isLocal = element['symbols'].has(maybeLocal);
-        var isThisPath = element.tag.indexOf('this.') === 0;
+        let isLocal = element['symbols'].has(maybeLocal);
+        let isThisPath = element.tag.indexOf('this.') === 0;
         return isLocal || open === '@' || isThisPath;
     }
     function isComponent(element) {
-        var open = element.tag.charAt(0);
-        var isPath = element.tag.indexOf('.') > -1;
-        var isUpperCase = open === open.toUpperCase() && open !== open.toLowerCase();
+        let open = element.tag.charAt(0);
+        let isPath = element.tag.indexOf('.') > -1;
+        let isUpperCase = open === open.toUpperCase() && open !== open.toLowerCase();
         return isUpperCase && !isPath || isDynamicComponent(element);
     }
     function assertIsSimplePath(path, loc, context) {
         if (!isSimplePath(path)) {
-            throw new _syntax.SyntaxError('`' + path.original + '` is not a valid name for a ' + context + ' on line ' + loc.start.line + '.', path.loc);
+            throw new _syntax.SyntaxError(`\`${path.original}\` is not a valid name for a ${context} on line ${loc.start.line}.`, path.loc);
         }
     }
     function assertValidYield(statement) {
-        var pairs = statement.hash.pairs;
-
+        let { pairs } = statement.hash;
         if (pairs.length === 1 && pairs[0].key !== 'to' || pairs.length > 1) {
-            throw new _syntax.SyntaxError('yield only takes a single named argument: \'to\'', statement.loc);
+            throw new _syntax.SyntaxError(`yield only takes a single named argument: 'to'`, statement.loc);
         } else if (pairs.length === 1 && pairs[0].value.type !== 'StringLiteral') {
-            throw new _syntax.SyntaxError('you can only yield to a literal value', statement.loc);
+            throw new _syntax.SyntaxError(`you can only yield to a literal value`, statement.loc);
         } else if (pairs.length === 0) {
             return 'default';
         } else {
@@ -2294,73 +2095,58 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
         }
     }
     function assertValidPartial(statement) {
-        var params = statement.params,
-            hash = statement.hash,
-            escaped = statement.escaped,
-            loc = statement.loc;
-
+        let { params, hash, escaped, loc } = statement;
         if (params && params.length !== 1) {
-            throw new _syntax.SyntaxError('Partial found with no arguments. You must specify a template name. (on line ' + loc.start.line + ')', statement.loc);
+            throw new _syntax.SyntaxError(`Partial found with no arguments. You must specify a template name. (on line ${loc.start.line})`, statement.loc);
         } else if (hash && hash.pairs.length > 0) {
-            throw new _syntax.SyntaxError('partial does not take any named arguments (on line ' + loc.start.line + ')', statement.loc);
+            throw new _syntax.SyntaxError(`partial does not take any named arguments (on line ${loc.start.line})`, statement.loc);
         } else if (!escaped) {
-            throw new _syntax.SyntaxError('{{{partial ...}}} is not supported, please use {{partial ...}} instead (on line ' + loc.start.line + ')', statement.loc);
+            throw new _syntax.SyntaxError(`{{{partial ...}}} is not supported, please use {{partial ...}} instead (on line ${loc.start.line})`, statement.loc);
         }
         return params;
     }
     function assertValidHasBlockUsage(type, call) {
-        var params = call.params,
-            hash = call.hash,
-            loc = call.loc,
-            param;
-
+        let { params, hash, loc } = call;
         if (hash && hash.pairs.length > 0) {
-            throw new _syntax.SyntaxError(type + ' does not take any named arguments', call.loc);
+            throw new _syntax.SyntaxError(`${type} does not take any named arguments`, call.loc);
         }
         if (params.length === 0) {
             return 'default';
         } else if (params.length === 1) {
-            param = params[0];
-
+            let param = params[0];
             if (param.type === 'StringLiteral') {
                 return param.value;
             } else {
-                throw new _syntax.SyntaxError('you can only yield to a literal value (on line ' + loc.start.line + ')', call.loc);
+                throw new _syntax.SyntaxError(`you can only yield to a literal value (on line ${loc.start.line})`, call.loc);
             }
         } else {
-            throw new _syntax.SyntaxError(type + ' only takes a single positional argument (on line ' + loc.start.line + ')', call.loc);
+            throw new _syntax.SyntaxError(`${type} only takes a single positional argument (on line ${loc.start.line})`, call.loc);
         }
     }
     function assertValidDebuggerUsage(statement) {
-        var params = statement.params,
-            hash = statement.hash;
-
+        let { params, hash } = statement;
         if (hash && hash.pairs.length > 0) {
-            throw new _syntax.SyntaxError('debugger does not take any named arguments', statement.loc);
+            throw new _syntax.SyntaxError(`debugger does not take any named arguments`, statement.loc);
         }
         if (params.length === 0) {
             return 'default';
         } else {
-            throw new _syntax.SyntaxError('debugger does not take any positional arguments', statement.loc);
+            throw new _syntax.SyntaxError(`debugger does not take any positional arguments`, statement.loc);
         }
     }
 
-    var defaultId = function () {
-        var crypto, idFn;
-
+    const defaultId = (() => {
         if (typeof _nodeModule.require === 'function') {
             try {
                 /* tslint:disable:no-require-imports */
-                crypto = (0, _nodeModule.require)('crypto');
+                const crypto = (0, _nodeModule.require)('crypto');
                 /* tslint:enable:no-require-imports */
-
-                idFn = function (src) {
-                    var hash = crypto.createHash('sha1');
+                let idFn = src => {
+                    let hash = crypto.createHash('sha1');
                     hash.update(src, 'utf8');
                     // trim to 6 bytes of data (2^48 - 1)
                     return hash.digest('base64').substring(0, 8);
                 };
-
                 idFn('test');
                 return idFn;
             } catch (e) {}
@@ -2368,26 +2154,21 @@ enifed('@glimmer/compiler', ['exports', 'node-module', '@glimmer/util', '@glimme
         return function () {
             return null;
         };
-    }();
-    var defaultOptions = {
+    })();
+    const defaultOptions = {
         id: defaultId,
         meta: {}
     };
 
 
     exports.defaultId = defaultId;
-    exports.precompile = function (string) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultOptions;
-
-        var ast = (0, _syntax.preprocess)(string, options);
-        var meta = options.meta;
-
-        var _TemplateCompiler$com = TemplateCompiler.compile(ast, options),
-            block = _TemplateCompiler$com.block;
-
-        var idFn = options.id || defaultId;
-        var blockJSON = JSON.stringify(block.toJSON());
-        var templateJSONObject = {
+    exports.precompile = function (string, options = defaultOptions) {
+        let ast = (0, _syntax.preprocess)(string, options);
+        let { meta } = options;
+        let { block } = TemplateCompiler.compile(ast, options);
+        let idFn = options.id || defaultId;
+        let blockJSON = JSON.stringify(block.toJSON());
+        let templateJSONObject = {
             id: idFn(JSON.stringify(meta) + blockJSON),
             block: blockJSON,
             meta: meta
@@ -2417,25 +2198,25 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
 
     function buildPath(original, loc) {
         if (typeof original !== 'string') return original;
-        var parts = original.split('.');
-        var thisHead = false;
+        let parts = original.split('.');
+        let thisHead = false;
         if (parts[0] === 'this') {
             thisHead = true;
             parts = parts.slice(1);
         }
         return {
             type: 'PathExpression',
-            original: original,
+            original,
             this: thisHead,
-            parts: parts,
+            parts,
             data: false,
             loc: buildLoc(loc || null)
         };
     }
     function buildLiteral(type, value, loc) {
         return {
-            type: type,
-            value: value,
+            type,
+            value,
             original: value,
             loc: buildLoc(loc || null)
         };
@@ -2454,25 +2235,18 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
     }
     function buildPosition(line, column) {
         return {
-            line: line,
-            column: column
+            line,
+            column
         };
     }
-    var SYNTHETIC = {
+    const SYNTHETIC = {
         source: '(synthetic)',
         start: { line: 1, column: 0 },
         end: { line: 1, column: 0 }
     };
-    function buildLoc() {
-        var _len, args, _key, loc, startLine, startColumn, endLine, endColumn, source;
-
-        for (_len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
+    function buildLoc(...args) {
         if (args.length === 1) {
-            loc = args[0];
-
+            let loc = args[0];
             if (loc && typeof loc === 'object') {
                 return {
                     source: buildSource(loc.source),
@@ -2483,9 +2257,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 return SYNTHETIC;
             }
         } else {
-            startLine = args[0], startColumn = args[1], endLine = args[2], endColumn = args[3], source = args[4];
-
-
+            let [startLine, startColumn, endLine, endColumn, source] = args;
             return {
                 source: buildSource(source),
                 start: buildPosition(startLine, startColumn),
@@ -2506,7 +2278,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             }
             return {
                 type: 'MustacheStatement',
-                path: path,
+                path,
                 params: params || [],
                 hash: hash || buildHash([]),
                 escaped: !raw,
@@ -2568,7 +2340,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 blockParams = [];
             }
             // this is used for backwards compat, prior to `selfClosing` being part of the ElementNode AST
-            var selfClosing = false;
+            let selfClosing = false;
             if (typeof tag === 'object') {
                 selfClosing = tag.selfClosing;
                 tag = tag.name;
@@ -2631,7 +2403,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             return {
                 type: 'HashPair',
                 key: key,
-                value: value,
+                value,
                 loc: buildLoc(loc || null)
             };
         },
@@ -2649,10 +2421,10 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         string: literal('StringLiteral'),
         boolean: literal('BooleanLiteral'),
         number: literal('NumberLiteral'),
-        undefined: function () {
+        undefined() {
             return buildLiteral('UndefinedLiteral', undefined);
         },
-        null: function () {
+        null() {
             return buildLiteral('NullLiteral', null);
         }
     };
@@ -2666,11 +2438,11 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
      * Subclass of `Error` with additional information
      * about location of incorrect markup.
      */
-    var SyntaxError = function () {
+    const SyntaxError = function () {
         SyntaxError.prototype = Object.create(Error.prototype);
         SyntaxError.prototype.constructor = SyntaxError;
         function SyntaxError(message, location) {
-            var error = Error.call(this, message);
+            let error = Error.call(this, message);
             this.message = message;
             this.stack = error.stack;
             this.location = location;
@@ -2680,38 +2452,30 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
 
     // Regex to validate the identifier for block parameters.
     // Based on the ID validation regex in Handlebars.
-    var ID_INVERSE_PATTERN = /[!"#%-,\.\/;->@\[-\^`\{-~]/;
+    let ID_INVERSE_PATTERN = /[!"#%-,\.\/;->@\[-\^`\{-~]/;
     // Checks the element's attributes to see if it uses block params.
     // If it does, registers the block params with the program and
     // removes the corresponding attributes from the element.
     function parseElementBlockParams(element) {
-        var params = parseBlockParams(element);
+        let params = parseBlockParams(element);
         if (params) element.blockParams = params;
     }
     function parseBlockParams(element) {
-        var l = element.attributes.length,
-            i,
-            paramsString,
-            params,
-            _i,
-            param;
-        var attrNames = [];
-        for (i = 0; i < l; i++) {
+        let l = element.attributes.length;
+        let attrNames = [];
+        for (let i = 0; i < l; i++) {
             attrNames.push(element.attributes[i].name);
         }
-        var asIndex = attrNames.indexOf('as');
+        let asIndex = attrNames.indexOf('as');
         if (asIndex !== -1 && l > asIndex && attrNames[asIndex + 1].charAt(0) === '|') {
             // Some basic validation, since we're doing the parsing ourselves
-            paramsString = attrNames.slice(asIndex).join(' ');
-
+            let paramsString = attrNames.slice(asIndex).join(' ');
             if (paramsString.charAt(paramsString.length - 1) !== '|' || paramsString.match(/\|/g).length !== 2) {
                 throw new SyntaxError("Invalid block parameters syntax: '" + paramsString + "'", element.loc);
             }
-            params = [];
-
-            for (_i = asIndex + 1; _i < l; _i++) {
-                param = attrNames[_i].replace(/\|/g, '');
-
+            let params = [];
+            for (let i = asIndex + 1; i < l; i++) {
+                let param = attrNames[i].replace(/\|/g, '');
                 if (param !== '') {
                     if (ID_INVERSE_PATTERN.test(param)) {
                         throw new SyntaxError("Invalid identifier for block parameters: '" + param + "' in '" + paramsString + "'", element.loc);
@@ -2749,7 +2513,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         }
     }
 
-    var entityParser = new _simpleHtmlTokenizer.EntityParser(_simpleHtmlTokenizer.HTML5NamedCharRefs);
+    const entityParser = new _simpleHtmlTokenizer.EntityParser(_simpleHtmlTokenizer.HTML5NamedCharRefs);
     class Parser {
         constructor(source) {
             this.elementStack = [];
@@ -2762,27 +2526,27 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             return this.currentAttribute;
         }
         get currentTag() {
-            var node = this.currentNode;
+            let node = this.currentNode;
 
             return node;
         }
         get currentStartTag() {
-            var node = this.currentNode;
+            let node = this.currentNode;
 
             return node;
         }
         get currentEndTag() {
-            var node = this.currentNode;
+            let node = this.currentNode;
 
             return node;
         }
         get currentComment() {
-            var node = this.currentNode;
+            let node = this.currentNode;
 
             return node;
         }
         get currentData() {
-            var node = this.currentNode;
+            let node = this.currentNode;
 
             return node;
         }
@@ -2793,13 +2557,13 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             return this.elementStack[this.elementStack.length - 1];
         }
         sourceForNode(node, endNode) {
-            var firstLine = node.loc.start.line - 1;
-            var currentLine = firstLine - 1;
-            var firstColumn = node.loc.start.column;
-            var string = [];
-            var line = void 0;
-            var lastLine = void 0;
-            var lastColumn = void 0;
+            let firstLine = node.loc.start.line - 1;
+            let currentLine = firstLine - 1;
+            let firstColumn = node.loc.start.column;
+            let string = [];
+            let line;
+            let lastLine;
+            let lastColumn;
             if (endNode) {
                 lastLine = endNode.loc.end.line - 1;
                 lastColumn = endNode.loc.end.column;
@@ -2832,13 +2596,12 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             this.cursorCount = 0;
         }
         cursor() {
-            return '%cursor:' + this.cursorCount++ + '%';
+            return `%cursor:${this.cursorCount++}%`;
         }
         Program(program) {
             this.cursorCount = 0;
-            var node = b.program([], program.blockParams, program.loc),
-                elementNode;
-            var i = void 0,
+            let node = b.program([], program.blockParams, program.loc);
+            let i,
                 l = program.body.length;
             this.elementStack.push(node);
             if (l === 0) {
@@ -2848,10 +2611,9 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 this.acceptNode(program.body[i]);
             }
             // Ensure that that the element stack is balanced properly.
-            var poppedNode = this.elementStack.pop();
+            let poppedNode = this.elementStack.pop();
             if (poppedNode !== node) {
-                elementNode = poppedNode;
-
+                let elementNode = poppedNode;
                 throw new SyntaxError('Unclosed element `' + elementNode.tag + '` (on line ' + elementNode.loc.start.line + ').', elementNode.loc);
             }
             return node;
@@ -2864,56 +2626,42 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             if (this.tokenizer['state'] !== 'comment' && this.tokenizer['state'] !== 'data' && this.tokenizer['state'] !== 'beforeData') {
                 throw new SyntaxError('A block may only be used inside an HTML element or another block.', block.loc);
             }
-
-            var _acceptCallNodes = acceptCallNodes(this, block),
-                path = _acceptCallNodes.path,
-                params = _acceptCallNodes.params,
-                hash = _acceptCallNodes.hash;
-
-            var program = this.Program(block.program);
-            var inverse = block.inverse ? this.Program(block.inverse) : null;
+            let { path, params, hash } = acceptCallNodes(this, block);
+            let program = this.Program(block.program);
+            let inverse = block.inverse ? this.Program(block.inverse) : null;
             if (path.original === 'in-element') {
                 hash = addInElementHash(this.cursor(), hash, block.loc);
             }
-            var node = b.block(path, params, hash, program, inverse, block.loc);
-            var parentProgram = this.currentElement();
+            let node = b.block(path, params, hash, program, inverse, block.loc);
+            let parentProgram = this.currentElement();
             appendChild(parentProgram, node);
         }
         MustacheStatement(rawMustache) {
-            var tokenizer = this.tokenizer,
-                _acceptCallNodes2,
-                path,
-                params,
-                hash;
-
+            let { tokenizer } = this;
             if (tokenizer.state === 'comment') {
                 this.appendToCommentData(this.sourceForNode(rawMustache));
                 return;
             }
-            var mustache = void 0;
-            var escaped = rawMustache.escaped,
-                loc = rawMustache.loc;
-
+            let mustache;
+            let { escaped, loc } = rawMustache;
             if (rawMustache.path.type.match(/Literal$/)) {
                 mustache = {
                     type: 'MustacheStatement',
                     path: this.acceptNode(rawMustache.path),
                     params: [],
                     hash: b.hash(),
-                    escaped: escaped,
-                    loc: loc
+                    escaped,
+                    loc
                 };
             } else {
-                _acceptCallNodes2 = acceptCallNodes(this, rawMustache), path = _acceptCallNodes2.path, params = _acceptCallNodes2.params, hash = _acceptCallNodes2.hash;
-
-
+                let { path, params, hash } = acceptCallNodes(this, rawMustache);
                 mustache = b.mustache(path, params, hash, !escaped, loc);
             }
             switch (tokenizer.state) {
                 // Tag helpers
                 case "tagOpen" /* tagOpen */:
                 case "tagName" /* tagName */:
-                    throw new SyntaxError('Cannot use mustaches in an elements tagname: `' + this.sourceForNode(rawMustache, rawMustache.path) + '` at L' + loc.start.line + ':C' + loc.start.column, mustache.loc);
+                    throw new SyntaxError(`Cannot use mustaches in an elements tagname: \`${this.sourceForNode(rawMustache, rawMustache.path)}\` at L${loc.start.line}:C${loc.start.column}`, mustache.loc);
                 case "beforeAttributeName" /* beforeAttributeName */:
                     addElementModifier(this.currentStartTag, mustache);
                     break;
@@ -2952,16 +2700,13 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             this.tokenizer.flushData();
         }
         CommentStatement(rawComment) {
-            var tokenizer = this.tokenizer;
-
+            let { tokenizer } = this;
             if (tokenizer.state === "comment" /* comment */) {
                     this.appendToCommentData(this.sourceForNode(rawComment));
                     return null;
                 }
-            var value = rawComment.value,
-                loc = rawComment.loc;
-
-            var comment = b.mustacheComment(value, loc);
+            let { value, loc } = rawComment;
+            let comment = b.mustacheComment(value, loc);
             switch (tokenizer.state) {
                 case "beforeAttributeName" /* beforeAttributeName */:
                     this.currentStartTag.comments.push(comment);
@@ -2971,63 +2716,51 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                     appendChild(this.currentElement(), comment);
                     break;
                 default:
-                    throw new SyntaxError('Using a Handlebars comment when in the `' + tokenizer['state'] + '` state is not supported: "' + comment.value + '" on line ' + loc.start.line + ':' + loc.start.column, rawComment.loc);
+                    throw new SyntaxError(`Using a Handlebars comment when in the \`${tokenizer['state']}\` state is not supported: "${comment.value}" on line ${loc.start.line}:${loc.start.column}`, rawComment.loc);
             }
             return comment;
         }
         PartialStatement(partial) {
-            var loc = partial.loc;
-
-            throw new SyntaxError('Handlebars partials are not supported: "' + this.sourceForNode(partial, partial.name) + '" at L' + loc.start.line + ':C' + loc.start.column, partial.loc);
+            let { loc } = partial;
+            throw new SyntaxError(`Handlebars partials are not supported: "${this.sourceForNode(partial, partial.name)}" at L${loc.start.line}:C${loc.start.column}`, partial.loc);
         }
         PartialBlockStatement(partialBlock) {
-            var loc = partialBlock.loc;
-
-            throw new SyntaxError('Handlebars partial blocks are not supported: "' + this.sourceForNode(partialBlock, partialBlock.name) + '" at L' + loc.start.line + ':C' + loc.start.column, partialBlock.loc);
+            let { loc } = partialBlock;
+            throw new SyntaxError(`Handlebars partial blocks are not supported: "${this.sourceForNode(partialBlock, partialBlock.name)}" at L${loc.start.line}:C${loc.start.column}`, partialBlock.loc);
         }
         Decorator(decorator) {
-            var loc = decorator.loc;
-
-            throw new SyntaxError('Handlebars decorators are not supported: "' + this.sourceForNode(decorator, decorator.path) + '" at L' + loc.start.line + ':C' + loc.start.column, decorator.loc);
+            let { loc } = decorator;
+            throw new SyntaxError(`Handlebars decorators are not supported: "${this.sourceForNode(decorator, decorator.path)}" at L${loc.start.line}:C${loc.start.column}`, decorator.loc);
         }
         DecoratorBlock(decoratorBlock) {
-            var loc = decoratorBlock.loc;
-
-            throw new SyntaxError('Handlebars decorator blocks are not supported: "' + this.sourceForNode(decoratorBlock, decoratorBlock.path) + '" at L' + loc.start.line + ':C' + loc.start.column, decoratorBlock.loc);
+            let { loc } = decoratorBlock;
+            throw new SyntaxError(`Handlebars decorator blocks are not supported: "${this.sourceForNode(decoratorBlock, decoratorBlock.path)}" at L${loc.start.line}:C${loc.start.column}`, decoratorBlock.loc);
         }
         SubExpression(sexpr) {
-            var _acceptCallNodes3 = acceptCallNodes(this, sexpr),
-                path = _acceptCallNodes3.path,
-                params = _acceptCallNodes3.params,
-                hash = _acceptCallNodes3.hash;
-
+            let { path, params, hash } = acceptCallNodes(this, sexpr);
             return b.sexpr(path, params, hash, sexpr.loc);
         }
         PathExpression(path) {
-            var original = path.original,
-                loc = path.loc,
-                locationInfo;
-
-            var parts = void 0;
+            let { original, loc } = path;
+            let parts;
             if (original.indexOf('/') !== -1) {
                 if (original.slice(0, 2) === './') {
-                    throw new SyntaxError('Using "./" is not supported in Glimmer and unnecessary: "' + path.original + '" on line ' + loc.start.line + '.', path.loc);
+                    throw new SyntaxError(`Using "./" is not supported in Glimmer and unnecessary: "${path.original}" on line ${loc.start.line}.`, path.loc);
                 }
                 if (original.slice(0, 3) === '../') {
-                    throw new SyntaxError('Changing context using "../" is not supported in Glimmer: "' + path.original + '" on line ' + loc.start.line + '.', path.loc);
+                    throw new SyntaxError(`Changing context using "../" is not supported in Glimmer: "${path.original}" on line ${loc.start.line}.`, path.loc);
                 }
                 if (original.indexOf('.') !== -1) {
-                    throw new SyntaxError('Mixing \'.\' and \'/\' in paths is not supported in Glimmer; use only \'.\' to separate property paths: "' + path.original + '" on line ' + loc.start.line + '.', path.loc);
+                    throw new SyntaxError(`Mixing '.' and '/' in paths is not supported in Glimmer; use only '.' to separate property paths: "${path.original}" on line ${loc.start.line}.`, path.loc);
                 }
                 parts = [path.parts.join('/')];
             } else if (original === '.') {
-                locationInfo = 'L' + loc.start.line + ':C' + loc.start.column;
-
-                throw new SyntaxError('\'.\' is not a supported path in Glimmer; check for a path with a trailing \'.\' at ' + locationInfo + '.', path.loc);
+                let locationInfo = `L${loc.start.line}:C${loc.start.column}`;
+                throw new SyntaxError(`'.' is not a supported path in Glimmer; check for a path with a trailing '.' at ${locationInfo}.`, path.loc);
             } else {
                 parts = path.parts;
             }
-            var thisHead = false;
+            let thisHead = false;
             // This is to fix a bug in the Handlebars AST where the path expressions in
             // `{{this.foo}}` (and similarly `{{foo-bar this.foo named=this.foo}}` etc)
             // are simply turned into `{{foo}}`. The fix is to push it back onto the
@@ -3045,18 +2778,15 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 type: 'PathExpression',
                 original: path.original,
                 this: thisHead,
-                parts: parts,
+                parts,
                 data: path.data,
                 loc: path.loc
             };
         }
         Hash(hash) {
-            var pairs = [],
-                i,
-                pair;
-            for (i = 0; i < hash.pairs.length; i++) {
-                pair = hash.pairs[i];
-
+            let pairs = [];
+            for (let i = 0; i < hash.pairs.length; i++) {
+                let pair = hash.pairs[i];
                 pairs.push(b.pair(pair.key, this.acceptNode(pair.value), pair.loc));
             }
             return b.hash(pairs, hash.loc);
@@ -3088,18 +2818,18 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         }
         // otherwise, return the number of newlines prior to
         // `value`
-        var difference = original.split(value)[0];
-        var lines = difference.split(/\n/);
-        var lineCount = lines.length - 1;
+        let difference = original.split(value)[0];
+        let lines = difference.split(/\n/);
+        let lineCount = lines.length - 1;
         return {
             lines: lineCount,
             columns: lines[lineCount].length
         };
     }
     function updateTokenizerLocation(tokenizer, content) {
-        var line = content.loc.start.line;
-        var column = content.loc.start.column;
-        var offsets = calculateRightStrippedOffsets(content.original, content.value);
+        let line = content.loc.start.line;
+        let column = content.loc.start.column;
+        let offsets = calculateRightStrippedOffsets(content.original, content.value);
         line = line + offsets.lines;
         if (offsets.lines) {
             column = offsets.columns;
@@ -3110,35 +2840,24 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         tokenizer.column = column;
     }
     function acceptCallNodes(compiler, node) {
-        var path = compiler.PathExpression(node.path);
-        var params = node.params ? node.params.map(function (e) {
-            return compiler.acceptNode(e);
-        }) : [];
-        var hash = node.hash ? compiler.Hash(node.hash) : b.hash();
-        return { path: path, params: params, hash: hash };
+        let path = compiler.PathExpression(node.path);
+        let params = node.params ? node.params.map(e => compiler.acceptNode(e)) : [];
+        let hash = node.hash ? compiler.Hash(node.hash) : b.hash();
+        return { path, params, hash };
     }
     function addElementModifier(element, mustache) {
-        var path = mustache.path,
-            params = mustache.params,
-            hash = mustache.hash,
-            loc = mustache.loc,
-            _modifier,
-            tag;
-
+        let { path, params, hash, loc } = mustache;
         if (isLiteral$1(path)) {
-            _modifier = '{{' + printLiteral(path) + '}}';
-            tag = '<' + element.name + ' ... ' + _modifier + ' ...';
-
-            throw new SyntaxError('In ' + tag + ', ' + _modifier + ' is not a valid modifier: "' + path.original + '" on line ' + (loc && loc.start.line) + '.', mustache.loc);
+            let modifier = `{{${printLiteral(path)}}}`;
+            let tag = `<${element.name} ... ${modifier} ...`;
+            throw new SyntaxError(`In ${tag}, ${modifier} is not a valid modifier: "${path.original}" on line ${loc && loc.start.line}.`, mustache.loc);
         }
-        var modifier = b.elementModifier(path, params, hash, loc);
+        let modifier = b.elementModifier(path, params, hash, loc);
         element.modifiers.push(modifier);
     }
     function addInElementHash(cursor, hash, loc) {
-        var hasNextSibling = false,
-            nullLiteral,
-            nextSibling;
-        hash.pairs.forEach(function (pair) {
+        let hasNextSibling = false;
+        hash.pairs.forEach(pair => {
             if (pair.key === 'guid') {
                 throw new SyntaxError('Cannot pass `guid` from user space', loc);
             }
@@ -3146,13 +2865,12 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 hasNextSibling = true;
             }
         });
-        var guid = b.literal('StringLiteral', cursor);
-        var guidPair = b.pair('guid', guid);
+        let guid = b.literal('StringLiteral', cursor);
+        let guidPair = b.pair('guid', guid);
         hash.pairs.unshift(guidPair);
         if (!hasNextSibling) {
-            nullLiteral = b.literal('NullLiteral', null);
-            nextSibling = b.pair('nextSibling', nullLiteral);
-
+            let nullLiteral = b.literal('NullLiteral', null);
+            let nextSibling = b.pair('nextSibling', nullLiteral);
             hash.pairs.push(nextSibling);
         }
         return hash;
@@ -3185,11 +2903,11 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         HashPair: ['value']
     };
 
-    var TraversalError = function () {
+    const TraversalError = function () {
         TraversalError.prototype = Object.create(Error.prototype);
         TraversalError.prototype.constructor = TraversalError;
         function TraversalError(message, node, parent, key) {
-            var error = Error.call(this, message);
+            let error = Error.call(this, message);
             this.key = key;
             this.message = message;
             this.node = node;
@@ -3209,10 +2927,8 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
     }
 
     function visitNode(visitor, node) {
-        var handler = visitor[node.type] || visitor.All || null,
-            keys,
-            i;
-        var result = void 0;
+        let handler = visitor[node.type] || visitor.All || null;
+        let result;
         if (handler && handler['enter']) {
             result = handler['enter'].call(null, node);
         }
@@ -3226,9 +2942,8 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             }
         }
         if (result === undefined) {
-            keys = visitorKeys[node.type];
-
-            for (i = 0; i < keys.length; i++) {
+            let keys = visitorKeys[node.type];
+            for (let i = 0; i < keys.length; i++) {
                 visitKey(visitor, handler, node, keys[i]);
             }
             if (handler && handler['exit']) {
@@ -3238,13 +2953,12 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         return result;
     }
     function visitKey(visitor, handler, node, key) {
-        var value = node[key],
-            _result;
+        let value = node[key];
         if (!value) {
             return;
         }
-        var keyHandler = handler && (handler.keys[key] || handler.keys.All);
-        var result = void 0;
+        let keyHandler = handler && (handler.keys[key] || handler.keys.All);
+        let result;
         if (keyHandler && keyHandler.enter) {
             result = keyHandler.enter.call(null, node, key);
             if (result !== undefined) {
@@ -3254,10 +2968,9 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         if (Array.isArray(value)) {
             visitArray(visitor, value);
         } else {
-            _result = visitNode(visitor, value);
-
-            if (_result !== undefined) {
-                assignKey(node, key, _result);
+            let result = visitNode(visitor, value);
+            if (result !== undefined) {
+                assignKey(node, key, result);
             }
         }
         if (keyHandler && keyHandler.exit) {
@@ -3268,11 +2981,8 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         }
     }
     function visitArray(visitor, array) {
-        var i, result;
-
-        for (i = 0; i < array.length; i++) {
-            result = visitNode(visitor, array[i]);
-
+        for (let i = 0; i < array.length; i++) {
+            let result = visitNode(visitor, array[i]);
             if (result !== undefined) {
                 i += spliceArray(array, i, result) - 1;
             }
@@ -3300,7 +3010,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             array.splice(index, 1);
             return 0;
         } else if (Array.isArray(result)) {
-            array.splice.apply(array, [index, 1].concat(result));
+            array.splice(index, 1, ...result);
             return result.length;
         } else {
             array.splice(index, 1, result);
@@ -3311,22 +3021,15 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         visitNode(normalizeVisitor(visitor), node);
     }
     function normalizeVisitor(visitor) {
-        var normalizedVisitor = {},
-            handler,
-            normalizedKeys,
-            keys,
-            keyHandler;
-        for (var type in visitor) {
-            handler = visitor[type] || visitor.All;
-            normalizedKeys = {};
-
+        let normalizedVisitor = {};
+        for (let type in visitor) {
+            let handler = visitor[type] || visitor.All;
+            let normalizedKeys = {};
             if (typeof handler === 'object') {
-                keys = handler.keys;
-
+                let keys = handler.keys;
                 if (keys) {
-                    for (var key in keys) {
-                        keyHandler = keys[key];
-
+                    for (let key in keys) {
+                        let keyHandler = keys[key];
                         if (typeof keyHandler === 'object') {
                             normalizedKeys[key] = {
                                 enter: typeof keyHandler.enter === 'function' ? keyHandler.enter : null,
@@ -3356,10 +3059,10 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         return normalizedVisitor;
     }
 
-    var ATTR_VALUE_REGEX_TEST = /[\xA0"&]/;
-    var ATTR_VALUE_REGEX_REPLACE = new RegExp(ATTR_VALUE_REGEX_TEST.source, 'g');
-    var TEXT_REGEX_TEST = /[\xA0&<>]/;
-    var TEXT_REGEX_REPLACE = new RegExp(TEXT_REGEX_TEST.source, 'g');
+    const ATTR_VALUE_REGEX_TEST = /[\xA0"&]/;
+    const ATTR_VALUE_REGEX_REPLACE = new RegExp(ATTR_VALUE_REGEX_TEST.source, 'g');
+    const TEXT_REGEX_TEST = /[\xA0&<>]/;
+    const TEXT_REGEX_REPLACE = new RegExp(TEXT_REGEX_TEST.source, 'g');
     function attrValueReplacer(char) {
         switch (char.charCodeAt(0)) {
             case 160 /* NBSP */:
@@ -3406,20 +3109,15 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         if (!ast) {
             return '';
         }
-        var output = [],
-            chainBlock,
-            body,
-            lines;
+        const output = [];
         switch (ast.type) {
             case 'Program':
                 {
-                    chainBlock = ast['chained'] && ast.body[0];
-
+                    const chainBlock = ast['chained'] && ast.body[0];
                     if (chainBlock) {
                         chainBlock['chained'] = true;
                     }
-                    body = buildEach(ast.body).join('');
-
+                    const body = buildEach(ast.body).join('');
                     output.push(body);
                 }
                 break;
@@ -3435,7 +3133,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                     output.push(' ', buildEach(ast.comments).join(' '));
                 }
                 if (ast.blockParams.length) {
-                    output.push(' ', 'as', ' ', '|' + ast.blockParams.join(' ') + '|');
+                    output.push(' ', 'as', ' ', `|${ast.blockParams.join(' ')}|`);
                 }
                 if (voidMap[ast.tag]) {
                     if (ast.selfClosing) {
@@ -3464,7 +3162,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 break;
             case 'ConcatStatement':
                 output.push('"');
-                ast.parts.forEach(function (node) {
+                ast.parts.forEach(node => {
                     if (node.type === 'TextNode') {
                         output.push(escapeAttrValue(node.chars));
                     } else {
@@ -3504,8 +3202,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 break;
             case 'BlockStatement':
                 {
-                    lines = [];
-
+                    const lines = [];
                     if (ast['chained']) {
                         lines.push(['{{else ', pathParams(ast), '}}'].join(''));
                     } else {
@@ -3536,7 +3233,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 break;
             case 'StringLiteral':
                 {
-                    output.push('"' + ast.value + '"');
+                    output.push(`"${ast.value}"`);
                 }
                 break;
             case 'NumberLiteral':
@@ -3556,22 +3253,22 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 break;
             case 'Hash':
                 {
-                    output.push(ast.pairs.map(function (pair) {
+                    output.push(ast.pairs.map(pair => {
                         return build(pair);
                     }).join(' '));
                 }
                 break;
             case 'HashPair':
                 {
-                    output.push(ast.key + '=' + build(ast.value));
+                    output.push(`${ast.key}=${build(ast.value)}`);
                 }
                 break;
         }
         return output.join('');
     }
     function compact(array) {
-        var newArray = [];
-        array.forEach(function (a) {
+        const newArray = [];
+        array.forEach(a => {
             if (typeof a !== 'undefined' && a !== null && a !== '') {
                 newArray.push(a);
             }
@@ -3582,7 +3279,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         return asts.map(build);
     }
     function pathParams(ast) {
-        var path = void 0;
+        let path;
         switch (ast.type) {
             case 'MustacheStatement':
             case 'SubExpression':
@@ -3605,9 +3302,9 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         return compact(array).join(delimiter || '');
     }
     function blockParams(block) {
-        var params = block.program.blockParams;
+        const params = block.program.blockParams;
         if (params.length) {
-            return ' as |' + params.join(' ') + '|';
+            return ` as |${params.join(' ')}|`;
         }
         return null;
     }
@@ -3638,36 +3335,32 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             this.stack.pop();
         }
         children(node, callback) {
-            var visitor = visitors[node.type];
+            let visitor = visitors[node.type];
             if (visitor) {
                 visitor(this, node, callback);
             }
         }
     }
-    var visitors = {
-        Program: function (walker, node, callback) {
-            var i;
-
-            for (i = 0; i < node.body.length; i++) {
+    let visitors = {
+        Program(walker, node, callback) {
+            for (let i = 0; i < node.body.length; i++) {
                 walker.visit(node.body[i], callback);
             }
         },
-        ElementNode: function (walker, node, callback) {
-            var i;
-
-            for (i = 0; i < node.children.length; i++) {
+        ElementNode(walker, node, callback) {
+            for (let i = 0; i < node.children.length; i++) {
                 walker.visit(node.children[i], callback);
             }
         },
-        BlockStatement: function (walker, node, callback) {
+        BlockStatement(walker, node, callback) {
             walker.visit(node.program, callback);
             walker.visit(node.inverse || null, callback);
         }
     };
 
-    var voidMap = Object.create(null);
+    const voidMap = Object.create(null);
 
-    'area base br col command embed hr img input keygen link meta param source track wbr'.split(' ').forEach(function (tagName) {
+    'area base br col command embed hr img input keygen link meta param source track wbr'.split(' ').forEach(tagName => {
         voidMap[tagName] = true;
     });
     class TokenizerEventHandlers extends HandlebarsNodeVisitors {
@@ -3739,11 +3432,8 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             };
         }
         finishTag() {
-            var _tokenizer = this.tokenizer,
-                line = _tokenizer.line,
-                column = _tokenizer.column;
-
-            var tag = this.currentTag;
+            let { line, column } = this.tokenizer;
+            let tag = this.currentTag;
             tag.loc = b.loc(this.tagOpenLine, this.tagOpenColumn, line, column);
             if (tag.type === 'StartTag') {
                 this.finishStartTag();
@@ -3755,21 +3445,15 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             }
         }
         finishStartTag() {
-            var _currentStartTag = this.currentStartTag,
-                name = _currentStartTag.name,
-                attributes = _currentStartTag.attributes,
-                modifiers = _currentStartTag.modifiers,
-                comments = _currentStartTag.comments,
-                selfClosing = _currentStartTag.selfClosing;
-
-            var loc = b.loc(this.tagOpenLine, this.tagOpenColumn);
-            var element = b.element({ name: name, selfClosing: selfClosing }, attributes, modifiers, [], comments, [], loc);
+            let { name, attributes, modifiers, comments, selfClosing } = this.currentStartTag;
+            let loc = b.loc(this.tagOpenLine, this.tagOpenColumn);
+            let element = b.element({ name, selfClosing }, attributes, modifiers, [], comments, [], loc);
             this.elementStack.push(element);
         }
         finishEndTag(isVoid) {
-            var tag = this.currentTag;
-            var element = this.elementStack.pop();
-            var parent = this.currentElement();
+            let tag = this.currentTag;
+            let element = this.elementStack.pop();
+            let parent = this.currentElement();
             validateEndTag(tag, element, isVoid);
             element.loc.end.line = this.tokenizer.line;
             element.loc.end.column = this.tokenizer.column;
@@ -3785,9 +3469,9 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         }
         // Tags - attributes
         beginAttribute() {
-            var tag = this.currentTag;
+            let tag = this.currentTag;
             if (tag.type === 'EndTag') {
-                throw new SyntaxError('Invalid end tag: closing tag must not have attributes, ' + ('in `' + tag.name + '` (on line ' + this.tokenizer.line + ').'), tag.loc);
+                throw new SyntaxError(`Invalid end tag: closing tag must not have attributes, ` + `in \`${tag.name}\` (on line ${this.tokenizer.line}).`, tag.loc);
             }
             this.currentAttribute = {
                 name: '',
@@ -3808,10 +3492,8 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
             this.currentAttr.valueStartColumn = this.tokenizer.column;
         }
         appendToAttributeValue(char) {
-            var parts = this.currentAttr.parts,
-                loc,
-                text;
-            var lastPart = parts[parts.length - 1];
+            let parts = this.currentAttr.parts;
+            let lastPart = parts[parts.length - 1];
             if (lastPart && lastPart.type === 'TextNode') {
                 lastPart.chars += char;
                 // update end location for each added char
@@ -3819,35 +3501,26 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 lastPart.loc.end.column = this.tokenizer.column;
             } else {
                 // initially assume the text node is a single char
-                loc = b.loc(this.tokenizer.line, this.tokenizer.column, this.tokenizer.line, this.tokenizer.column);
+                let loc = b.loc(this.tokenizer.line, this.tokenizer.column, this.tokenizer.line, this.tokenizer.column);
                 // correct for `\n` as first char
-
                 if (char === '\n') {
                     loc.start.line -= 1;
                     loc.start.column = lastPart ? lastPart.loc.end.column : this.currentAttr.valueStartColumn;
                 }
-                text = b.text(char, loc);
-
+                let text = b.text(char, loc);
                 parts.push(text);
             }
         }
         finishAttributeValue() {
-            var _currentAttr = this.currentAttr,
-                name = _currentAttr.name,
-                parts = _currentAttr.parts,
-                isQuoted = _currentAttr.isQuoted,
-                isDynamic = _currentAttr.isDynamic,
-                valueStartLine = _currentAttr.valueStartLine,
-                valueStartColumn = _currentAttr.valueStartColumn;
-
-            var value = assembleAttributeValue(parts, isQuoted, isDynamic, this.tokenizer.line);
+            let { name, parts, isQuoted, isDynamic, valueStartLine, valueStartColumn } = this.currentAttr;
+            let value = assembleAttributeValue(parts, isQuoted, isDynamic, this.tokenizer.line);
             value.loc = b.loc(valueStartLine, valueStartColumn, this.tokenizer.line, this.tokenizer.column);
-            var loc = b.loc(this.currentAttr.start.line, this.currentAttr.start.column, this.tokenizer.line, this.tokenizer.column);
-            var attribute = b.attr(name, value, loc);
+            let loc = b.loc(this.currentAttr.start.line, this.currentAttr.start.column, this.tokenizer.line, this.tokenizer.column);
+            let attribute = b.attr(name, value, loc);
             this.currentStartTag.attributes.push(attribute);
         }
         reportSyntaxError(message) {
-            throw new SyntaxError('Syntax error at line ' + this.tokenizer.line + ' col ' + this.tokenizer.column + ': ' + message, b.loc(this.tokenizer.line, this.tokenizer.column));
+            throw new SyntaxError(`Syntax error at line ${this.tokenizer.line} col ${this.tokenizer.column}: ${message}`, b.loc(this.tokenizer.line, this.tokenizer.column));
         }
     }
     function assembleAttributeValue(parts, isQuoted, isDynamic, line) {
@@ -3858,7 +3531,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
                 if (parts.length === 1 || parts.length === 2 && parts[1].type === 'TextNode' && parts[1].chars === '/') {
                     return parts[0];
                 } else {
-                    throw new SyntaxError('An unquoted attribute value must be a string or a mustache, ' + 'preceeded by whitespace or a \'=\' character, and ' + ('followed by whitespace, a \'>\' character, or \'/>\' (on line ' + line + ')'), b.loc(line, 0));
+                    throw new SyntaxError(`An unquoted attribute value must be a string or a mustache, ` + `preceeded by whitespace or a '=' character, and ` + `followed by whitespace, a '>' character, or '/>' (on line ${line})`, b.loc(line, 0));
                 }
             }
         } else {
@@ -3866,11 +3539,8 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         }
     }
     function assembleConcatenatedValue(parts) {
-        var i, part;
-
-        for (i = 0; i < parts.length; i++) {
-            part = parts[i];
-
+        for (let i = 0; i < parts.length; i++) {
+            let part = parts[i];
             if (part.type !== 'MustacheStatement' && part.type !== 'TextNode') {
                 throw new SyntaxError('Unsupported node in quoted attribute value: ' + part['type'], part.loc);
             }
@@ -3878,7 +3548,7 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
         return b.concat(parts);
     }
     function validateEndTag(tag, element, selfClosing) {
-        var error = void 0;
+        let error;
         if (voidMap[tag.name] && !selfClosing) {
             // EngTag is also called by StartTag for void and self-closing tags (i.e.
             // <input> or <br />, so we need to check for that here. Otherwise, we would
@@ -3896,27 +3566,21 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
     function formatEndTagInfo(tag) {
         return '`' + tag.name + '` (on line ' + tag.loc.end.line + ')';
     }
-    var syntax = {
+    const syntax = {
         parse: preprocess,
         builders: b,
         print: build,
-        traverse: traverse,
-        Walker: Walker
+        traverse,
+        Walker
     };
     function preprocess(html, options) {
-        var ast = typeof html === 'object' ? html : (0, _handlebars.parse)(html),
-            i,
-            l,
-            transform,
-            env,
-            pluginResult;
-        var program = new TokenizerEventHandlers(html).acceptNode(ast);
+        let ast = typeof html === 'object' ? html : (0, _handlebars.parse)(html);
+        let program = new TokenizerEventHandlers(html).acceptNode(ast);
         if (options && options.plugins && options.plugins.ast) {
-            for (i = 0, l = options.plugins.ast.length; i < l; i++) {
-                transform = options.plugins.ast[i];
-                env = (0, _util.assign)({}, options, { syntax: syntax }, { plugins: undefined });
-                pluginResult = transform(env);
-
+            for (let i = 0, l = options.plugins.ast.length; i < l; i++) {
+                let transform = options.plugins.ast[i];
+                let env = (0, _util.assign)({}, options, { syntax }, { plugins: undefined });
+                let pluginResult = transform(env);
                 traverse(program, pluginResult.visitor);
             }
         }
@@ -3942,13 +3606,13 @@ enifed('@glimmer/syntax', ['exports', 'simple-html-tokenizer', '@glimmer/util', 
 enifed('@glimmer/util', ['exports'], function (exports) {
     'use strict';
 
-    var objKeys = Object.keys;
+    const { keys: objKeys } = Object;
 
     // import Logger from './logger';
     // let alreadyWarned = false;
 
 
-    var GUID = 0;
+    let GUID = 0;
     function initializeGuid(object) {
         return object._guid = ++GUID;
     }
@@ -3956,7 +3620,7 @@ enifed('@glimmer/util', ['exports'], function (exports) {
         return object._guid || initializeGuid(object);
     }
 
-    var SERIALIZATION_FIRST_NODE_STRING = '%+b:0%';
+    const SERIALIZATION_FIRST_NODE_STRING = '%+b:0%';
 
 
     function dict() {
@@ -3976,8 +3640,8 @@ enifed('@glimmer/util', ['exports'], function (exports) {
             this.stack.push(item);
         }
         pop() {
-            var item = this.stack.pop();
-            var len = this.stack.length;
+            let item = this.stack.pop();
+            let len = this.stack.length;
             this.current = len === 0 ? null : this.stack[len - 1];
             return item === undefined ? null : item;
         }
@@ -3992,7 +3656,7 @@ enifed('@glimmer/util', ['exports'], function (exports) {
             this._tail = tail;
         }
         forEachNode(callback) {
-            var node = this._head;
+            let node = this._head;
             while (node !== null) {
                 callback(node);
                 node = this.nextNode(node);
@@ -4005,10 +3669,8 @@ enifed('@glimmer/util', ['exports'], function (exports) {
             return this._tail;
         }
         toArray() {
-            var out = [];
-            this.forEachNode(function (n) {
-                return out.push(n);
-            });
+            let out = [];
+            this.forEachNode(n => out.push(n));
             return out;
         }
         nextNode(node) {
@@ -4016,9 +3678,9 @@ enifed('@glimmer/util', ['exports'], function (exports) {
             return node.next;
         }
     }
-    var EMPTY_SLICE = new ListSlice(null, null);
+    const EMPTY_SLICE = new ListSlice(null, null);
 
-    var EMPTY_ARRAY = Object.freeze([]);
+    const EMPTY_ARRAY = Object.freeze([]);
 
     exports.assert = function (test, msg) {
         // if (!alreadyWarned) {
@@ -4030,26 +3692,20 @@ enifed('@glimmer/util', ['exports'], function (exports) {
         }
     };
     exports.assign = function (obj) {
-        var i, assignment, keys, j, key;
-
-        for (i = 1; i < arguments.length; i++) {
-            assignment = arguments[i];
-
+        for (let i = 1; i < arguments.length; i++) {
+            let assignment = arguments[i];
             if (assignment === null || typeof assignment !== 'object') continue;
-            keys = objKeys(assignment);
-
-            for (j = 0; j < keys.length; j++) {
-                key = keys[j];
-
+            let keys = objKeys(assignment);
+            for (let j = 0; j < keys.length; j++) {
+                let key = keys[j];
                 obj[key] = assignment[key];
             }
         }
         return obj;
     };
     exports.fillNulls = function (count) {
-        var arr = new Array(count),
-            i;
-        for (i = 0; i < count; i++) {
+        let arr = new Array(count);
+        for (let i = 0; i < count; i++) {
             arr[i] = null;
         }
         return arr;
@@ -4089,25 +3745,21 @@ enifed('@glimmer/util', ['exports'], function (exports) {
             this._head = this._tail = null;
         }
         toArray() {
-            var out = [];
-            this.forEachNode(function (n) {
-                return out.push(n);
-            });
+            let out = [];
+            this.forEachNode(n => out.push(n));
             return out;
         }
         nextNode(node) {
             return node.next;
         }
         forEachNode(callback) {
-            var node = this._head;
+            let node = this._head;
             while (node !== null) {
                 callback(node);
                 node = node.next;
             }
         }
-        insertBefore(node) {
-            var reference = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
+        insertBefore(node, reference = null) {
             if (reference === null) return this.append(node);
             if (reference.prev) reference.prev.next = node;else this._head = node;
             node.prev = reference.prev;
@@ -4116,7 +3768,7 @@ enifed('@glimmer/util', ['exports'], function (exports) {
             return node;
         }
         append(node) {
-            var tail = this._tail;
+            let tail = this._tail;
             if (tail) {
                 tail.next = node;
                 node.prev = tail;
@@ -4142,16 +3794,14 @@ enifed('@glimmer/util', ['exports'], function (exports) {
     exports.ListSlice = ListSlice;
     exports.EMPTY_ARRAY = EMPTY_ARRAY;
     exports.unwrap = function (val) {
-        if (val === null || val === undefined) throw new Error('Expected value to be present');
+        if (val === null || val === undefined) throw new Error(`Expected value to be present`);
         return val;
     };
     exports.expect = function (val, message) {
         if (val === null || val === undefined) throw new Error(message);
         return val;
     };
-    exports.unreachable = function () {
-        var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'unreachable';
-
+    exports.unreachable = function (message = 'unreachable') {
         return new Error(message);
     };
 });
@@ -4200,9 +3850,9 @@ enifed("@glimmer/wire-format", ["exports"], function (exports) {
         };
     }
     // Statements
-    var isModifier = is(Opcodes.Modifier);
-    var isFlushElement = is(Opcodes.FlushElement);
-    var isAttrSplat = is(Opcodes.AttrSplat);
+    const isModifier = is(Opcodes.Modifier);
+    const isFlushElement = is(Opcodes.FlushElement);
+    const isAttrSplat = is(Opcodes.AttrSplat);
     function isAttribute(val) {
         return val[0] === Opcodes.StaticAttr || val[0] === Opcodes.DynamicAttr || val[0] === Opcodes.TrustingAttr;
     }
@@ -4210,8 +3860,8 @@ enifed("@glimmer/wire-format", ["exports"], function (exports) {
         return val[0] === Opcodes.StaticArg || val[0] === Opcodes.DynamicArg;
     }
     // Expressions
-    var isGet = is(Opcodes.Get);
-    var isMaybeLocal = is(Opcodes.MaybeLocal);
+    const isGet = is(Opcodes.Get);
+    const isMaybeLocal = is(Opcodes.MaybeLocal);
 
     exports.is = is;
     exports.isModifier = isModifier;
@@ -4231,9 +3881,9 @@ enifed('ember-babel', ['exports'], function (exports) {
   exports.taggedTemplateLiteralLoose = taggedTemplateLiteralLoose;
   exports.createClass = createClass;
   exports.possibleConstructorReturn = possibleConstructorReturn;
-  var create = Object.create;
-  var setPrototypeOf = Object.setPrototypeOf;
-  var defineProperty = Object.defineProperty;
+  const create = Object.create;
+  const setPrototypeOf = Object.setPrototypeOf;
+  const defineProperty = Object.defineProperty;
 
   function classCallCheck() {}
 
@@ -4281,12 +3931,12 @@ enifed('ember-browser-environment', ['exports'], function (exports) {
 
     var hasDom = typeof self === 'object' && self !== null && self.Object === Object && typeof Window !== 'undefined' && self.constructor === Window && typeof document === 'object' && document !== null && self.document === document && typeof location === 'object' && location !== null && self.location === location && typeof history === 'object' && history !== null && self.history === history && typeof navigator === 'object' && navigator !== null && self.navigator === navigator && typeof navigator.userAgent === 'string';
 
-    var window = hasDom ? self : null;
-    var location$1 = hasDom ? self.location : null;
-    var history$1 = hasDom ? self.history : null;
-    var userAgent = hasDom ? self.navigator.userAgent : 'Lynx (textmode)';
-    var isChrome = hasDom ? !!window.chrome && !window.opera : false;
-    var isFirefox = hasDom ? typeof InstallTrigger !== 'undefined' : false;
+    const window = hasDom ? self : null;
+    const location$1 = hasDom ? self.location : null;
+    const history$1 = hasDom ? self.history : null;
+    const userAgent = hasDom ? self.navigator.userAgent : 'Lynx (textmode)';
+    const isChrome = hasDom ? !!window.chrome && !window.opera : false;
+    const isFirefox = hasDom ? typeof InstallTrigger !== 'undefined' : false;
 
     exports.window = window;
     exports.location = location$1;
@@ -4313,7 +3963,7 @@ enifed('ember-environment', ['exports'], function (exports) {
     new Function('return this')(); // eval outside of strict mode
 
     // legacy imports/exports/lookup stuff (should we keep this??)
-    var context = function (global, Ember) {
+    const context = function (global, Ember) {
         return Ember === undefined ? { imports: global, exports: global, lookup: global } : {
             // import jQuery
             imports: Ember.imports || global,
@@ -4336,7 +3986,7 @@ enifed('ember-environment', ['exports'], function (exports) {
       @type Object
       @public
     */
-    var ENV = {
+    const ENV = {
         ENABLE_OPTIONAL_FEATURES: false,
         /**
           Determines whether Ember should add to `Array`, `Function`, and `String`
@@ -4442,31 +4092,25 @@ enifed('ember-environment', ['exports'], function (exports) {
         EMBER_LOAD_HOOKS: {},
         FEATURES: {}
     };
-    (function (EmberENV) {
+    (EmberENV => {
         if (typeof EmberENV !== 'object' || EmberENV === null) return;
-        for (var flag in EmberENV) {
+        for (let flag in EmberENV) {
             if (!EmberENV.hasOwnProperty(flag) || flag === 'EXTEND_PROTOTYPES' || flag === 'EMBER_LOAD_HOOKS') continue;
-            defaultValue = ENV[flag];
-
+            let defaultValue = ENV[flag];
             if (defaultValue === true) {
                 ENV[flag] = EmberENV[flag] !== false;
             } else if (defaultValue === false) {
                 ENV[flag] = EmberENV[flag] === true;
             }
         }
-        var EXTEND_PROTOTYPES = EmberENV.EXTEND_PROTOTYPES,
-            defaultValue,
-            isEnabled,
-            hooks;
-
+        let { EXTEND_PROTOTYPES } = EmberENV;
         if (EXTEND_PROTOTYPES !== undefined) {
             if (typeof EXTEND_PROTOTYPES === 'object' && EXTEND_PROTOTYPES !== null) {
                 ENV.EXTEND_PROTOTYPES.String = EXTEND_PROTOTYPES.String !== false;
                 ENV.EXTEND_PROTOTYPES.Function = EXTEND_PROTOTYPES.Function !== false;
                 ENV.EXTEND_PROTOTYPES.Array = EXTEND_PROTOTYPES.Array !== false;
             } else {
-                isEnabled = EXTEND_PROTOTYPES !== false;
-
+                let isEnabled = EXTEND_PROTOTYPES !== false;
                 ENV.EXTEND_PROTOTYPES.String = isEnabled;
                 ENV.EXTEND_PROTOTYPES.Function = isEnabled;
                 ENV.EXTEND_PROTOTYPES.Array = isEnabled;
@@ -4474,24 +4118,19 @@ enifed('ember-environment', ['exports'], function (exports) {
         }
         // TODO this does not seem to be used by anything,
         //      can we remove it? do we need to deprecate it?
-        var EMBER_LOAD_HOOKS = EmberENV.EMBER_LOAD_HOOKS;
-
+        let { EMBER_LOAD_HOOKS } = EmberENV;
         if (typeof EMBER_LOAD_HOOKS === 'object' && EMBER_LOAD_HOOKS !== null) {
-            for (var hookName in EMBER_LOAD_HOOKS) {
+            for (let hookName in EMBER_LOAD_HOOKS) {
                 if (!EMBER_LOAD_HOOKS.hasOwnProperty(hookName)) continue;
-                hooks = EMBER_LOAD_HOOKS[hookName];
-
+                let hooks = EMBER_LOAD_HOOKS[hookName];
                 if (Array.isArray(hooks)) {
-                    ENV.EMBER_LOAD_HOOKS[hookName] = hooks.filter(function (hook) {
-                        return typeof hook === 'function';
-                    });
+                    ENV.EMBER_LOAD_HOOKS[hookName] = hooks.filter(hook => typeof hook === 'function');
                 }
             }
         }
-        var FEATURES = EmberENV.FEATURES;
-
+        let { FEATURES } = EmberENV;
         if (typeof FEATURES === 'object' && FEATURES !== null) {
-            for (var feature in FEATURES) {
+            for (let feature in FEATURES) {
                 if (!FEATURES.hasOwnProperty(feature)) continue;
                 ENV.FEATURES[feature] = FEATURES[feature] === true;
             }
@@ -4552,7 +4191,7 @@ enifed('ember-template-compiler/index', ['exports', 'ember-template-compiler/lib
             return _index.default;
         }
     });
-    var _Ember = exports._Ember = typeof _emberEnvironment.context.imports.Ember === 'object' && _emberEnvironment.context.imports.Ember || {};
+    const _Ember = exports._Ember = typeof _emberEnvironment.context.imports.Ember === 'object' && _emberEnvironment.context.imports.Ember || {};
     // private API used by ember-cli-htmlbars to setup ENV and FEATURES
     if (!_Ember.ENV) {
         _Ember.ENV = _emberEnvironment.ENV;
@@ -4575,11 +4214,11 @@ enifed('ember-template-compiler/lib/compat', ['exports', 'ember-template-compile
     'use strict';
 
     exports.default = function (Ember) {
-        var EmberHandlebars = Ember.Handlebars;
+        let EmberHandlebars = Ember.Handlebars;
         if (!EmberHandlebars) {
             Ember.Handlebars = EmberHandlebars = {};
         }
-        var EmberHTMLBars = Ember.HTMLBars;
+        let EmberHTMLBars = Ember.HTMLBars;
         if (!EmberHTMLBars) {
             Ember.HTMLBars = EmberHTMLBars = {};
         }
@@ -4592,24 +4231,23 @@ enifed('ember-template-compiler/lib/plugins/assert-if-helper-without-arguments',
     'use strict';
 
     exports.default = function (env) {
-        var moduleName = env.meta.moduleName;
-
+        let { moduleName } = env.meta;
         return {
             name: 'assert-if-helper-without-arguments',
             visitor: {
-                BlockStatement: function (node) {
+                BlockStatement(node) {
                     if (isInvalidBlockIf(node)) {
-                        true && !false && (0, _debug.assert)(blockAssertMessage(node.path.original) + ' ' + (0, _calculateLocationDisplay.default)(moduleName, node.loc));
+                        true && !false && (0, _debug.assert)(`${blockAssertMessage(node.path.original)} ${(0, _calculateLocationDisplay.default)(moduleName, node.loc)}`);
                     }
                 },
-                MustacheStatement: function (node) {
+                MustacheStatement(node) {
                     if (isInvalidInlineIf(node)) {
-                        true && !false && (0, _debug.assert)(inlineAssertMessage(node.path.original) + ' ' + (0, _calculateLocationDisplay.default)(moduleName, node.loc));
+                        true && !false && (0, _debug.assert)(`${inlineAssertMessage(node.path.original)} ${(0, _calculateLocationDisplay.default)(moduleName, node.loc)}`);
                     }
                 },
-                SubExpression: function (node) {
+                SubExpression(node) {
                     if (isInvalidInlineIf(node)) {
-                        true && !false && (0, _debug.assert)(inlineAssertMessage(node.path.original) + ' ' + (0, _calculateLocationDisplay.default)(moduleName, node.loc));
+                        true && !false && (0, _debug.assert)(`${inlineAssertMessage(node.path.original)} ${(0, _calculateLocationDisplay.default)(moduleName, node.loc)}`);
                     }
                 }
             }
@@ -4617,10 +4255,10 @@ enifed('ember-template-compiler/lib/plugins/assert-if-helper-without-arguments',
     };
 
     function blockAssertMessage(original) {
-        return '#' + original + ' requires a single argument.';
+        return `#${original} requires a single argument.`;
     }
     function inlineAssertMessage(original) {
-        return 'The inline form of the \'' + original + '\' helper expects two or three arguments.';
+        return `The inline form of the '${original}' helper expects two or three arguments.`;
     }
     function isInvalidInlineIf(node) {
         return node.path.original === 'if' && (!node.params || node.params.length < 2 || node.params.length > 3);
@@ -4633,12 +4271,11 @@ enifed('ember-template-compiler/lib/plugins/assert-input-helper-without-block', 
     'use strict';
 
     exports.default = function (env) {
-        var moduleName = env.meta.moduleName;
-
+        let { moduleName } = env.meta;
         return {
             name: 'assert-input-helper-without-block',
             visitor: {
-                BlockStatement: function (node) {
+                BlockStatement(node) {
                     if (node.path.original !== 'input') {
                         return;
                     }
@@ -4649,61 +4286,45 @@ enifed('ember-template-compiler/lib/plugins/assert-input-helper-without-block', 
     };
 
     function assertMessage(moduleName, node) {
-        var sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
-        return 'The {{input}} helper cannot be used in block form. ' + sourceInformation;
+        let sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
+        return `The {{input}} helper cannot be used in block form. ${sourceInformation}`;
     }
 });
 enifed('ember-template-compiler/lib/plugins/assert-reserved-named-arguments', ['exports', '@ember/debug', 'ember-template-compiler/lib/system/calculate-location-display'], function (exports, _debug, _calculateLocationDisplay) {
     'use strict';
 
     exports.default = function (env) {
-        var moduleName = env.meta.moduleName;
-
+        let { moduleName } = env.meta;
         return {
             name: 'assert-reserved-named-arguments',
             visitor: {
-                PathExpression: function (_ref) {
-                    var original = _ref.original,
-                        loc = _ref.loc;
-
+                PathExpression({ original, loc }) {
                     if (isReserved(original)) {
-                        true && !false && (0, _debug.assert)(assertMessage(original) + ' ' + (0, _calculateLocationDisplay.default)(moduleName, loc));
+                        true && !false && (0, _debug.assert)(`${assertMessage(original)} ${(0, _calculateLocationDisplay.default)(moduleName, loc)}`);
                     }
                 }
             }
         };
     };
 
-    var RESERVED = ['@arguments', '@args', '@block', '@else'];
-    var isReserved = void 0,
-        assertMessage = void 0;
+    const RESERVED = ['@arguments', '@args', '@block', '@else'];
+    let isReserved, assertMessage;
 
-    isReserved = function (name) {
-        return RESERVED.indexOf(name) !== -1 || !!name.match(/^@[^a-z]/);
-    };
-    assertMessage = function (name) {
-        return '\'' + name + '\' is reserved.';
-    };
+    isReserved = name => RESERVED.indexOf(name) !== -1 || !!name.match(/^@[^a-z]/);
+    assertMessage = name => `'${name}' is reserved.`;
 });
 enifed('ember-template-compiler/lib/plugins/assert-splattribute-expression', ['exports', '@ember/debug', 'ember-template-compiler/lib/system/calculate-location-display'], function (exports, _debug, _calculateLocationDisplay) {
     'use strict';
 
     exports.default = function (env) {
-        var moduleName = env.meta.moduleName;
-
+        let { moduleName } = env.meta;
         return {
             name: 'assert-splattribute-expressions',
             visitor: {
-                AttrNode: function (_ref) {
-                    var name = _ref.name,
-                        loc = _ref.loc;
-                },
-                PathExpression: function (_ref2) {
-                    var original = _ref2.original,
-                        loc = _ref2.loc;
-
+                AttrNode({ name, loc }) {},
+                PathExpression({ original, loc }) {
                     if (original === '...attributes') {
-                        true && !false && (0, _debug.assert)(errorMessage() + ' ' + (0, _calculateLocationDisplay.default)(moduleName, loc));
+                        true && !false && (0, _debug.assert)(`${errorMessage()} ${(0, _calculateLocationDisplay.default)(moduleName, loc)}`);
                     }
                 }
             }
@@ -4711,7 +4332,7 @@ enifed('ember-template-compiler/lib/plugins/assert-splattribute-expression', ['e
     };
 
     function errorMessage() {
-        return 'Using "...attributes" can only be used in the element position e.g. <div ...attributes />. It cannot be used as a path.';
+        return `Using "...attributes" can only be used in the element position e.g. <div ...attributes />. It cannot be used as a path.`;
     }
 });
 enifed('ember-template-compiler/lib/plugins/deprecate-render-model', ['exports', '@ember/debug', '@ember/deprecated-features', 'ember-template-compiler/lib/system/calculate-location-display'], function (exports, _debug, _deprecatedFeatures, _calculateLocationDisplay) {
@@ -4721,24 +4342,22 @@ enifed('ember-template-compiler/lib/plugins/deprecate-render-model', ['exports',
 
     // Remove after 3.4 once _ENABLE_RENDER_SUPPORT flag is no longer needed.
     function (env) {
-        var moduleName, deprecationMessage;
-
         if (_deprecatedFeatures.RENDER_HELPER) {
-            moduleName = env.meta.moduleName;
-            deprecationMessage = function (node, param) {
-                var sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
-                var componentName = node.params[0].original;
-                var modelName = param.original;
-
-                return 'Please refactor `' + ('{{render "' + componentName + '" ' + modelName + '}}') + '` to a component and invoke via' + (' `' + ('{{' + componentName + ' model=' + modelName + '}}') + '`. ' + sourceInformation);
+            let { moduleName } = env.meta;
+            let deprecationMessage = (node, param) => {
+                let sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
+                let componentName = node.params[0].original;
+                let modelName = param.original;
+                let original = `{{render "${componentName}" ${modelName}}}`;
+                let preferred = `{{${componentName} model=${modelName}}}`;
+                return `Please refactor \`${original}\` to a component and invoke via` + ` \`${preferred}\`. ${sourceInformation}`;
             };
-
             return {
                 name: 'deprecate-render-model',
                 visitor: {
-                    MustacheStatement: function (node) {
+                    MustacheStatement(node) {
                         if (node.path.original === 'render' && node.params.length > 1) {
-                            node.params.forEach(function (param) {
+                            node.params.forEach(param => {
                                 if (param.type !== 'PathExpression') {
                                     return;
                                 }
@@ -4763,28 +4382,26 @@ enifed('ember-template-compiler/lib/plugins/deprecate-render', ['exports', '@emb
 
     // Remove after 3.4 once _ENABLE_RENDER_SUPPORT flag is no longer needed.
     function (env) {
-        var moduleName, deprecationMessage;
-
         if (_deprecatedFeatures.RENDER_HELPER) {
-            moduleName = env.meta.moduleName;
-            deprecationMessage = function (node) {
-                var sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
-                var componentName = node.params[0].original;
-
-                return 'Please refactor `' + ('{{render "' + componentName + '"}}') + '` to a component and invoke via' + (' `' + ('{{' + componentName + '}}') + '`. ' + sourceInformation);
+            let { moduleName } = env.meta;
+            let deprecationMessage = node => {
+                let sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
+                let componentName = node.params[0].original;
+                let original = `{{render "${componentName}"}}`;
+                let preferred = `{{${componentName}}}`;
+                return `Please refactor \`${original}\` to a component and invoke via` + ` \`${preferred}\`. ${sourceInformation}`;
             };
-
             return {
                 name: 'deprecate-render',
                 visitor: {
-                    MustacheStatement: function (node) {
+                    MustacheStatement(node) {
                         if (node.path.original !== 'render') {
                             return;
                         }
                         if (node.params.length !== 1) {
                             return;
                         }
-                        node.params.forEach(function (param) {
+                        node.params.forEach(param => {
                             if (param.type !== 'StringLiteral') {
                                 return;
                             }
@@ -4805,23 +4422,20 @@ enifed('ember-template-compiler/lib/plugins/deprecate-send-action', ['exports', 
     'use strict';
 
     exports.default = function (env) {
-        var moduleName, deprecationMessage;
-
         if (_deprecatedFeatures.SEND_ACTION) {
-            moduleName = env.meta.moduleName;
-            deprecationMessage = function (node, evName, action) {
-                var sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
-                return 'Please refactor `{{input ' + evName + '="' + action + '"}}` to `{{input ' + evName + '=(action "' + action + '")}}. ' + sourceInformation;
+            let { moduleName } = env.meta;
+            let deprecationMessage = (node, evName, action) => {
+                let sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
+                return `Please refactor \`{{input ${evName}="${action}"}}\` to \`{{input ${evName}=(action "${action}")}}\. ${sourceInformation}`;
             };
-
             return {
                 name: 'deprecate-send-action',
                 visitor: {
-                    MustacheStatement: function (node) {
+                    MustacheStatement(node) {
                         if (node.path.original !== 'input') {
                             return;
                         }
-                        node.hash.pairs.forEach(function (pair) {
+                        node.hash.pairs.forEach(pair => {
                             if (EVENTS.indexOf(pair.key) > -1 && pair.value.type === 'StringLiteral') {
                                 true && !false && (0, _debug.deprecate)(deprecationMessage(node, pair.key, pair.value.original), false, {
                                     id: 'ember-component.send-action',
@@ -4836,12 +4450,12 @@ enifed('ember-template-compiler/lib/plugins/deprecate-send-action', ['exports', 
         }
     };
 
-    var EVENTS = ['insert-newline', 'enter', 'escape-press', 'focus-in', 'focus-out', 'key-press', 'key-up', 'key-down'];
+    const EVENTS = ['insert-newline', 'enter', 'escape-press', 'focus-in', 'focus-out', 'key-press', 'key-up', 'key-down'];
 });
 enifed('ember-template-compiler/lib/plugins/index', ['exports', 'ember-template-compiler/lib/plugins/assert-if-helper-without-arguments', 'ember-template-compiler/lib/plugins/assert-input-helper-without-block', 'ember-template-compiler/lib/plugins/assert-reserved-named-arguments', 'ember-template-compiler/lib/plugins/assert-splattribute-expression', 'ember-template-compiler/lib/plugins/deprecate-render', 'ember-template-compiler/lib/plugins/deprecate-render-model', 'ember-template-compiler/lib/plugins/deprecate-send-action', 'ember-template-compiler/lib/plugins/transform-action-syntax', 'ember-template-compiler/lib/plugins/transform-angle-bracket-components', 'ember-template-compiler/lib/plugins/transform-attrs-into-args', 'ember-template-compiler/lib/plugins/transform-dot-component-invocation', 'ember-template-compiler/lib/plugins/transform-each-in-into-each', 'ember-template-compiler/lib/plugins/transform-has-block-syntax', 'ember-template-compiler/lib/plugins/transform-in-element', 'ember-template-compiler/lib/plugins/transform-inline-link-to', 'ember-template-compiler/lib/plugins/transform-input-type-syntax', 'ember-template-compiler/lib/plugins/transform-old-class-binding-syntax', 'ember-template-compiler/lib/plugins/transform-quoted-bindings-into-just-bindings', 'ember-template-compiler/lib/plugins/transform-top-level-components', '@ember/deprecated-features'], function (exports, _assertIfHelperWithoutArguments, _assertInputHelperWithoutBlock, _assertReservedNamedArguments, _assertSplattributeExpression, _deprecateRender, _deprecateRenderModel, _deprecateSendAction, _transformActionSyntax, _transformAngleBracketComponents, _transformAttrsIntoArgs, _transformDotComponentInvocation, _transformEachInIntoEach, _transformHasBlockSyntax, _transformInElement, _transformInlineLinkTo, _transformInputTypeSyntax, _transformOldClassBindingSyntax, _transformQuotedBindingsIntoJustBindings, _transformTopLevelComponents, _deprecatedFeatures) {
     'use strict';
 
-    var transforms = [_transformDotComponentInvocation.default, _transformAngleBracketComponents.default, _transformTopLevelComponents.default, _transformInlineLinkTo.default, _transformOldClassBindingSyntax.default, _transformQuotedBindingsIntoJustBindings.default, _assertReservedNamedArguments.default, _transformActionSyntax.default, _transformInputTypeSyntax.default, _transformAttrsIntoArgs.default, _transformEachInIntoEach.default, _transformHasBlockSyntax.default, _assertInputHelperWithoutBlock.default, _transformInElement.default, _assertIfHelperWithoutArguments.default, _assertSplattributeExpression.default];
+    const transforms = [_transformDotComponentInvocation.default, _transformAngleBracketComponents.default, _transformTopLevelComponents.default, _transformInlineLinkTo.default, _transformOldClassBindingSyntax.default, _transformQuotedBindingsIntoJustBindings.default, _assertReservedNamedArguments.default, _transformActionSyntax.default, _transformInputTypeSyntax.default, _transformAttrsIntoArgs.default, _transformEachInIntoEach.default, _transformHasBlockSyntax.default, _assertInputHelperWithoutBlock.default, _transformInElement.default, _assertIfHelperWithoutArguments.default, _assertSplattributeExpression.default];
     if (_deprecatedFeatures.RENDER_HELPER) {
         transforms.push(_deprecateRenderModel.default);
         transforms.push(_deprecateRender.default);
@@ -4878,24 +4492,22 @@ enifed('ember-template-compiler/lib/plugins/transform-action-syntax', ['exports'
       @private
       @class TransformActionSyntax
     */
-    function (_ref) {
-        var syntax = _ref.syntax;
-        var b = syntax.builders;
-
+    function ({ syntax }) {
+        let { builders: b } = syntax;
         return {
             name: 'transform-action-syntax',
             visitor: {
-                ElementModifierStatement: function (node) {
+                ElementModifierStatement(node) {
                     if (isAction(node)) {
                         insertThisAsFirstParam(node, b);
                     }
                 },
-                MustacheStatement: function (node) {
+                MustacheStatement(node) {
                     if (isAction(node)) {
                         insertThisAsFirstParam(node, b);
                     }
                 },
-                SubExpression: function (node) {
+                SubExpression(node) {
                     if (isAction(node)) {
                         insertThisAsFirstParam(node, b);
                     }
@@ -4917,8 +4529,8 @@ enifed('ember-template-compiler/lib/plugins/transform-angle-bracket-components',
         return {
             name: 'transform-angle-bracket-components',
             visitor: {
-                ComponentNode: function (node) {
-                    node.tag = '<' + node.tag + '>';
+                ComponentNode(node) {
+                    node.tag = `<${node.tag}>`;
                 }
             }
         };
@@ -4951,28 +4563,24 @@ enifed('ember-template-compiler/lib/plugins/transform-attrs-into-args', ['export
       @class TransformAttrsToProps
     */
     function (env) {
-        var b = env.syntax.builders;
-
-        var stack = [[]];
+        let { builders: b } = env.syntax;
+        let stack = [[]];
         return {
             name: 'transform-attrs-into-args',
             visitor: {
                 Program: {
-                    enter: function (node) {
-                        var parent = stack[stack.length - 1];
+                    enter(node) {
+                        let parent = stack[stack.length - 1];
                         stack.push(parent.concat(node.blockParams));
                     },
-                    exit: function () {
+                    exit() {
                         stack.pop();
                     }
                 },
-                PathExpression: function (node) {
-                    var path;
-
+                PathExpression(node) {
                     if (isAttrs(node, stack[stack.length - 1])) {
-                        path = b.path(node.original.substr(6));
-
-                        path.original = '@' + path.original;
+                        let path = b.path(node.original.substr(6));
+                        path.original = `@${path.original}`;
                         path.data = true;
                         return path;
                     }
@@ -4981,7 +4589,7 @@ enifed('ember-template-compiler/lib/plugins/transform-attrs-into-args', ['export
         };
     };
     function isAttrs(node, symbols) {
-        var name = node.parts[0];
+        let name = node.parts[0];
         if (symbols.indexOf(name) !== -1) {
             return false;
         }
@@ -5053,17 +4661,16 @@ enifed('ember-template-compiler/lib/plugins/transform-dot-component-invocation',
     @class TransFormDotComponentInvocation
   */
   function (env) {
-    var b = env.syntax.builders;
-
+    let { builders: b } = env.syntax;
     return {
       name: 'transform-dot-component-invocation',
       visitor: {
-        MustacheStatement: function (node) {
+        MustacheStatement(node) {
           if (isInlineInvocation(node.path, node.params, node.hash)) {
             wrapInComponent(node, b);
           }
         },
-        BlockStatement: function (node) {
+        BlockStatement(node) {
           if (isMultipartPath(node.path)) {
             wrapInComponent(node, b);
           }
@@ -5083,8 +4690,8 @@ enifed('ember-template-compiler/lib/plugins/transform-dot-component-invocation',
     return false;
   }
   function wrapInComponent(node, builder) {
-    var component = node.path;
-    var componentHelper = builder.path('component');
+    let component = node.path;
+    let componentHelper = builder.path('component');
     node.path = componentHelper;
     node.params.unshift(component);
   }
@@ -5113,18 +4720,14 @@ enifed('ember-template-compiler/lib/plugins/transform-each-in-into-each', ['expo
       @class TransformHasBlockSyntax
     */
     function (env) {
-        var b = env.syntax.builders;
-
+        let { builders: b } = env.syntax;
         return {
             name: 'transform-each-in-into-each',
             visitor: {
-                BlockStatement: function (node) {
-                    var blockParams, key, value;
-
+                BlockStatement(node) {
                     if (node.path.original === 'each-in') {
                         node.params[0] = b.sexpr(b.path('-each-in'), [node.params[0]]);
-                        blockParams = node.program.blockParams;
-
+                        let blockParams = node.program.blockParams;
                         if (!blockParams || blockParams.length === 0) {
                             // who uses {{#each-in}} without block params?!
                         } else if (blockParams.length === 1) {
@@ -5132,10 +4735,9 @@ enifed('ember-template-compiler/lib/plugins/transform-each-in-into-each', ['expo
                             // pick a name that won't parse so it won't shadow any real variables
                             blockParams = ['( unused value )', blockParams[0]];
                         } else {
-                            key = blockParams.shift();
-                            value = blockParams.shift();
-
-                            blockParams = [value, key].concat(blockParams);
+                            let key = blockParams.shift();
+                            let value = blockParams.shift();
+                            blockParams = [value, key, ...blockParams];
                         }
                         node.program.blockParams = blockParams;
                         return b.block(b.path('each'), node.params, node.hash, node.program, node.inverse, node.loc);
@@ -5149,22 +4751,21 @@ enifed('ember-template-compiler/lib/plugins/transform-has-block-syntax', ['expor
     'use strict';
 
     exports.default = function (env) {
-        var b = env.syntax.builders;
-
+        let { builders: b } = env.syntax;
         return {
             name: 'transform-has-block-syntax',
             visitor: {
-                PathExpression: function (node) {
+                PathExpression(node) {
                     if (TRANSFORMATIONS[node.original]) {
                         return b.sexpr(b.path(TRANSFORMATIONS[node.original]));
                     }
                 },
-                MustacheStatement: function (node) {
+                MustacheStatement(node) {
                     if (typeof node.path.original === 'string' && TRANSFORMATIONS[node.path.original]) {
                         return b.mustache(b.path(TRANSFORMATIONS[node.path.original]), node.params, node.hash, undefined, node.loc);
                     }
                 },
-                SubExpression: function (node) {
+                SubExpression(node) {
                     if (TRANSFORMATIONS[node.path.original]) {
                         return b.sexpr(b.path(TRANSFORMATIONS[node.path.original]), node.params, node.hash);
                     }
@@ -5191,7 +4792,7 @@ enifed('ember-template-compiler/lib/plugins/transform-has-block-syntax', ['expor
       @private
       @class TransformHasBlockSyntax
     */
-    var TRANSFORMATIONS = {
+    const TRANSFORMATIONS = {
         hasBlock: 'has-block',
         hasBlockParams: 'has-block-params'
     };
@@ -5243,16 +4844,13 @@ enifed('ember-template-compiler/lib/plugins/transform-in-element', ['exports', '
     @class TransformHasBlockSyntax
   */
   function (env) {
-    var moduleName = env.meta.moduleName;
-    var b = env.syntax.builders;
-
-    var cursorCount = 0;
+    let { moduleName } = env.meta;
+    let { builders: b } = env.syntax;
+    let cursorCount = 0;
     return {
       name: 'transform-in-element',
       visitor: {
-        BlockStatement: function (node) {
-          var hasNextSibling, hash, guid, guidPair, nullLiteral, nextSibling;
-
+        BlockStatement(node) {
           if (node.path.original === 'in-element') {
             true && !false && (0, _debug.assert)(assertMessage(moduleName, node));
           } else if (node.path.original === '-in-element') {
@@ -5260,22 +4858,19 @@ enifed('ember-template-compiler/lib/plugins/transform-in-element', ['exports', '
             node.path.parts = ['in-element'];
             // replicate special hash arguments added here:
             // https://github.com/glimmerjs/glimmer-vm/blob/ba9b37d44b85fa1385eeeea71910ff5798198c8e/packages/%40glimmer/syntax/lib/parser/handlebars-node-visitors.ts#L340-L363
-            hasNextSibling = false;
-            hash = node.hash;
-
-            hash.pairs.forEach(function (pair) {
+            let hasNextSibling = false;
+            let hash = node.hash;
+            hash.pairs.forEach(pair => {
               if (pair.key === 'nextSibling') {
                 hasNextSibling = true;
               }
             });
-            guid = b.literal('StringLiteral', '%cursor:' + cursorCount++ + '%');
-            guidPair = b.pair('guid', guid);
-
+            let guid = b.literal('StringLiteral', `%cursor:${cursorCount++}%`);
+            let guidPair = b.pair('guid', guid);
             hash.pairs.unshift(guidPair);
             if (!hasNextSibling) {
-              nullLiteral = b.literal('NullLiteral', null);
-              nextSibling = b.pair('nextSibling', nullLiteral);
-
+              let nullLiteral = b.literal('NullLiteral', null);
+              let nextSibling = b.pair('nextSibling', nullLiteral);
               hash.pairs.push(nextSibling);
             }
           }
@@ -5284,25 +4879,21 @@ enifed('ember-template-compiler/lib/plugins/transform-in-element', ['exports', '
     };
   };
   function assertMessage(moduleName, node) {
-    var sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
-    return 'The {{in-element}} helper cannot be used. ' + sourceInformation;
+    let sourceInformation = (0, _calculateLocationDisplay.default)(moduleName, node.loc);
+    return `The {{in-element}} helper cannot be used. ${sourceInformation}`;
   }
 });
 enifed('ember-template-compiler/lib/plugins/transform-inline-link-to', ['exports'], function (exports) {
     'use strict';
 
     exports.default = function (env) {
-        var b = env.syntax.builders;
-
+        let { builders: b } = env.syntax;
         return {
             name: 'transform-inline-link-to',
             visitor: {
-                MustacheStatement: function (node) {
-                    var content;
-
+                MustacheStatement(node) {
                     if (node.path.original === 'link-to') {
-                        content = node.escaped ? node.params[0] : unsafeHtml(b, node.params[0]);
-
+                        let content = node.escaped ? node.params[0] : unsafeHtml(b, node.params[0]);
                         return b.block('link-to', node.params.slice(1), node.hash, buildProgram(b, content, node.loc), null, node.loc);
                     }
                 }
@@ -5320,7 +4911,7 @@ enifed('ember-template-compiler/lib/plugins/transform-inline-link-to', ['exports
                 return b.mustache(content.path, content.params, content.hash, undefined, loc);
             // The default case handles literals.
             default:
-                return b.text('' + content.value, loc);
+                return b.text(`${content.value}`, loc);
         }
     }
     function unsafeHtml(b, expr) {
@@ -5355,11 +4946,11 @@ enifed('ember-template-compiler/lib/plugins/transform-input-type-syntax', ['expo
       @class TransformInputTypeSyntax
     */
     function (env) {
-        var b = env.syntax.builders;
+        let b = env.syntax.builders;
         return {
             name: 'transform-input-type-syntax',
             visitor: {
-                MustacheStatement: function (node) {
+                MustacheStatement(node) {
                     if (isInput(node)) {
                         insertTypeHelperParameter(node, b);
                     }
@@ -5371,10 +4962,9 @@ enifed('ember-template-compiler/lib/plugins/transform-input-type-syntax', ['expo
         return node.path.original === 'input';
     }
     function insertTypeHelperParameter(node, builders) {
-        var pairs = node.hash.pairs,
-            i;
-        var pair = null;
-        for (i = 0; i < pairs.length; i++) {
+        let pairs = node.hash.pairs;
+        let pair = null;
+        for (let i = 0; i < pairs.length; i++) {
             if (pairs[i].key === 'type') {
                 pair = pairs[i];
                 break;
@@ -5389,14 +4979,14 @@ enifed('ember-template-compiler/lib/plugins/transform-old-class-binding-syntax',
     'use strict';
 
     exports.default = function (env) {
-        var b = env.syntax.builders;
+        let b = env.syntax.builders;
         return {
             name: 'transform-old-class-binding-syntax',
             visitor: {
-                MustacheStatement: function (node) {
+                MustacheStatement(node) {
                     process(b, node);
                 },
-                BlockStatement: function (node) {
+                BlockStatement(node) {
                     process(b, node);
                 }
             }
@@ -5404,12 +4994,11 @@ enifed('ember-template-compiler/lib/plugins/transform-old-class-binding-syntax',
     };
 
     function process(b, node) {
-        var allOfTheMicrosyntaxes = [];
-        var allOfTheMicrosyntaxIndexes = [];
-        var classPair = void 0;
-        each(node.hash.pairs, function (pair, index) {
-            var key = pair.key;
-
+        let allOfTheMicrosyntaxes = [];
+        let allOfTheMicrosyntaxIndexes = [];
+        let classPair;
+        each(node.hash.pairs, (pair, index) => {
+            let { key } = pair;
             if (key === 'classBinding' || key === 'classNameBindings') {
                 allOfTheMicrosyntaxIndexes.push(index);
                 allOfTheMicrosyntaxes.push(pair);
@@ -5420,7 +5009,7 @@ enifed('ember-template-compiler/lib/plugins/transform-old-class-binding-syntax',
         if (allOfTheMicrosyntaxes.length === 0) {
             return;
         }
-        var classValue = [];
+        let classValue = [];
         if (classPair) {
             classValue.push(classPair.value);
             classValue.push(b.string(' '));
@@ -5428,45 +5017,36 @@ enifed('ember-template-compiler/lib/plugins/transform-old-class-binding-syntax',
             classPair = b.pair('class', null);
             node.hash.pairs.push(classPair);
         }
-        each(allOfTheMicrosyntaxIndexes, function (index) {
+        each(allOfTheMicrosyntaxIndexes, index => {
             node.hash.pairs.splice(index, 1);
         });
-        each(allOfTheMicrosyntaxes, function (_ref) {
-            var value = _ref.value,
-                microsyntax;
-
-            var sexprs = [];
+        each(allOfTheMicrosyntaxes, ({ value }) => {
+            let sexprs = [];
             // TODO: add helpful deprecation when both `classNames` and `classNameBindings` can
             // be removed.
             if (value.type === 'StringLiteral') {
-                microsyntax = parseMicrosyntax(value.original);
-
+                let microsyntax = parseMicrosyntax(value.original);
                 buildSexprs(microsyntax, sexprs, b);
-                classValue.push.apply(classValue, sexprs);
+                classValue.push(...sexprs);
             }
         });
-        var hash = b.hash();
+        let hash = b.hash();
         classPair.value = b.sexpr(b.path('concat'), classValue, hash);
     }
     function buildSexprs(microsyntax, sexprs, b) {
-        var i, _microsyntax$i, propName, activeClass, inactiveClass, sexpr, params, sexprParams, hash;
-
-        for (i = 0; i < microsyntax.length; i++) {
-            _microsyntax$i = microsyntax[i], propName = _microsyntax$i[0], activeClass = _microsyntax$i[1], inactiveClass = _microsyntax$i[2];
-            sexpr = void 0;
+        for (let i = 0; i < microsyntax.length; i++) {
+            let [propName, activeClass, inactiveClass] = microsyntax[i];
+            let sexpr;
             // :my-class-name microsyntax for static values
-
             if (propName === '') {
                 sexpr = b.string(activeClass);
             } else {
-                params = [b.path(propName)];
-
+                let params = [b.path(propName)];
                 if (activeClass || activeClass === '') {
                     params.push(b.string(activeClass));
                 } else {
-                    sexprParams = [b.string(propName), b.path(propName)];
-                    hash = b.hash();
-
+                    let sexprParams = [b.string(propName), b.path(propName)];
+                    let hash = b.hash();
                     if (activeClass !== undefined) {
                         hash.pairs.push(b.pair('activeClass', b.string(activeClass)));
                     }
@@ -5485,17 +5065,14 @@ enifed('ember-template-compiler/lib/plugins/transform-old-class-binding-syntax',
         }
     }
     function each(list, callback) {
-        var i;
-
-        for (i = 0; i < list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
             callback(list[i], i);
         }
     }
     function parseMicrosyntax(string) {
-        var segments = string.split(' '),
-            i;
-        var ret = [];
-        for (i = 0; i < segments.length; i++) {
+        let segments = string.split(' ');
+        let ret = [];
+        for (let i = 0; i < segments.length; i++) {
             ret[i] = segments[i].split(':');
         }
         return ret;
@@ -5508,8 +5085,8 @@ enifed('ember-template-compiler/lib/plugins/transform-quoted-bindings-into-just-
         return {
             name: 'transform-quoted-bindings-into-just-bindings',
             visitor: {
-                ElementNode: function (node) {
-                    var styleAttr = getStyleAttr(node);
+                ElementNode(node) {
+                    let styleAttr = getStyleAttr(node);
                     if (!validStyleAttr(styleAttr)) {
                         return;
                     }
@@ -5523,17 +5100,16 @@ enifed('ember-template-compiler/lib/plugins/transform-quoted-bindings-into-just-
         if (!attr) {
             return false;
         }
-        var value = attr.value;
+        let value = attr.value;
         if (!value || value.type !== 'ConcatStatement' || value.parts.length !== 1) {
             return false;
         }
-        var onlyPart = value.parts[0];
+        let onlyPart = value.parts[0];
         return onlyPart.type === 'MustacheStatement';
     }
     function getStyleAttr(node) {
-        var attributes = node.attributes,
-            i;
-        for (i = 0; i < attributes.length; i++) {
+        let attributes = node.attributes;
+        for (let i = 0; i < attributes.length; i++) {
             if (attributes[i].name === 'style') {
                 return attributes[i];
             }
@@ -5548,9 +5124,9 @@ enifed('ember-template-compiler/lib/plugins/transform-top-level-components', ['e
         return {
             name: 'transform-top-level-component',
             visitor: {
-                Program: function (node) {
-                    hasSingleComponentNode(node, function (component) {
-                        component.tag = '@' + component.tag;
+                Program(node) {
+                    hasSingleComponentNode(node, component => {
+                        component.tag = `@${component.tag}`;
                         component.isStatic = true;
                     });
                 }
@@ -5559,20 +5135,15 @@ enifed('ember-template-compiler/lib/plugins/transform-top-level-components', ['e
     };
 
     function hasSingleComponentNode(program, componentCallback) {
-        var loc = program.loc,
-            body = program.body,
-            i,
-            curr;
-
+        let { loc, body } = program;
         if (!loc || loc.start.line !== 1 || loc.start.column !== 0) {
             return;
         }
-        var lastComponentNode = void 0;
-        var nodeCount = 0;
-        for (i = 0; i < body.length; i++) {
-            curr = body[i];
+        let lastComponentNode;
+        let nodeCount = 0;
+        for (let i = 0; i < body.length; i++) {
+            let curr = body[i];
             // text node with whitespace only
-
             if (curr.type === 'TextNode' && /^[\s]*$/.test(curr.chars)) {
                 continue;
             }
@@ -5612,35 +5183,25 @@ enifed('ember-template-compiler/lib/system/bootstrap', ['exports', 'ember-templa
     /**
     @module ember
     */
-    exports.default = function (_ref) {
-        var context = _ref.context,
-            hasTemplate = _ref.hasTemplate,
-            setTemplate = _ref.setTemplate,
-            i,
-            script,
-            templateName,
-            template;
-
+    exports.default = function ({ context, hasTemplate, setTemplate }) {
         if (!context) {
             context = document;
         }
 
-        var elements = context.querySelectorAll('script[type="text/x-handlebars"]');
-        for (i = 0; i < elements.length; i++) {
-            script = elements[i];
+        let elements = context.querySelectorAll('script[type="text/x-handlebars"]');
+        for (let i = 0; i < elements.length; i++) {
+            let script = elements[i];
             // Get the name of the script
             // First look for data-template-name attribute, then fall back to its
             // id if no name is found.
-
-            templateName = script.getAttribute('data-template-name') || script.getAttribute('id') || 'application';
-            template = void 0;
-
-            template = (0, _compile.default)(script.innerHTML, {
+            let templateName = script.getAttribute('data-template-name') || script.getAttribute('id') || 'application';
+            let template = (0, _compile.default)(script.innerHTML, {
                 moduleName: templateName
             });
+
             // Check if template of same name already exists.
             if (hasTemplate(templateName)) {
-                throw new Error('Template named "' + templateName + '" already exists.');
+                throw new Error(`Template named "${templateName}" already exists.`);
             }
             // For templates which have a name, we save them and then remove them from the DOM.
             setTemplate(templateName, template);
@@ -5653,27 +5214,22 @@ enifed('ember-template-compiler/lib/system/calculate-location-display', ['export
     'use strict';
 
     exports.default = function (moduleName, loc) {
-        var moduleInfo = '',
-            _ref,
-            column,
-            line;
+        let moduleInfo = '';
         if (moduleName) {
-            moduleInfo += '\'' + moduleName + '\' ';
+            moduleInfo += `'${moduleName}' `;
         }
         if (loc) {
-            _ref = loc.start || { line: undefined, column: undefined }, column = _ref.column, line = _ref.line;
-
-
+            let { column, line } = loc.start || { line: undefined, column: undefined };
             if (line !== undefined && column !== undefined) {
                 if (moduleName) {
                     // only prepend @ if the moduleName was present
                     moduleInfo += '@ ';
                 }
-                moduleInfo += 'L' + line + ':C' + column;
+                moduleInfo += `L${line}:C${column}`;
             }
         }
         if (moduleInfo) {
-            moduleInfo = '(' + moduleInfo + ') ';
+            moduleInfo = `(${moduleInfo}) `;
         }
         return moduleInfo;
     };
@@ -5685,62 +5241,49 @@ enifed('ember-template-compiler/lib/system/compile-options', ['exports', '@ember
     exports.registerPlugin = registerPlugin;
     exports.unregisterPlugin = unregisterPlugin;
 
-    var USER_PLUGINS = [];
+    let USER_PLUGINS = [];
     function compileOptions(_options) {
-        var options = (0, _polyfills.assign)({ meta: {} }, _options, {
-            customizeComponentName: function (tagname) {
+        let options = (0, _polyfills.assign)({ meta: {} }, _options, {
+            customizeComponentName(tagname) {
                 return _dasherizeComponentName.default.get(tagname);
             }
-        }),
-            meta,
-            potententialPugins,
-            providedPlugins,
-            pluginsToAdd;
+        });
         // move `moduleName` into `meta` property
         if (options.moduleName) {
-            meta = options.meta;
-
+            let meta = options.meta;
             meta.moduleName = options.moduleName;
         }
         if (!options.plugins) {
-            options.plugins = { ast: [].concat(USER_PLUGINS, _index.default) };
+            options.plugins = { ast: [...USER_PLUGINS, ..._index.default] };
         } else {
-            potententialPugins = [].concat(USER_PLUGINS, _index.default);
-            providedPlugins = options.plugins.ast.map(function (plugin) {
-                return wrapLegacyPluginIfNeeded(plugin);
-            });
-            pluginsToAdd = potententialPugins.filter(function (plugin) {
+            let potententialPugins = [...USER_PLUGINS, ..._index.default];
+            let providedPlugins = options.plugins.ast.map(plugin => wrapLegacyPluginIfNeeded(plugin));
+            let pluginsToAdd = potententialPugins.filter(plugin => {
                 return options.plugins.ast.indexOf(plugin) === -1;
             });
-
             options.plugins.ast = providedPlugins.concat(pluginsToAdd);
         }
         return options;
     }
     function wrapLegacyPluginIfNeeded(_plugin) {
-        var plugin = _plugin,
-            pluginFunc;
+        let plugin = _plugin;
         if (_plugin.prototype && _plugin.prototype.transform) {
-            pluginFunc = function (env) {
-                var pluginInstantiated = false;
+            const pluginFunc = env => {
+                let pluginInstantiated = false;
                 return {
                     name: _plugin.constructor && _plugin.constructor.name,
                     visitor: {
-                        Program: function (node) {
-                            var _plugin2;
-
+                        Program(node) {
                             if (!pluginInstantiated) {
                                 pluginInstantiated = true;
-                                _plugin2 = new _plugin(env);
-
-                                _plugin2.syntax = env.syntax;
-                                return _plugin2.transform(node);
+                                let plugin = new _plugin(env);
+                                plugin.syntax = env.syntax;
+                                return plugin.transform(node);
                             }
                         }
                     }
                 };
             };
-
             pluginFunc.__raw = _plugin;
             plugin = pluginFunc;
         }
@@ -5748,27 +5291,22 @@ enifed('ember-template-compiler/lib/system/compile-options', ['exports', '@ember
     }
     function registerPlugin(type, _plugin) {
         if (type !== 'ast') {
-            throw new Error('Attempting to register ' + _plugin + ' as "' + type + '" which is not a valid Glimmer plugin type.');
+            throw new Error(`Attempting to register ${_plugin} as "${type}" which is not a valid Glimmer plugin type.`);
         }
-        for (i = 0; i < USER_PLUGINS.length; i++) {
-            PLUGIN = USER_PLUGINS[i];
-
+        for (let i = 0; i < USER_PLUGINS.length; i++) {
+            let PLUGIN = USER_PLUGINS[i];
             if (PLUGIN === _plugin || PLUGIN.__raw === _plugin) {
                 return;
             }
         }
-        var plugin = wrapLegacyPluginIfNeeded(_plugin),
-            i,
-            PLUGIN;
-        USER_PLUGINS = [plugin].concat(USER_PLUGINS);
+        let plugin = wrapLegacyPluginIfNeeded(_plugin);
+        USER_PLUGINS = [plugin, ...USER_PLUGINS];
     }
     function unregisterPlugin(type, PluginClass) {
         if (type !== 'ast') {
-            throw new Error('Attempting to unregister ' + PluginClass + ' as "' + type + '" which is not a valid Glimmer plugin type.');
+            throw new Error(`Attempting to unregister ${PluginClass} as "${type}" which is not a valid Glimmer plugin type.`);
         }
-        USER_PLUGINS = USER_PLUGINS.filter(function (plugin) {
-            return plugin !== PluginClass && plugin.__raw !== PluginClass;
-        });
+        USER_PLUGINS = USER_PLUGINS.filter(plugin => plugin !== PluginClass && plugin.__raw !== PluginClass);
     }
 });
 enifed('ember-template-compiler/lib/system/compile', ['exports', 'require', 'ember-template-compiler/lib/system/precompile'], function (exports, _require2, _precompile) {
@@ -5778,7 +5316,7 @@ enifed('ember-template-compiler/lib/system/compile', ['exports', 'require', 'emb
     /**
     @module ember
     */
-    var template = void 0;
+    let template;
     /**
       Uses HTMLBars `compile` function to process a string into a compiled template.
     
@@ -5797,8 +5335,8 @@ enifed('ember-template-compiler/lib/system/compile', ['exports', 'require', 'emb
         if (!template) {
             throw new Error('Cannot call `compile` with only the template compiler loaded. Please load `ember.debug.js` or `ember.prod.js` prior to calling `compile`.');
         }
-        var precompiledTemplateString = (0, _precompile.default)(templateString, options);
-        var templateJS = new Function('return ' + precompiledTemplateString)();
+        let precompiledTemplateString = (0, _precompile.default)(templateString, options);
+        let templateJS = new Function(`return ${precompiledTemplateString}`)();
         return template(templateJS);
     }
 });
@@ -5810,41 +5348,36 @@ enifed('ember-template-compiler/lib/system/dasherize-component-name', ['exports'
       `Ember.String.dasherize` would resolve it to `xfoo`..
     */
 
-    var SIMPLE_DASHERIZE_REGEXP = /[A-Z]/g;
-    var ALPHA = /[A-Za-z]/;
-    exports.default = new _emberUtils.Cache(1000, function (key) {
-        return key.replace(SIMPLE_DASHERIZE_REGEXP, function (char, index) {
-            if (index === 0 || !ALPHA.test(key[index - 1])) {
-                return char.toLowerCase();
-            }
-            return '-' + char.toLowerCase();
-        });
-    });
+    const SIMPLE_DASHERIZE_REGEXP = /[A-Z]/g;
+    const ALPHA = /[A-Za-z]/;
+    exports.default = new _emberUtils.Cache(1000, key => key.replace(SIMPLE_DASHERIZE_REGEXP, (char, index) => {
+        if (index === 0 || !ALPHA.test(key[index - 1])) {
+            return char.toLowerCase();
+        }
+        return `-${char.toLowerCase()}`;
+    }));
 });
 enifed('ember-template-compiler/lib/system/initializer', ['require', 'ember-template-compiler/lib/system/bootstrap'], function (_require2, _bootstrap) {
     'use strict';
 
     // Globals mode template compiler
 
-    var emberEnv, emberGlimmer, emberApp, Application, hasTemplate, setTemplate, hasDOM;
     if ((0, _require2.has)('@ember/application') && (0, _require2.has)('ember-browser-environment') && (0, _require2.has)('ember-glimmer')) {
         // tslint:disable:no-require-imports
-        emberEnv = (0, _require2.default)('ember-browser-environment');
-        emberGlimmer = (0, _require2.default)('ember-glimmer');
-        emberApp = (0, _require2.default)('@ember/application');
-        Application = emberApp.default;
-        hasTemplate = emberGlimmer.hasTemplate, setTemplate = emberGlimmer.setTemplate;
-        hasDOM = emberEnv.hasDOM;
-
-
+        let emberEnv = (0, _require2.default)('ember-browser-environment');
+        let emberGlimmer = (0, _require2.default)('ember-glimmer');
+        let emberApp = (0, _require2.default)('@ember/application');
+        let Application = emberApp.default;
+        let { hasTemplate, setTemplate } = emberGlimmer;
+        let { hasDOM } = emberEnv;
         Application.initializer({
             name: 'domTemplates',
-            initialize: function () {
-                var context = void 0;
+            initialize() {
+                let context;
                 if (hasDOM) {
                     context = document;
                 }
-                (0, _bootstrap.default)({ context: context, hasTemplate: hasTemplate, setTemplate: setTemplate });
+                (0, _bootstrap.default)({ context, hasTemplate, setTemplate });
             }
         });
     }
@@ -5875,46 +5408,46 @@ enifed('ember-template-compiler/tests/plugins/assert-if-helper-without-arguments
   'use strict';
 
   (0, _internalTestHelpers.moduleFor)('ember-template-compiler: assert-if-helper-without-argument', class extends _internalTestHelpers.AbstractTestCase {
-    ['@test block if helper expects one argument']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if}}aVal{{/if}}', {
+    [`@test block if helper expects one argument`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if}}aVal{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '#if requires a single argument. (\'baz/foo-bar\' @ L1:C0) ');
+      }, `#if requires a single argument. ('baz/foo-bar' @ L1:C0) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if val1 val2}}aVal{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if val1 val2}}aVal{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '#if requires a single argument. (\'baz/foo-bar\' @ L1:C0) ');
+      }, `#if requires a single argument. ('baz/foo-bar' @ L1:C0) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if}}aVal{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if}}aVal{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '#if requires a single argument. (\'baz/foo-bar\' @ L1:C0) ');
+      }, `#if requires a single argument. ('baz/foo-bar' @ L1:C0) `);
     }
 
-    ['@test inline if helper expects between one and three arguments']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{if}}', {
+    [`@test inline if helper expects between one and three arguments`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, 'The inline form of the \'if\' helper expects two or three arguments. (\'baz/foo-bar\' @ L1:C0) ');
+      }, `The inline form of the 'if' helper expects two or three arguments. ('baz/foo-bar' @ L1:C0) `);
 
-      (0, _index.compile)('{{if foo bar baz}}', {
+      (0, _index.compile)(`{{if foo bar baz}}`, {
         moduleName: 'baz/foo-bar'
       });
     }
 
     ['@test subexpression if helper expects between one and three arguments']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{input foo=(if)}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input foo=(if)}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, 'The inline form of the \'if\' helper expects two or three arguments. (\'baz/foo-bar\' @ L1:C12) ');
+      }, `The inline form of the 'if' helper expects two or three arguments. ('baz/foo-bar' @ L1:C12) `);
 
-      (0, _index.compile)('{{some-thing foo=(if foo bar baz)}}', {
+      (0, _index.compile)(`{{some-thing foo=(if foo bar baz)}}`, {
         moduleName: 'baz/foo-bar'
       });
     }
@@ -5925,12 +5458,13 @@ enifed('ember-template-compiler/tests/plugins/assert-input-helper-without-block-
 
   (0, _internalTestHelpers.moduleFor)('ember-template-compiler: assert-input-helper-without-block', class extends _internalTestHelpers.AbstractTestCase {
     ['@test Using {{#input}}{{/input}} is not valid']() {
+      let expectedMessage = `The {{input}} helper cannot be used in block form. ('baz/foo-bar' @ L1:C0) `;
 
-      expectAssertion(function () {
+      expectAssertion(() => {
         (0, _index.compile)('{{#input value="123"}}Completely invalid{{/input}}', {
           moduleName: 'baz/foo-bar'
         });
-      }, 'The {{input}} helper cannot be used in block form. (\'baz/foo-bar\' @ L1:C0) ');
+      }, expectedMessage);
     }
   });
 });
@@ -5938,381 +5472,381 @@ enifed('ember-template-compiler/tests/plugins/assert-reserved-named-arguments-te
   'use strict';
 
   (0, _internalTestHelpers.moduleFor)('ember-template-compiler: assert-reserved-named-arguments (EMBER_GLIMMER_NAMED_ARGUMENTS) ', class extends _internalTestHelpers.AbstractTestCase {
-    ['@test \'@arguments\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@arguments}}', {
+    [`@test '@arguments' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@arguments}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@arguments\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@arguments' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @arguments}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @arguments}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@arguments\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@arguments' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @arguments "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @arguments "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@arguments\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@arguments' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@args\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@args}}', {
+    [`@test '@args' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@args}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@args\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@args' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @args}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @args}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@args\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@args' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @args "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @args "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@args\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@args' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@block\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@block}}', {
+    [`@test '@block' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@block}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@block\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@block' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @block}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @block}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@block\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@block' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @block "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @block "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@block\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@block' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@else\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@else}}', {
+    [`@test '@else' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@else}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@else\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@else' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @else}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @else}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@else\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@else' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @else "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @else "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@else\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@else' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
     // anything else that doesn't start with a lower case letter
-    ['@test \'@Arguments\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@Arguments}}', {
+    [`@test '@Arguments' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@Arguments}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Arguments\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@Arguments' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @Arguments}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @Arguments}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Arguments\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@Arguments' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @Arguments "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @Arguments "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Arguments\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@Arguments' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@Args\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@Args}}', {
+    [`@test '@Args' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@Args}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Args\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@Args' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @Args}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @Args}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Args\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@Args' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @Args "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @Args "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Args\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@Args' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@FOO\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@FOO}}', {
+    [`@test '@FOO' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@FOO}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@FOO\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@FOO' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @FOO}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @FOO}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@FOO\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@FOO' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @FOO "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @FOO "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@FOO\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@FOO' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@Foo\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@Foo}}', {
+    [`@test '@Foo' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@Foo}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Foo\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@Foo' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @Foo}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @Foo}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Foo\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@Foo' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @Foo "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @Foo "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@Foo\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@Foo' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@.\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@.}}', {
+    [`@test '@.' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@.}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@.\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@.' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @.}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @.}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@.\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@.' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @. "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @. "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@.\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@.' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@_\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@_}}', {
+    [`@test '@_' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@_}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@_\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@_' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @_}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @_}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@_\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@_' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @_ "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @_ "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@_\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@_' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@-\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@-}}', {
+    [`@test '@-' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@-}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@-\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@-' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @-}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @-}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@-\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@-' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @- "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @- "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@-\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@-' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@$\' is reserved']() {
-      expectAssertion(function () {
-        (0, _index.compile)('{{@$}}', {
+    [`@test '@$' is reserved`]() {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{@$}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@$\' is reserved. (\'baz/foo-bar\' @ L1:C2) ');
+      }, `'@$' is reserved. ('baz/foo-bar' @ L1:C2) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{#if @$}}Yup{{/if}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{#if @$}}Yup{{/if}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@$\' is reserved. (\'baz/foo-bar\' @ L1:C6) ');
+      }, `'@$' is reserved. ('baz/foo-bar' @ L1:C6) `);
 
-      expectAssertion(function () {
-        (0, _index.compile)('{{input type=(if @$ "bar" "baz")}}', {
+      expectAssertion(() => {
+        (0, _index.compile)(`{{input type=(if @$ "bar" "baz")}}`, {
           moduleName: 'baz/foo-bar'
         });
-      }, '\'@$\' is reserved. (\'baz/foo-bar\' @ L1:C17) ');
+      }, `'@$' is reserved. ('baz/foo-bar' @ L1:C17) `);
     }
 
-    ['@test \'@\' is de facto reserved (parse error)'](assert) {
-      assert.throws(function () {
+    [`@test '@' is de facto reserved (parse error)`](assert) {
+      assert.throws(() => {
         (0, _index.compile)('{{@}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{#if @}}Yup{{/if}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{input type=(if @ "bar" "baz")}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
     }
 
-    ['@test \'@0\' is de facto reserved (parse error)'](assert) {
-      assert.throws(function () {
+    [`@test '@0' is de facto reserved (parse error)`](assert) {
+      assert.throws(() => {
         (0, _index.compile)('{{@0}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{#if @0}}Yup{{/if}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{input type=(if @0 "bar" "baz")}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
     }
 
-    ['@test \'@1\' is de facto reserved (parse error)'](assert) {
-      assert.throws(function () {
+    [`@test '@1' is de facto reserved (parse error)`](assert) {
+      assert.throws(() => {
         (0, _index.compile)('{{@1}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{#if @1}}Yup{{/if}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{input type=(if @1 "bar" "baz")}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
     }
 
-    ['@test \'@2\' is de facto reserved (parse error)'](assert) {
-      assert.throws(function () {
+    [`@test '@2' is de facto reserved (parse error)`](assert) {
+      assert.throws(() => {
         (0, _index.compile)('{{@2}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{#if @2}}Yup{{/if}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{input type=(if @2 "bar" "baz")}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
     }
 
-    ['@test \'@@\' is de facto reserved (parse error)'](assert) {
-      assert.throws(function () {
+    [`@test '@@' is de facto reserved (parse error)`](assert) {
+      assert.throws(() => {
         (0, _index.compile)('{{@@}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{#if @@}}Yup{{/if}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{input type=(if @@ "bar" "baz")}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
     }
 
-    ['@test \'@=\' is de facto reserved (parse error)'](assert) {
-      assert.throws(function () {
+    [`@test '@=' is de facto reserved (parse error)`](assert) {
+      assert.throws(() => {
         (0, _index.compile)('{{@=}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{#if @=}}Yup{{/if}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{input type=(if @= "bar" "baz")}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
     }
 
-    ['@test \'@!\' is de facto reserved (parse error)'](assert) {
-      assert.throws(function () {
+    [`@test '@!' is de facto reserved (parse error)`](assert) {
+      assert.throws(() => {
         (0, _index.compile)('{{@!}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{#if @!}}Yup{{/if}}', {
           moduleName: 'baz/foo-bar'
         });
       }, /Expecting 'ID'/);
 
-      assert.throws(function () {
+      assert.throws(() => {
         (0, _index.compile)('{{input type=(if @! "bar" "baz")}}', {
           moduleName: 'baz/foo-bar'
         });
@@ -6325,7 +5859,7 @@ enifed('ember-template-compiler/tests/plugins/assert-splattribute-expression-tes
 
   (0, _internalTestHelpers.moduleFor)('ember-template-compiler: assert-splattribute-expression', class extends _internalTestHelpers.AbstractTestCase {
     expectedMessage(locInfo) {
-      return 'Using "...attributes" can only be used in the element position e.g. <div ...attributes />. It cannot be used as a path. (' + locInfo + ') ';
+      return `Using "...attributes" can only be used in the element position e.g. <div ...attributes />. It cannot be used as a path. (${locInfo}) `;
     }
 
     '@test ...attributes is in element space'(assert) {
@@ -6335,34 +5869,34 @@ enifed('ember-template-compiler/tests/plugins/assert-splattribute-expression-tes
     }
 
     '@test {{...attributes}} is not valid'() {
-      expectAssertion(function () {
+      expectAssertion(() => {
         (0, _index.compile)('<div>{{...attributes}}</div>', {
           moduleName: 'foo-bar'
         });
-      }, this.expectedMessage('\'foo-bar\' @ L1:C7'));
+      }, this.expectedMessage(`'foo-bar' @ L1:C7`));
     }
 
     '@test {{...attributes}} is not valid path expression'() {
-      expectAssertion(function () {
+      expectAssertion(() => {
         (0, _index.compile)('<div>{{...attributes}}</div>', {
           moduleName: 'foo-bar'
         });
-      }, this.expectedMessage('\'foo-bar\' @ L1:C7'));
+      }, this.expectedMessage(`'foo-bar' @ L1:C7`));
     }
     '@test {{...attributes}} is not valid modifier'() {
-      expectAssertion(function () {
+      expectAssertion(() => {
         (0, _index.compile)('<div {{...attributes}}>Wat</div>', {
           moduleName: 'foo-bar'
         });
-      }, this.expectedMessage('\'foo-bar\' @ L1:C7'));
+      }, this.expectedMessage(`'foo-bar' @ L1:C7`));
     }
 
     '@test {{...attributes}} is not valid attribute'() {
-      expectAssertion(function () {
+      expectAssertion(() => {
         (0, _index.compile)('<div class={{...attributes}}>Wat</div>', {
           moduleName: 'foo-bar'
         });
-      }, this.expectedMessage('\'foo-bar\' @ L1:C13'));
+      }, this.expectedMessage(`'foo-bar' @ L1:C13`));
     }
   });
 });
@@ -6371,12 +5905,13 @@ enifed('ember-template-compiler/tests/plugins/deprecate-render-model-test', ['em
 
   (0, _internalTestHelpers.moduleFor)('ember-template-compiler: deprecate-model-render', class extends _internalTestHelpers.AbstractTestCase {
     ['@test Using `{{render` with model provides a deprecation']() {
+      let expectedMessage = `Please refactor \`{{render "foo-bar" coolModel}}\` to a component and` + ` invoke via \`{{foo-bar model=coolModel}}\`. ('baz/foo-bar' @ L1:C0) `;
 
-      expectDeprecation(function () {
+      expectDeprecation(() => {
         (0, _index.compile)('{{render "foo-bar" coolModel}}', {
           moduleName: 'baz/foo-bar'
         });
-      }, 'Please refactor `{{render "foo-bar" coolModel}}` to a component and' + ' invoke via `{{foo-bar model=coolModel}}`. (\'baz/foo-bar\' @ L1:C0) ');
+      }, expectedMessage);
     }
   });
 });
@@ -6385,12 +5920,13 @@ enifed('ember-template-compiler/tests/plugins/deprecate-render-test', ['ember-te
 
   (0, _internalTestHelpers.moduleFor)('ember-template-compiler: deprecate-render', class extends _internalTestHelpers.AbstractTestCase {
     ['@test Using `{{render` without a model provides a deprecation']() {
+      let expectedMessage = `Please refactor \`{{render "foo-bar"}}\` to a component and` + ` invoke via \`{{foo-bar}}\`. ('baz/foo-bar' @ L1:C0) `;
 
-      expectDeprecation(function () {
+      expectDeprecation(() => {
         (0, _index.compile)('{{render "foo-bar"}}', {
           moduleName: 'baz/foo-bar'
         });
-      }, 'Please refactor `{{render "foo-bar"}}` to a component and' + ' invoke via `{{foo-bar}}`. (\'baz/foo-bar\' @ L1:C0) ');
+      }, expectedMessage);
     }
   });
 });
@@ -6400,11 +5936,12 @@ enifed('ember-template-compiler/tests/plugins/deprecate-send-action-test', ['emb
   class DeprecateSendActionTest extends _internalTestHelpers.AbstractTestCase {}
 
   ['insert-newline', 'enter', 'escape-press', 'focus-in', 'focus-out', 'key-press', 'key-up', 'key-down'].forEach(function (e) {
-    DeprecateSendActionTest.prototype['@test Using `{{input ' + e + '="actionName"}}` provides a deprecation'] = function () {
+    DeprecateSendActionTest.prototype[`@test Using \`{{input ${e}="actionName"}}\` provides a deprecation`] = function () {
+      let expectedMessage = `Please refactor \`{{input ${e}="foo-bar"}}\` to \`{{input ${e}=(action "foo-bar")}}\. ('baz/foo-bar' @ L1:C0) `;
 
-      expectDeprecation(function () {
-        (0, _index.compile)('{{input ' + e + '="foo-bar"}}', { moduleName: 'baz/foo-bar' });
-      }, 'Please refactor `{{input ' + e + '="foo-bar"}}` to `{{input ' + e + '=(action "foo-bar")}}. (\'baz/foo-bar\' @ L1:C0) ');
+      expectDeprecation(() => {
+        (0, _index.compile)(`{{input ${e}="foo-bar"}}`, { moduleName: 'baz/foo-bar' });
+      }, expectedMessage);
     };
   });
 
@@ -6418,8 +5955,8 @@ enifed('ember-template-compiler/tests/plugins/transform-dot-component-invocation
       assert.expect(0);
 
       ['{{this.modal open}}', '{{this.modal isOpen=true}}', '{{#this.modal}}Woot{{/this.modal}}', '{{c.modal open}}', '{{c.modal isOpen=true}}', '{{#c.modal}}Woot{{/c.modal}}', '{{#my-component as |c|}}{{c.a name="Chad"}}{{/my-component}}', '{{#my-component as |c|}}{{c.a "Chad"}}{{/my-component}}', '{{#my-component as |c|}}{{#c.a}}{{/c.a}}{{/my-component}}', '<input disabled={{true}}>', // GH#15740
-      '<td colspan={{3}}></td>'].forEach(function (layout, i) {
-        (0, _index.compile)(layout, { moduleName: 'example-' + i });
+      '<td colspan={{3}}></td>'].forEach((layout, i) => {
+        (0, _index.compile)(layout, { moduleName: `example-${i}` });
       });
     }
   });
@@ -6431,7 +5968,7 @@ enifed('ember-template-compiler/tests/plugins/transform-inline-link-to-test', ['
     ['@test Can transform an inline {{link-to}} without error'](assert) {
       assert.expect(0);
 
-      (0, _index.compile)('{{link-to \'foo\' \'index\'}}', {
+      (0, _index.compile)(`{{link-to 'foo' 'index'}}`, {
         moduleName: 'foo/bar/baz'
       });
     }
@@ -6444,40 +5981,37 @@ enifed('ember-template-compiler/tests/plugins/transform-input-type-syntax-test',
     ['@test Can compile an {{input}} helper that has a sub-expression value as its type'](assert) {
       assert.expect(0);
 
-      (0, _index.compile)('{{input type=(if true \'password\' \'text\')}}');
+      (0, _index.compile)(`{{input type=(if true 'password' 'text')}}`);
     }
 
     ['@test Can compile an {{input}} helper with a string literal type'](assert) {
       assert.expect(0);
 
-      (0, _index.compile)('{{input type=\'text\'}}');
+      (0, _index.compile)(`{{input type='text'}}`);
     }
 
     ['@test Can compile an {{input}} helper with a type stored in a var'](assert) {
       assert.expect(0);
 
-      (0, _index.compile)('{{input type=_type}}');
+      (0, _index.compile)(`{{input type=_type}}`);
     }
   });
 });
 enifed('ember-template-compiler/tests/system/bootstrap-test', ['@ember/runloop', 'ember-glimmer', 'ember-template-compiler/lib/system/bootstrap', 'internal-test-helpers'], function (_runloop, _emberGlimmer, _bootstrap, _internalTestHelpers) {
   'use strict';
 
-  var component = void 0,
-      fixture = void 0;
+  let component, fixture;
 
   function checkTemplate(templateName, assert) {
-    (0, _runloop.run)(function () {
-      return (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate });
-    });
+    (0, _runloop.run)(() => (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate }));
 
-    var template = (0, _emberGlimmer.getTemplate)(templateName);
-    var qunitFixture = document.querySelector('#qunit-fixture');
+    let template = (0, _emberGlimmer.getTemplate)(templateName);
+    let qunitFixture = document.querySelector('#qunit-fixture');
 
     assert.ok(template, 'template is available on Ember.TEMPLATES');
     assert.notOk(qunitFixture.querySelector('script'), 'script removed');
 
-    var owner = (0, _internalTestHelpers.buildOwner)();
+    let owner = (0, _internalTestHelpers.buildOwner)();
     owner.register('template:-top-level', template);
     owner.register('component:-top-level', _emberGlimmer.Component.extend({
       layoutName: '-top-level',
@@ -6523,14 +6057,12 @@ enifed('ember-template-compiler/tests/system/bootstrap-test', ['@ember/runloop',
     }
 
     // Add this test case, only for typeof Handlebars === 'object';
-    [(typeof Handlebars === 'object' ? '@test' : '@skip') + ' template with type text/x-raw-handlebars should be parsed'](assert) {
+    [`${typeof Handlebars === 'object' ? '@test' : '@skip'} template with type text/x-raw-handlebars should be parsed`](assert) {
       fixture.innerHTML = '<script type="text/x-raw-handlebars" data-template-name="funkyTemplate">{{name}}</script>';
 
-      (0, _runloop.run)(function () {
-        return (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate });
-      });
+      (0, _runloop.run)(() => (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate }));
 
-      var template = (0, _emberGlimmer.getTemplate)('funkyTemplate');
+      let template = (0, _emberGlimmer.getTemplate)('funkyTemplate');
 
       assert.ok(template, 'template with name funkyTemplate available');
 
@@ -6541,41 +6073,31 @@ enifed('ember-template-compiler/tests/system/bootstrap-test', ['@ember/runloop',
     ['@test duplicated default application templates should throw exception'](assert) {
       fixture.innerHTML = '<script type="text/x-handlebars">first</script><script type="text/x-handlebars">second</script>';
 
-      assert.throws(function () {
-        return (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate });
-      }, /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
+      assert.throws(() => (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate }), /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
     }
 
     ['@test default default application template and id application template present should throw exception'](assert) {
       fixture.innerHTML = '<script type="text/x-handlebars">first</script><script type="text/x-handlebars" id="application">second</script>';
 
-      assert.throws(function () {
-        return (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate });
-      }, /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
+      assert.throws(() => (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate }), /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
     }
 
     ['@test default application template and data-template-name application template present should throw exception'](assert) {
       fixture.innerHTML = '<script type="text/x-handlebars">first</script><script type="text/x-handlebars" data-template-name="application">second</script>';
 
-      assert.throws(function () {
-        return (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate });
-      }, /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
+      assert.throws(() => (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate }), /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
     }
 
     ['@test duplicated template id should throw exception'](assert) {
       fixture.innerHTML = '<script type="text/x-handlebars" id="funkyTemplate">first</script><script type="text/x-handlebars" id="funkyTemplate">second</script>';
 
-      assert.throws(function () {
-        return (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate });
-      }, /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
+      assert.throws(() => (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate }), /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
     }
 
     ['@test duplicated template data-template-name should throw exception'](assert) {
       fixture.innerHTML = '<script type="text/x-handlebars" data-template-name="funkyTemplate">first</script><script type="text/x-handlebars" data-template-name="funkyTemplate">second</script>';
 
-      assert.throws(function () {
-        return (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate });
-      }, /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
+      assert.throws(() => (0, _bootstrap.default)({ context: fixture, hasTemplate: _emberGlimmer.hasTemplate, setTemplate: _emberGlimmer.setTemplate }), /Template named "[^"]+" already exists\./, 'duplicate templates should not be allowed');
     }
   });
 });
@@ -6590,19 +6112,16 @@ enifed('ember-template-compiler/tests/system/compile_options_test', ['ember-temp
     ['@test has default AST plugins'](assert) {
       assert.expect(_index.defaultPlugins.length);
 
-      var plugins = (0, _index.compileOptions)().plugins.ast,
-          i,
-          plugin;
+      let plugins = (0, _index.compileOptions)().plugins.ast;
 
-      for (i = 0; i < _index.defaultPlugins.length; i++) {
-        plugin = _index.defaultPlugins[i];
-
-        assert.ok(plugins.indexOf(plugin) > -1, 'includes ' + plugin);
+      for (let i = 0; i < _index.defaultPlugins.length; i++) {
+        let plugin = _index.defaultPlugins[i];
+        assert.ok(plugins.indexOf(plugin) > -1, `includes ${plugin}`);
       }
     }
   });
 
-  var customTransformCounter = 0;
+  let customTransformCounter = 0;
   class CustomTransform {
     constructor(options) {
       customTransformCounter++;
@@ -6611,18 +6130,17 @@ enifed('ember-template-compiler/tests/system/compile_options_test', ['ember-temp
     }
 
     transform(ast) {
-      var walker = new this.syntax.Walker();
+      let walker = new this.syntax.Walker();
 
-      walker.visit(ast, function (node) {
-        var i, attribute;
+      walker.visit(ast, node => {
+        var i;
 
         if (node.type !== 'ElementNode') {
           return;
         }
 
         for (i = 0; i < node.attributes.length; i++) {
-          attribute = node.attributes[i];
-
+          let attribute = node.attributes[i];
 
           if (attribute.name === 'data-test') {
             node.attributes.splice(i, 1);
@@ -6744,9 +6262,9 @@ enifed('ember-utils', ['exports'], function (exports) {
     */
 
     function intern(str) {
-        var obj = {};
+        let obj = {};
         obj[str] = 1;
-        for (var key in obj) {
+        for (let key in obj) {
             if (key === str) {
                 return key;
             }
@@ -6779,7 +6297,7 @@ enifed('ember-utils', ['exports'], function (exports) {
      @private
      @return {Number} the uuid
      */
-    var _uuid = 0;
+    let _uuid = 0;
     /**
      Generates a universally unique identifier. This method
      is used internally by Ember for assisting with
@@ -6799,10 +6317,10 @@ enifed('ember-utils', ['exports'], function (exports) {
      @type String
      @final
      */
-    var GUID_PREFIX = 'ember';
+    const GUID_PREFIX = 'ember';
     // Used for guid generation...
-    var OBJECT_GUIDS = new WeakMap();
-    var NON_OBJECT_GUIDS = new Map();
+    const OBJECT_GUIDS = new WeakMap();
+    const NON_OBJECT_GUIDS = new Map();
     /**
       A unique key used to assign guids and other private metadata to objects.
       If you inspect an object in your browser debugger you will often see these.
@@ -6817,7 +6335,7 @@ enifed('ember-utils', ['exports'], function (exports) {
       @type String
       @final
     */
-    var GUID_KEY = intern('__ember' + +new Date());
+    const GUID_KEY = intern(`__ember${+new Date()}`);
     /**
       Generates a new guid, optionally saving the guid to the object that you
       pass in. You will rarely need to use this method. Instead you should
@@ -6853,14 +6371,14 @@ enifed('ember-utils', ['exports'], function (exports) {
     */
 
 
-    var GENERATED_SYMBOLS = [];
+    const GENERATED_SYMBOLS = [];
 
     function symbol(debugName) {
         // TODO: Investigate using platform symbols, but we do not
         // want to require non-enumerability for this API, which
         // would introduce a large cost.
-        var id = GUID_KEY + Math.floor(Math.random() * +new Date());
-        var symbol = intern('__' + debugName + id + '__');
+        let id = GUID_KEY + Math.floor(Math.random() * +new Date());
+        let symbol = intern(`__${debugName}${id}__`);
         GENERATED_SYMBOLS.push(symbol);
         return symbol;
     }
@@ -6889,10 +6407,10 @@ enifed('ember-utils', ['exports'], function (exports) {
         }
     };
 
-    var HAS_SUPER_PATTERN = /\.(_super|call\(this|apply\(this)/;
-    var fnToString = Function.prototype.toString;
-    var checkHasSuper = function () {
-        var sourceAvailable = fnToString.call(function () {
+    const HAS_SUPER_PATTERN = /\.(_super|call\(this|apply\(this)/;
+    const fnToString = Function.prototype.toString;
+    const checkHasSuper = (() => {
+        let sourceAvailable = fnToString.call(function () {
             return this;
         }).indexOf('return this') > -1;
         if (sourceAvailable) {
@@ -6903,19 +6421,19 @@ enifed('ember-utils', ['exports'], function (exports) {
         return function () {
             return true;
         };
-    }();
-    var HAS_SUPER_MAP = new WeakMap();
-    var ROOT = Object.freeze(function () {});
+    })();
+    const HAS_SUPER_MAP = new WeakMap();
+    const ROOT = Object.freeze(function () {});
     HAS_SUPER_MAP.set(ROOT, false);
     function hasSuper(func) {
-        var hasSuper = HAS_SUPER_MAP.get(func);
+        let hasSuper = HAS_SUPER_MAP.get(func);
         if (hasSuper === undefined) {
             hasSuper = checkHasSuper(func);
             HAS_SUPER_MAP.set(func, hasSuper);
         }
         return hasSuper;
     }
-    var OBSERVERS_MAP = new WeakMap();
+    const OBSERVERS_MAP = new WeakMap();
     function setObservers(func, observers) {
         if (observers) {
             OBSERVERS_MAP.set(func, observers);
@@ -6924,7 +6442,7 @@ enifed('ember-utils', ['exports'], function (exports) {
     function getObservers(func) {
         return OBSERVERS_MAP.get(func);
     }
-    var LISTENERS_MAP = new WeakMap();
+    const LISTENERS_MAP = new WeakMap();
     function setListeners(func, listeners) {
         if (listeners) {
             LISTENERS_MAP.set(func, listeners);
@@ -6933,7 +6451,7 @@ enifed('ember-utils', ['exports'], function (exports) {
     function getListeners(func) {
         return LISTENERS_MAP.get(func);
     }
-    var IS_WRAPPED_FUNCTION_SET = new WeakSet$1();
+    const IS_WRAPPED_FUNCTION_SET = new WeakSet$1();
     /**
       Wraps the passed function so that `this._super` will point to the superFunc
       when the function is invoked. This is the primitive we use to implement
@@ -6949,9 +6467,9 @@ enifed('ember-utils', ['exports'], function (exports) {
 
     function _wrap(func, superFunc) {
         function superWrapper() {
-            var orig = this._super;
+            let orig = this._super;
             this._super = superFunc;
-            var ret = func.apply(this, arguments);
+            let ret = func.apply(this, arguments);
             this._super = orig;
             return ret;
         }
@@ -6961,15 +6479,14 @@ enifed('ember-utils', ['exports'], function (exports) {
         return superWrapper;
     }
 
-    var objectToString = Object.prototype.toString;
-    var functionToString = Function.prototype.toString;
-    var isArray = Array.isArray;
-    var objectKeys = Object.keys;
-    var stringify = JSON.stringify;
-
-    var LIST_LIMIT = 100;
-    var DEPTH_LIMIT = 4;
-    var SAFE_KEY = /^[\w$]+$/;
+    const { toString: objectToString } = Object.prototype;
+    const { toString: functionToString } = Function.prototype;
+    const { isArray } = Array;
+    const { keys: objectKeys } = Object;
+    const { stringify } = JSON;
+    const LIST_LIMIT = 100;
+    const DEPTH_LIMIT = 4;
+    const SAFE_KEY = /^[\w$]+$/;
     /**
      @module @ember/debug
     */
@@ -6989,7 +6506,7 @@ enifed('ember-utils', ['exports'], function (exports) {
     */
 
     function inspectValue(value, depth, seen) {
-        var valueIsArray = false;
+        let valueIsArray = false;
         switch (typeof value) {
             case 'undefined':
                 return 'undefined';
@@ -7006,7 +6523,7 @@ enifed('ember-utils', ['exports'], function (exports) {
                 // custom toString
                 return value.toString();
             case 'function':
-                return value.toString === functionToString ? value.name ? '[Function:' + value.name + ']' : '[Function]' : value.toString();
+                return value.toString === functionToString ? value.name ? `[Function:${value.name}]` : `[Function]` : value.toString();
             case 'string':
                 return stringify(value);
             case 'symbol':
@@ -7018,7 +6535,7 @@ enifed('ember-utils', ['exports'], function (exports) {
         if (seen === undefined) {
             seen = new WeakSet$1();
         } else {
-            if (seen.has(value)) return '[Circular]';
+            if (seen.has(value)) return `[Circular]`;
         }
         seen.add(value);
         return valueIsArray ? inspectArray(value, depth + 1, seen) : inspectObject(value, depth + 1, seen);
@@ -7030,18 +6547,15 @@ enifed('ember-utils', ['exports'], function (exports) {
         if (depth > DEPTH_LIMIT) {
             return '[Object]';
         }
-        var s = '{',
-            i,
-            key;
-        var keys = objectKeys(obj);
-        for (i = 0; i < keys.length; i++) {
+        let s = '{';
+        let keys = objectKeys(obj);
+        for (let i = 0; i < keys.length; i++) {
             s += i === 0 ? ' ' : ', ';
             if (i >= LIST_LIMIT) {
-                s += '... ' + (keys.length - LIST_LIMIT) + ' more keys';
+                s += `... ${keys.length - LIST_LIMIT} more keys`;
                 break;
             }
-            key = keys[i];
-
+            let key = keys[i];
             s += inspectKey(key) + ': ' + inspectValue(obj[key], depth, seen);
         }
         s += ' }';
@@ -7051,12 +6565,11 @@ enifed('ember-utils', ['exports'], function (exports) {
         if (depth > DEPTH_LIMIT) {
             return '[Array]';
         }
-        var s = '[',
-            i;
-        for (i = 0; i < arr.length; i++) {
+        let s = '[';
+        for (let i = 0; i < arr.length; i++) {
             s += i === 0 ? ' ' : ', ';
             if (i >= LIST_LIMIT) {
-                s += '... ' + (arr.length - LIST_LIMIT) + ' more items';
+                s += `... ${arr.length - LIST_LIMIT} more items`;
                 break;
             }
             s += inspectValue(arr[i], depth, seen);
@@ -7114,12 +6627,13 @@ enifed('ember-utils', ['exports'], function (exports) {
     */
 
 
-    var isArray$1 = Array.isArray;
-
-    var NAMES = new WeakMap();
+    const { isArray: isArray$1 } = Array;
 
 
-    var objectToString$1 = Object.prototype.toString;
+    const NAMES = new WeakMap();
+
+
+    const objectToString$1 = Object.prototype.toString;
     function isNone(obj) {
         return obj === null || obj === undefined;
     }
@@ -7128,8 +6642,6 @@ enifed('ember-utils', ['exports'], function (exports) {
      method, e.g. an object created with `Object.create(null)`.
     */
     function toString(obj) {
-        var r, k;
-
         if (typeof obj === 'string') {
             return obj;
         }
@@ -7138,9 +6650,8 @@ enifed('ember-utils', ['exports'], function (exports) {
         if (Array.isArray(obj)) {
             // Reimplement Array.prototype.join according to spec (22.1.3.13)
             // Changing ToString(element) with this safe version of ToString.
-            r = '';
-
-            for (k = 0; k < obj.length; k++) {
+            let r = '';
+            for (let k = 0; k < obj.length; k++) {
                 if (k > 0) {
                     r += ',';
                 }
@@ -7156,7 +6667,7 @@ enifed('ember-utils', ['exports'], function (exports) {
         return objectToString$1.call(obj);
     }
 
-    var HAS_NATIVE_SYMBOL = function () {
+    const HAS_NATIVE_SYMBOL = function () {
         if (typeof Symbol !== 'function') {
             return false;
         }
@@ -7165,9 +6676,9 @@ enifed('ember-utils', ['exports'], function (exports) {
         return Object.prototype.toString.call(Symbol()) === '[object Symbol]';
     }();
 
-    var HAS_NATIVE_PROXY = typeof Proxy === 'function';
+    const HAS_NATIVE_PROXY = typeof Proxy === 'function';
 
-    var PROXIES = new WeakSet$1();
+    const PROXIES = new WeakSet$1();
 
 
     /*
@@ -7180,7 +6691,7 @@ enifed('ember-utils', ['exports'], function (exports) {
      Utility methods that are needed in < 80% of cases should be placed
      elsewhere (so they can be lazily evaluated / parsed).
     */
-    var NAME_KEY = symbol('NAME_KEY');
+    const NAME_KEY = symbol('NAME_KEY');
 
     exports.NAME_KEY = NAME_KEY;
     exports.symbol = symbol;
@@ -7188,25 +6699,22 @@ enifed('ember-utils', ['exports'], function (exports) {
         return GENERATED_SYMBOLS.indexOf(possibleSymbol) !== -1;
     };
     exports.dictionary = function (parent) {
-        var dict = Object.create(parent);
+        let dict = Object.create(parent);
         dict['_dict'] = null;
         delete dict['_dict'];
         return dict;
     };
     exports.uuid = uuid;
     exports.GUID_KEY = GUID_KEY;
-    exports.generateGuid = function (obj) {
-        var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : GUID_PREFIX;
-
-        var guid = prefix + uuid();
+    exports.generateGuid = function (obj, prefix = GUID_PREFIX) {
+        let guid = prefix + uuid();
         if (isObject(obj)) {
             OBJECT_GUIDS.set(obj, guid);
         }
         return guid;
     };
     exports.guidFor = function (value) {
-        var guid = void 0,
-            type;
+        let guid;
         if (isObject(value)) {
             guid = OBJECT_GUIDS.get(value);
             if (guid === undefined) {
@@ -7216,8 +6724,7 @@ enifed('ember-utils', ['exports'], function (exports) {
         } else {
             guid = NON_OBJECT_GUIDS.get(value);
             if (guid === undefined) {
-                type = typeof value;
-
+                let type = typeof value;
                 if (type === 'string') {
                     guid = 'st' + uuid();
                 } else if (type === 'number') {
@@ -7257,11 +6764,9 @@ enifed('ember-utils', ['exports'], function (exports) {
         return inspectValue(obj, 0);
     };
     exports.lookupDescriptor = function (obj, keyName) {
-        var current = obj,
-            descriptor;
+        let current = obj;
         do {
-            descriptor = Object.getOwnPropertyDescriptor(current, keyName);
-
+            let descriptor = Object.getOwnPropertyDescriptor(current, keyName);
             if (descriptor !== undefined) {
                 return descriptor;
             }
@@ -7271,11 +6776,8 @@ enifed('ember-utils', ['exports'], function (exports) {
     };
     exports.canInvoke = canInvoke;
     exports.tryInvoke = function (obj, methodName, args) {
-        var method;
-
         if (canInvoke(obj, methodName)) {
-            method = obj[methodName];
-
+            let method = obj[methodName];
             return method.apply(obj, args);
         }
     };
@@ -7317,7 +6819,7 @@ enifed('ember-utils', ['exports'], function (exports) {
             this.store = store || new Map();
         }
         get(key) {
-            var value = this.store.get(key);
+            let value = this.store.get(key);
             if (this.store.has(key)) {
                 this.hits++;
                 return this.store.get(key);
@@ -7345,7 +6847,7 @@ enifed('ember-utils', ['exports'], function (exports) {
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.5.1-ember-native-class-polyfill-3-5+f1af53df";
+  exports.default = "3.5.1-ember-native-class-polyfill-3-5+f56b8abf";
 });
 enifed("handlebars", ["exports"], function (exports) {
   "use strict";
@@ -7672,11 +7174,10 @@ enifed("handlebars", ["exports"], function (exports) {
 
             if (!recovering) {
               expected = [];
-              for (p in table[state]) {
-                if (this.terminals_[p] && p > 2) {
-                  expected.push("'" + this.terminals_[p] + "'");
-                }
-              }if (this.lexer.showPosition) {
+              for (p in table[state]) if (this.terminals_[p] && p > 2) {
+                expected.push("'" + this.terminals_[p] + "'");
+              }
+              if (this.lexer.showPosition) {
                 errStr = "Parse error on line " + (yylineno + 1) + ":\n" + this.lexer.showPosition() + "\nExpecting " + expected.join(", ") + ", got '" + (this.terminals_[symbol] || symbol) + "'";
               } else {
                 errStr = "Parse error on line " + (yylineno + 1) + ": Unexpected " + (symbol == 1 ? "end of input" : "'" + (this.terminals_[symbol] || symbol) + "'");
@@ -8081,13 +7582,12 @@ enifed("handlebars", ["exports"], function (exports) {
     return new Parser();
   }();
 
-  var errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
+  const errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
 
   function Exception(message, node) {
-    var loc = node && node.loc,
-        line = void 0,
-        column = void 0,
-        idx;
+    let loc = node && node.loc,
+        line,
+        column;
     if (loc) {
       line = loc.start.line;
       column = loc.start.column;
@@ -8095,10 +7595,10 @@ enifed("handlebars", ["exports"], function (exports) {
       message += ' - ' + line + ':' + column;
     }
 
-    var tmp = Error.prototype.constructor.call(this, message);
+    let tmp = Error.prototype.constructor.call(this, message);
 
     // Unfortunately errors are not enumerable in Chrome (at least), so `for prop in tmp` doesn't work.
-    for (idx = 0; idx < errorProps.length; idx++) {
+    for (let idx = 0; idx < errorProps.length; idx++) {
       this[errorProps[idx]] = tmp[errorProps[idx]];
     }
 
@@ -8139,7 +7639,7 @@ enifed("handlebars", ["exports"], function (exports) {
 
     // Visits a given value. If mutating, will replace the value if necessary.
     acceptKey: function (node, name) {
-      var value = this.accept(node[name]);
+      let value = this.accept(node[name]);
       if (this.mutating) {
         // Hacky sanity check: This may have a few false positives for type for the helper
         // methods but will generally do the right thing without a lot of overhead.
@@ -8163,9 +7663,7 @@ enifed("handlebars", ["exports"], function (exports) {
     // Traverses a given array. If mutating, empty respnses will be removed
     // for child elements.
     acceptArray: function (array) {
-      var i, l;
-
-      for (i = 0, l = array.length; i < l; i++) {
+      for (let i = 0, l = array.length; i < l; i++) {
         this.acceptKey(array, i);
 
         if (!array[i]) {
@@ -8191,7 +7689,7 @@ enifed("handlebars", ["exports"], function (exports) {
       }
       this.current = object;
 
-      var ret = this[object.type](object);
+      let ret = this[object.type](object);
 
       this.current = this.parents.shift();
 
@@ -8257,39 +7755,31 @@ enifed("handlebars", ["exports"], function (exports) {
     this.acceptKey(partial, 'hash');
   }
 
-  function WhitespaceControl() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
+  function WhitespaceControl(options = {}) {
     this.options = options;
   }
   WhitespaceControl.prototype = new Visitor();
 
   WhitespaceControl.prototype.Program = function (program) {
-    var doStandalone = !this.options.ignoreStandalone,
-        i,
-        l,
-        current,
-        strip,
-        _isPrevWhitespace,
-        _isNextWhitespace,
-        openStandalone,
-        closeStandalone,
-        inlineStandalone;
+    const doStandalone = !this.options.ignoreStandalone;
 
-    var isRoot = !this.isRootSeen;
+    let isRoot = !this.isRootSeen;
     this.isRootSeen = true;
 
-    var body = program.body;
-    for (i = 0, l = body.length; i < l; i++) {
-      current = body[i], strip = this.accept(current);
-
+    let body = program.body;
+    for (let i = 0, l = body.length; i < l; i++) {
+      let current = body[i],
+          strip = this.accept(current);
 
       if (!strip) {
         continue;
       }
 
-      _isPrevWhitespace = isPrevWhitespace(body, i, isRoot), _isNextWhitespace = isNextWhitespace(body, i, isRoot), openStandalone = strip.openStandalone && _isPrevWhitespace, closeStandalone = strip.closeStandalone && _isNextWhitespace, inlineStandalone = strip.inlineStandalone && _isPrevWhitespace && _isNextWhitespace;
-
+      let _isPrevWhitespace = isPrevWhitespace(body, i, isRoot),
+          _isNextWhitespace = isNextWhitespace(body, i, isRoot),
+          openStandalone = strip.openStandalone && _isPrevWhitespace,
+          closeStandalone = strip.closeStandalone && _isNextWhitespace,
+          inlineStandalone = strip.inlineStandalone && _isPrevWhitespace && _isNextWhitespace;
 
       if (strip.close) {
         omitRight(body, i, true);
@@ -8331,11 +7821,10 @@ enifed("handlebars", ["exports"], function (exports) {
     this.accept(block.inverse);
 
     // Find the inverse program that is involed with whitespace stripping.
-    var program = block.program || block.inverse,
+    let program = block.program || block.inverse,
         inverse = block.program && block.inverse,
         firstInverse = inverse,
-        lastInverse = inverse,
-        inverseStrip;
+        lastInverse = inverse;
 
     if (inverse && inverse.chained) {
       firstInverse = inverse.body[0].program;
@@ -8346,7 +7835,7 @@ enifed("handlebars", ["exports"], function (exports) {
       }
     }
 
-    var strip = {
+    let strip = {
       open: block.openStrip.open,
       close: block.closeStrip.close,
 
@@ -8361,8 +7850,7 @@ enifed("handlebars", ["exports"], function (exports) {
     }
 
     if (inverse) {
-      inverseStrip = block.inverseStrip;
-
+      let inverseStrip = block.inverseStrip;
 
       if (inverseStrip.open) {
         omitLeft(program.body, null, true);
@@ -8393,7 +7881,7 @@ enifed("handlebars", ["exports"], function (exports) {
 
   WhitespaceControl.prototype.PartialStatement = WhitespaceControl.prototype.CommentStatement = function (node) {
     /* istanbul ignore next */
-    var strip = node.strip || {};
+    let strip = node.strip || {};
     return {
       inlineStandalone: true,
       open: strip.open,
@@ -8408,7 +7896,7 @@ enifed("handlebars", ["exports"], function (exports) {
 
     // Nodes that end with newlines are considered whitespace (but are special
     // cased for strip operations)
-    var prev = body[i - 1],
+    let prev = body[i - 1],
         sibling = body[i - 2];
     if (!prev) {
       return isRoot;
@@ -8423,7 +7911,7 @@ enifed("handlebars", ["exports"], function (exports) {
       i = -1;
     }
 
-    var next = body[i + 1],
+    let next = body[i + 1],
         sibling = body[i + 2];
     if (!next) {
       return isRoot;
@@ -8442,12 +7930,12 @@ enifed("handlebars", ["exports"], function (exports) {
   // If mulitple is truthy then all whitespace will be stripped out until non-whitespace
   // content is met.
   function omitRight(body, i, multiple) {
-    var current = body[i == null ? 0 : i + 1];
+    let current = body[i == null ? 0 : i + 1];
     if (!current || current.type !== 'ContentStatement' || !multiple && current.rightStripped) {
       return;
     }
 
-    var original = current.value;
+    let original = current.value;
     current.value = current.value.replace(multiple ? /^\s+/ : /^[ \t]*\r?\n?/, '');
     current.rightStripped = current.value !== original;
   }
@@ -8460,26 +7948,23 @@ enifed("handlebars", ["exports"], function (exports) {
   // If mulitple is truthy then all whitespace will be stripped out until non-whitespace
   // content is met.
   function omitLeft(body, i, multiple) {
-    var current = body[i == null ? body.length - 1 : i - 1];
+    let current = body[i == null ? body.length - 1 : i - 1];
     if (!current || current.type !== 'ContentStatement' || !multiple && current.leftStripped) {
       return;
     }
 
     // We omit the last node if it's whitespace only and not preceeded by a non-content node.
-    var original = current.value;
+    let original = current.value;
     current.value = current.value.replace(multiple ? /\s+$/ : /[ \t]+$/, '');
     current.leftStripped = current.value !== original;
     return current.leftStripped;
   }
 
   function validateClose(open, close) {
-    var errorNode;
-
     close = close.path ? close.path.original : close;
 
     if (open.path.original !== close) {
-      errorNode = { loc: open.path.loc };
-
+      let errorNode = { loc: open.path.loc };
 
       throw new Exception(open.path.original + " doesn't match " + close, errorNode);
     }
@@ -8516,26 +8001,22 @@ enifed("handlebars", ["exports"], function (exports) {
     preparePath: function (data, parts, loc) {
       loc = this.locInfo(loc);
 
-      var original = data ? '@' : '',
+      let original = data ? '@' : '',
           dig = [],
-          depth = 0,
-          i,
-          l,
-          part,
+          depth = 0;
+
+      for (let i = 0, l = parts.length; i < l; i++) {
+        let part = parts[i].part,
 
 
-      // If we have [] syntax then we do not treat path references as operators,
-      // i.e. foo.[this] resolves to approximately context.foo['this']
-      isLiteral;
-
-      for (i = 0, l = parts.length; i < l; i++) {
-        part = parts[i].part, isLiteral = parts[i].original !== part;
-
+        // If we have [] syntax then we do not treat path references as operators,
+        // i.e. foo.[this] resolves to approximately context.foo['this']
+        isLiteral = parts[i].original !== part;
         original += (parts[i].separator || '') + part;
 
         if (!isLiteral && (part === '..' || part === '.' || part === 'this')) {
           if (dig.length > 0) {
-            throw new Exception('Invalid path: ' + original, { loc: loc });
+            throw new Exception('Invalid path: ' + original, { loc });
           } else if (part === '..') {
             depth++;
           }
@@ -8546,25 +8027,25 @@ enifed("handlebars", ["exports"], function (exports) {
 
       return {
         type: 'PathExpression',
-        data: data,
-        depth: depth,
+        data,
+        depth,
         parts: dig,
-        original: original,
-        loc: loc
+        original,
+        loc
       };
     },
     prepareMustache: function (path, params, hash, open, strip, locInfo) {
       // Must use charAt to support IE pre-10
-      var escapeFlag = open.charAt(3) || open.charAt(2);
+      let escapeFlag = open.charAt(3) || open.charAt(2);
 
-      var decorator = /\*/.test(open);
+      let decorator = /\*/.test(open);
       return {
         type: decorator ? 'Decorator' : 'MustacheStatement',
-        path: path,
-        params: params,
-        hash: hash,
+        path,
+        params,
+        hash,
         escaped: escapeFlag !== '{' && escapeFlag !== '&',
-        strip: strip,
+        strip,
         loc: this.locInfo(locInfo)
       };
     },
@@ -8572,7 +8053,7 @@ enifed("handlebars", ["exports"], function (exports) {
       validateClose(openRawBlock, close);
 
       locInfo = this.locInfo(locInfo);
-      var program = {
+      let program = {
         type: 'Program',
         body: contents,
         strip: {},
@@ -8584,7 +8065,7 @@ enifed("handlebars", ["exports"], function (exports) {
         path: openRawBlock.path,
         params: openRawBlock.params,
         hash: openRawBlock.hash,
-        program: program,
+        program,
         openStrip: {},
         inverseStrip: {},
         closeStrip: {},
@@ -8596,12 +8077,11 @@ enifed("handlebars", ["exports"], function (exports) {
         validateClose(openBlock, close);
       }
 
-      var decorator = /\*/.test(openBlock.open);
+      let decorator = /\*/.test(openBlock.open);
 
       program.blockParams = openBlock.blockParams;
 
-      var inverse = void 0,
-          inverseStrip = void 0;
+      let inverse, inverseStrip;
 
       if (inverseAndProgram) {
         if (decorator) {
@@ -8627,22 +8107,20 @@ enifed("handlebars", ["exports"], function (exports) {
         path: openBlock.path,
         params: openBlock.params,
         hash: openBlock.hash,
-        program: program,
-        inverse: inverse,
+        program,
+        inverse,
         openStrip: openBlock.strip,
-        inverseStrip: inverseStrip,
+        inverseStrip,
         closeStrip: close && close.strip,
         loc: this.locInfo(locInfo)
       };
     },
     prepareProgram: function (statements, loc) {
-      var firstLoc, lastLoc;
-
       if (!loc && statements.length) {
-        firstLoc = statements[0].loc, lastLoc = statements[statements.length - 1].loc;
+        const firstLoc = statements[0].loc,
+              lastLoc = statements[statements.length - 1].loc;
 
         /* istanbul ignore else */
-
         if (firstLoc && lastLoc) {
           loc = {
             source: firstLoc.source,
@@ -8673,7 +8151,7 @@ enifed("handlebars", ["exports"], function (exports) {
         name: open.path,
         params: open.params,
         hash: open.hash,
-        program: program,
+        program,
         openStrip: open.strip,
         closeStrip: close && close.strip,
         loc: this.locInfo(locInfo)
@@ -8681,12 +8159,12 @@ enifed("handlebars", ["exports"], function (exports) {
     }
   });
 
-  var toString = Object.prototype.toString;
+  let toString = Object.prototype.toString;
 
   // Sourced from lodash
   // https://github.com/bestiejs/lodash/blob/master/LICENSE.txt
   /* eslint-disable func-style */
-  var isFunction = function (value) {
+  let isFunction = function (value) {
     return typeof value === 'function';
   };
   // fallback for older versions of Chrome and Safari
@@ -8697,12 +8175,10 @@ enifed("handlebars", ["exports"], function (exports) {
     };
   }
 
-  var yy = {};
+  let yy = {};
   (function (obj /* , ...source */) {
-    var i;
-
-    for (i = 1; i < arguments.length; i++) {
-      for (var key in arguments[i]) {
+    for (let i = 1; i < arguments.length; i++) {
+      for (let key in arguments[i]) {
         if (Object.prototype.hasOwnProperty.call(arguments[i], key)) {
           obj[key] = arguments[i][key];
         }
@@ -8726,7 +8202,7 @@ enifed("handlebars", ["exports"], function (exports) {
       return new yy.SourceLocation(options && options.srcName, locInfo);
     };
 
-    var strip = new WhitespaceControl(options);
+    let strip = new WhitespaceControl(options);
     return strip.accept(handlebars.parse(input));
   };
 });
@@ -8753,7 +8229,7 @@ enifed("simple-html-tokenizer", ["exports"], function (exports) {
      */
 
     var namedCharRefs = {
-        Aacute: "Á", aacute: "á", Abreve: "Ă", abreve: "ă", ac: "∾", acd: "∿", acE: "∾̳", Acirc: "Â", acirc: "â", acute: "´", Acy: "А", acy: "а", AElig: "Æ", aelig: "æ", af: "\u2061", Afr: "𝔄", afr: "𝔞", Agrave: "À", agrave: "à", alefsym: "ℵ", aleph: "ℵ", Alpha: "Α", alpha: "α", Amacr: "Ā", amacr: "ā", amalg: "⨿", amp: "&", AMP: "&", andand: "⩕", And: "⩓", and: "∧", andd: "⩜", andslope: "⩘", andv: "⩚", ang: "∠", ange: "⦤", angle: "∠", angmsdaa: "⦨", angmsdab: "⦩", angmsdac: "⦪", angmsdad: "⦫", angmsdae: "⦬", angmsdaf: "⦭", angmsdag: "⦮", angmsdah: "⦯", angmsd: "∡", angrt: "∟", angrtvb: "⊾", angrtvbd: "⦝", angsph: "∢", angst: "Å", angzarr: "⍼", Aogon: "Ą", aogon: "ą", Aopf: "𝔸", aopf: "𝕒", apacir: "⩯", ap: "≈", apE: "⩰", ape: "≊", apid: "≋", apos: "'", ApplyFunction: "\u2061", approx: "≈", approxeq: "≊", Aring: "Å", aring: "å", Ascr: "𝒜", ascr: "𝒶", Assign: "≔", ast: "*", asymp: "≈", asympeq: "≍", Atilde: "Ã", atilde: "ã", Auml: "Ä", auml: "ä", awconint: "∳", awint: "⨑", backcong: "≌", backepsilon: "϶", backprime: "‵", backsim: "∽", backsimeq: "⋍", Backslash: "∖", Barv: "⫧", barvee: "⊽", barwed: "⌅", Barwed: "⌆", barwedge: "⌅", bbrk: "⎵", bbrktbrk: "⎶", bcong: "≌", Bcy: "Б", bcy: "б", bdquo: "„", becaus: "∵", because: "∵", Because: "∵", bemptyv: "⦰", bepsi: "϶", bernou: "ℬ", Bernoullis: "ℬ", Beta: "Β", beta: "β", beth: "ℶ", between: "≬", Bfr: "𝔅", bfr: "𝔟", bigcap: "⋂", bigcirc: "◯", bigcup: "⋃", bigodot: "⨀", bigoplus: "⨁", bigotimes: "⨂", bigsqcup: "⨆", bigstar: "★", bigtriangledown: "▽", bigtriangleup: "△", biguplus: "⨄", bigvee: "⋁", bigwedge: "⋀", bkarow: "⤍", blacklozenge: "⧫", blacksquare: "▪", blacktriangle: "▴", blacktriangledown: "▾", blacktriangleleft: "◂", blacktriangleright: "▸", blank: "␣", blk12: "▒", blk14: "░", blk34: "▓", block: "█", bne: "=⃥", bnequiv: "≡⃥", bNot: "⫭", bnot: "⌐", Bopf: "𝔹", bopf: "𝕓", bot: "⊥", bottom: "⊥", bowtie: "⋈", boxbox: "⧉", boxdl: "┐", boxdL: "╕", boxDl: "╖", boxDL: "╗", boxdr: "┌", boxdR: "╒", boxDr: "╓", boxDR: "╔", boxh: "─", boxH: "═", boxhd: "┬", boxHd: "╤", boxhD: "╥", boxHD: "╦", boxhu: "┴", boxHu: "╧", boxhU: "╨", boxHU: "╩", boxminus: "⊟", boxplus: "⊞", boxtimes: "⊠", boxul: "┘", boxuL: "╛", boxUl: "╜", boxUL: "╝", boxur: "└", boxuR: "╘", boxUr: "╙", boxUR: "╚", boxv: "│", boxV: "║", boxvh: "┼", boxvH: "╪", boxVh: "╫", boxVH: "╬", boxvl: "┤", boxvL: "╡", boxVl: "╢", boxVL: "╣", boxvr: "├", boxvR: "╞", boxVr: "╟", boxVR: "╠", bprime: "‵", breve: "˘", Breve: "˘", brvbar: "¦", bscr: "𝒷", Bscr: "ℬ", bsemi: "⁏", bsim: "∽", bsime: "⋍", bsolb: "⧅", bsol: "\\", bsolhsub: "⟈", bull: "•", bullet: "•", bump: "≎", bumpE: "⪮", bumpe: "≏", Bumpeq: "≎", bumpeq: "≏", Cacute: "Ć", cacute: "ć", capand: "⩄", capbrcup: "⩉", capcap: "⩋", cap: "∩", Cap: "⋒", capcup: "⩇", capdot: "⩀", CapitalDifferentialD: "ⅅ", caps: "∩︀", caret: "⁁", caron: "ˇ", Cayleys: "ℭ", ccaps: "⩍", Ccaron: "Č", ccaron: "č", Ccedil: "Ç", ccedil: "ç", Ccirc: "Ĉ", ccirc: "ĉ", Cconint: "∰", ccups: "⩌", ccupssm: "⩐", Cdot: "Ċ", cdot: "ċ", cedil: "¸", Cedilla: "¸", cemptyv: "⦲", cent: "¢", centerdot: "·", CenterDot: "·", cfr: "𝔠", Cfr: "ℭ", CHcy: "Ч", chcy: "ч", check: "✓", checkmark: "✓", Chi: "Χ", chi: "χ", circ: "ˆ", circeq: "≗", circlearrowleft: "↺", circlearrowright: "↻", circledast: "⊛", circledcirc: "⊚", circleddash: "⊝", CircleDot: "⊙", circledR: "®", circledS: "Ⓢ", CircleMinus: "⊖", CirclePlus: "⊕", CircleTimes: "⊗", cir: "○", cirE: "⧃", cire: "≗", cirfnint: "⨐", cirmid: "⫯", cirscir: "⧂", ClockwiseContourIntegral: "∲", CloseCurlyDoubleQuote: "”", CloseCurlyQuote: "’", clubs: "♣", clubsuit: "♣", colon: ":", Colon: "∷", Colone: "⩴", colone: "≔", coloneq: "≔", comma: ",", commat: "@", comp: "∁", compfn: "∘", complement: "∁", complexes: "ℂ", cong: "≅", congdot: "⩭", Congruent: "≡", conint: "∮", Conint: "∯", ContourIntegral: "∮", copf: "𝕔", Copf: "ℂ", coprod: "∐", Coproduct: "∐", copy: "©", COPY: "©", copysr: "℗", CounterClockwiseContourIntegral: "∳", crarr: "↵", cross: "✗", Cross: "⨯", Cscr: "𝒞", cscr: "𝒸", csub: "⫏", csube: "⫑", csup: "⫐", csupe: "⫒", ctdot: "⋯", cudarrl: "⤸", cudarrr: "⤵", cuepr: "⋞", cuesc: "⋟", cularr: "↶", cularrp: "⤽", cupbrcap: "⩈", cupcap: "⩆", CupCap: "≍", cup: "∪", Cup: "⋓", cupcup: "⩊", cupdot: "⊍", cupor: "⩅", cups: "∪︀", curarr: "↷", curarrm: "⤼", curlyeqprec: "⋞", curlyeqsucc: "⋟", curlyvee: "⋎", curlywedge: "⋏", curren: "¤", curvearrowleft: "↶", curvearrowright: "↷", cuvee: "⋎", cuwed: "⋏", cwconint: "∲", cwint: "∱", cylcty: "⌭", dagger: "†", Dagger: "‡", daleth: "ℸ", darr: "↓", Darr: "↡", dArr: "⇓", dash: "‐", Dashv: "⫤", dashv: "⊣", dbkarow: "⤏", dblac: "˝", Dcaron: "Ď", dcaron: "ď", Dcy: "Д", dcy: "д", ddagger: "‡", ddarr: "⇊", DD: "ⅅ", dd: "ⅆ", DDotrahd: "⤑", ddotseq: "⩷", deg: "°", Del: "∇", Delta: "Δ", delta: "δ", demptyv: "⦱", dfisht: "⥿", Dfr: "𝔇", dfr: "𝔡", dHar: "⥥", dharl: "⇃", dharr: "⇂", DiacriticalAcute: "´", DiacriticalDot: "˙", DiacriticalDoubleAcute: "˝", DiacriticalGrave: "`", DiacriticalTilde: "˜", diam: "⋄", diamond: "⋄", Diamond: "⋄", diamondsuit: "♦", diams: "♦", die: "¨", DifferentialD: "ⅆ", digamma: "ϝ", disin: "⋲", div: "÷", divide: "÷", divideontimes: "⋇", divonx: "⋇", DJcy: "Ђ", djcy: "ђ", dlcorn: "⌞", dlcrop: "⌍", dollar: "$", Dopf: "𝔻", dopf: "𝕕", Dot: "¨", dot: "˙", DotDot: "⃜", doteq: "≐", doteqdot: "≑", DotEqual: "≐", dotminus: "∸", dotplus: "∔", dotsquare: "⊡", doublebarwedge: "⌆", DoubleContourIntegral: "∯", DoubleDot: "¨", DoubleDownArrow: "⇓", DoubleLeftArrow: "⇐", DoubleLeftRightArrow: "⇔", DoubleLeftTee: "⫤", DoubleLongLeftArrow: "⟸", DoubleLongLeftRightArrow: "⟺", DoubleLongRightArrow: "⟹", DoubleRightArrow: "⇒", DoubleRightTee: "⊨", DoubleUpArrow: "⇑", DoubleUpDownArrow: "⇕", DoubleVerticalBar: "∥", DownArrowBar: "⤓", downarrow: "↓", DownArrow: "↓", Downarrow: "⇓", DownArrowUpArrow: "⇵", DownBreve: "̑", downdownarrows: "⇊", downharpoonleft: "⇃", downharpoonright: "⇂", DownLeftRightVector: "⥐", DownLeftTeeVector: "⥞", DownLeftVectorBar: "⥖", DownLeftVector: "↽", DownRightTeeVector: "⥟", DownRightVectorBar: "⥗", DownRightVector: "⇁", DownTeeArrow: "↧", DownTee: "⊤", drbkarow: "⤐", drcorn: "⌟", drcrop: "⌌", Dscr: "𝒟", dscr: "𝒹", DScy: "Ѕ", dscy: "ѕ", dsol: "⧶", Dstrok: "Đ", dstrok: "đ", dtdot: "⋱", dtri: "▿", dtrif: "▾", duarr: "⇵", duhar: "⥯", dwangle: "⦦", DZcy: "Џ", dzcy: "џ", dzigrarr: "⟿", Eacute: "É", eacute: "é", easter: "⩮", Ecaron: "Ě", ecaron: "ě", Ecirc: "Ê", ecirc: "ê", ecir: "≖", ecolon: "≕", Ecy: "Э", ecy: "э", eDDot: "⩷", Edot: "Ė", edot: "ė", eDot: "≑", ee: "ⅇ", efDot: "≒", Efr: "𝔈", efr: "𝔢", eg: "⪚", Egrave: "È", egrave: "è", egs: "⪖", egsdot: "⪘", el: "⪙", Element: "∈", elinters: "⏧", ell: "ℓ", els: "⪕", elsdot: "⪗", Emacr: "Ē", emacr: "ē", empty: "∅", emptyset: "∅", EmptySmallSquare: "◻", emptyv: "∅", EmptyVerySmallSquare: "▫", emsp13: " ", emsp14: " ", emsp: " ", ENG: "Ŋ", eng: "ŋ", ensp: " ", Eogon: "Ę", eogon: "ę", Eopf: "𝔼", eopf: "𝕖", epar: "⋕", eparsl: "⧣", eplus: "⩱", epsi: "ε", Epsilon: "Ε", epsilon: "ε", epsiv: "ϵ", eqcirc: "≖", eqcolon: "≕", eqsim: "≂", eqslantgtr: "⪖", eqslantless: "⪕", Equal: "⩵", equals: "=", EqualTilde: "≂", equest: "≟", Equilibrium: "⇌", equiv: "≡", equivDD: "⩸", eqvparsl: "⧥", erarr: "⥱", erDot: "≓", escr: "ℯ", Escr: "ℰ", esdot: "≐", Esim: "⩳", esim: "≂", Eta: "Η", eta: "η", ETH: "Ð", eth: "ð", Euml: "Ë", euml: "ë", euro: "€", excl: "!", exist: "∃", Exists: "∃", expectation: "ℰ", exponentiale: "ⅇ", ExponentialE: "ⅇ", fallingdotseq: "≒", Fcy: "Ф", fcy: "ф", female: "♀", ffilig: "ﬃ", fflig: "ﬀ", ffllig: "ﬄ", Ffr: "𝔉", ffr: "𝔣", filig: "ﬁ", FilledSmallSquare: "◼", FilledVerySmallSquare: "▪", fjlig: "fj", flat: "♭", fllig: "ﬂ", fltns: "▱", fnof: "ƒ", Fopf: "𝔽", fopf: "𝕗", forall: "∀", ForAll: "∀", fork: "⋔", forkv: "⫙", Fouriertrf: "ℱ", fpartint: "⨍", frac12: "½", frac13: "⅓", frac14: "¼", frac15: "⅕", frac16: "⅙", frac18: "⅛", frac23: "⅔", frac25: "⅖", frac34: "¾", frac35: "⅗", frac38: "⅜", frac45: "⅘", frac56: "⅚", frac58: "⅝", frac78: "⅞", frasl: "⁄", frown: "⌢", fscr: "𝒻", Fscr: "ℱ", gacute: "ǵ", Gamma: "Γ", gamma: "γ", Gammad: "Ϝ", gammad: "ϝ", gap: "⪆", Gbreve: "Ğ", gbreve: "ğ", Gcedil: "Ģ", Gcirc: "Ĝ", gcirc: "ĝ", Gcy: "Г", gcy: "г", Gdot: "Ġ", gdot: "ġ", ge: "≥", gE: "≧", gEl: "⪌", gel: "⋛", geq: "≥", geqq: "≧", geqslant: "⩾", gescc: "⪩", ges: "⩾", gesdot: "⪀", gesdoto: "⪂", gesdotol: "⪄", gesl: "⋛︀", gesles: "⪔", Gfr: "𝔊", gfr: "𝔤", gg: "≫", Gg: "⋙", ggg: "⋙", gimel: "ℷ", GJcy: "Ѓ", gjcy: "ѓ", gla: "⪥", gl: "≷", glE: "⪒", glj: "⪤", gnap: "⪊", gnapprox: "⪊", gne: "⪈", gnE: "≩", gneq: "⪈", gneqq: "≩", gnsim: "⋧", Gopf: "𝔾", gopf: "𝕘", grave: "`", GreaterEqual: "≥", GreaterEqualLess: "⋛", GreaterFullEqual: "≧", GreaterGreater: "⪢", GreaterLess: "≷", GreaterSlantEqual: "⩾", GreaterTilde: "≳", Gscr: "𝒢", gscr: "ℊ", gsim: "≳", gsime: "⪎", gsiml: "⪐", gtcc: "⪧", gtcir: "⩺", gt: ">", GT: ">", Gt: "≫", gtdot: "⋗", gtlPar: "⦕", gtquest: "⩼", gtrapprox: "⪆", gtrarr: "⥸", gtrdot: "⋗", gtreqless: "⋛", gtreqqless: "⪌", gtrless: "≷", gtrsim: "≳", gvertneqq: "≩︀", gvnE: "≩︀", Hacek: "ˇ", hairsp: " ", half: "½", hamilt: "ℋ", HARDcy: "Ъ", hardcy: "ъ", harrcir: "⥈", harr: "↔", hArr: "⇔", harrw: "↭", Hat: "^", hbar: "ℏ", Hcirc: "Ĥ", hcirc: "ĥ", hearts: "♥", heartsuit: "♥", hellip: "…", hercon: "⊹", hfr: "𝔥", Hfr: "ℌ", HilbertSpace: "ℋ", hksearow: "⤥", hkswarow: "⤦", hoarr: "⇿", homtht: "∻", hookleftarrow: "↩", hookrightarrow: "↪", hopf: "𝕙", Hopf: "ℍ", horbar: "―", HorizontalLine: "─", hscr: "𝒽", Hscr: "ℋ", hslash: "ℏ", Hstrok: "Ħ", hstrok: "ħ", HumpDownHump: "≎", HumpEqual: "≏", hybull: "⁃", hyphen: "‐", Iacute: "Í", iacute: "í", ic: "\u2063", Icirc: "Î", icirc: "î", Icy: "И", icy: "и", Idot: "İ", IEcy: "Е", iecy: "е", iexcl: "¡", iff: "⇔", ifr: "𝔦", Ifr: "ℑ", Igrave: "Ì", igrave: "ì", ii: "ⅈ", iiiint: "⨌", iiint: "∭", iinfin: "⧜", iiota: "℩", IJlig: "Ĳ", ijlig: "ĳ", Imacr: "Ī", imacr: "ī", image: "ℑ", ImaginaryI: "ⅈ", imagline: "ℐ", imagpart: "ℑ", imath: "ı", Im: "ℑ", imof: "⊷", imped: "Ƶ", Implies: "⇒", incare: "℅", in: "∈", infin: "∞", infintie: "⧝", inodot: "ı", intcal: "⊺", int: "∫", Int: "∬", integers: "ℤ", Integral: "∫", intercal: "⊺", Intersection: "⋂", intlarhk: "⨗", intprod: "⨼", InvisibleComma: "\u2063", InvisibleTimes: "\u2062", IOcy: "Ё", iocy: "ё", Iogon: "Į", iogon: "į", Iopf: "𝕀", iopf: "𝕚", Iota: "Ι", iota: "ι", iprod: "⨼", iquest: "¿", iscr: "𝒾", Iscr: "ℐ", isin: "∈", isindot: "⋵", isinE: "⋹", isins: "⋴", isinsv: "⋳", isinv: "∈", it: "\u2062", Itilde: "Ĩ", itilde: "ĩ", Iukcy: "І", iukcy: "і", Iuml: "Ï", iuml: "ï", Jcirc: "Ĵ", jcirc: "ĵ", Jcy: "Й", jcy: "й", Jfr: "𝔍", jfr: "𝔧", jmath: "ȷ", Jopf: "𝕁", jopf: "𝕛", Jscr: "𝒥", jscr: "𝒿", Jsercy: "Ј", jsercy: "ј", Jukcy: "Є", jukcy: "є", Kappa: "Κ", kappa: "κ", kappav: "ϰ", Kcedil: "Ķ", kcedil: "ķ", Kcy: "К", kcy: "к", Kfr: "𝔎", kfr: "𝔨", kgreen: "ĸ", KHcy: "Х", khcy: "х", KJcy: "Ќ", kjcy: "ќ", Kopf: "𝕂", kopf: "𝕜", Kscr: "𝒦", kscr: "𝓀", lAarr: "⇚", Lacute: "Ĺ", lacute: "ĺ", laemptyv: "⦴", lagran: "ℒ", Lambda: "Λ", lambda: "λ", lang: "⟨", Lang: "⟪", langd: "⦑", langle: "⟨", lap: "⪅", Laplacetrf: "ℒ", laquo: "«", larrb: "⇤", larrbfs: "⤟", larr: "←", Larr: "↞", lArr: "⇐", larrfs: "⤝", larrhk: "↩", larrlp: "↫", larrpl: "⤹", larrsim: "⥳", larrtl: "↢", latail: "⤙", lAtail: "⤛", lat: "⪫", late: "⪭", lates: "⪭︀", lbarr: "⤌", lBarr: "⤎", lbbrk: "❲", lbrace: "{", lbrack: "[", lbrke: "⦋", lbrksld: "⦏", lbrkslu: "⦍", Lcaron: "Ľ", lcaron: "ľ", Lcedil: "Ļ", lcedil: "ļ", lceil: "⌈", lcub: "{", Lcy: "Л", lcy: "л", ldca: "⤶", ldquo: "“", ldquor: "„", ldrdhar: "⥧", ldrushar: "⥋", ldsh: "↲", le: "≤", lE: "≦", LeftAngleBracket: "⟨", LeftArrowBar: "⇤", leftarrow: "←", LeftArrow: "←", Leftarrow: "⇐", LeftArrowRightArrow: "⇆", leftarrowtail: "↢", LeftCeiling: "⌈", LeftDoubleBracket: "⟦", LeftDownTeeVector: "⥡", LeftDownVectorBar: "⥙", LeftDownVector: "⇃", LeftFloor: "⌊", leftharpoondown: "↽", leftharpoonup: "↼", leftleftarrows: "⇇", leftrightarrow: "↔", LeftRightArrow: "↔", Leftrightarrow: "⇔", leftrightarrows: "⇆", leftrightharpoons: "⇋", leftrightsquigarrow: "↭", LeftRightVector: "⥎", LeftTeeArrow: "↤", LeftTee: "⊣", LeftTeeVector: "⥚", leftthreetimes: "⋋", LeftTriangleBar: "⧏", LeftTriangle: "⊲", LeftTriangleEqual: "⊴", LeftUpDownVector: "⥑", LeftUpTeeVector: "⥠", LeftUpVectorBar: "⥘", LeftUpVector: "↿", LeftVectorBar: "⥒", LeftVector: "↼", lEg: "⪋", leg: "⋚", leq: "≤", leqq: "≦", leqslant: "⩽", lescc: "⪨", les: "⩽", lesdot: "⩿", lesdoto: "⪁", lesdotor: "⪃", lesg: "⋚︀", lesges: "⪓", lessapprox: "⪅", lessdot: "⋖", lesseqgtr: "⋚", lesseqqgtr: "⪋", LessEqualGreater: "⋚", LessFullEqual: "≦", LessGreater: "≶", lessgtr: "≶", LessLess: "⪡", lesssim: "≲", LessSlantEqual: "⩽", LessTilde: "≲", lfisht: "⥼", lfloor: "⌊", Lfr: "𝔏", lfr: "𝔩", lg: "≶", lgE: "⪑", lHar: "⥢", lhard: "↽", lharu: "↼", lharul: "⥪", lhblk: "▄", LJcy: "Љ", ljcy: "љ", llarr: "⇇", ll: "≪", Ll: "⋘", llcorner: "⌞", Lleftarrow: "⇚", llhard: "⥫", lltri: "◺", Lmidot: "Ŀ", lmidot: "ŀ", lmoustache: "⎰", lmoust: "⎰", lnap: "⪉", lnapprox: "⪉", lne: "⪇", lnE: "≨", lneq: "⪇", lneqq: "≨", lnsim: "⋦", loang: "⟬", loarr: "⇽", lobrk: "⟦", longleftarrow: "⟵", LongLeftArrow: "⟵", Longleftarrow: "⟸", longleftrightarrow: "⟷", LongLeftRightArrow: "⟷", Longleftrightarrow: "⟺", longmapsto: "⟼", longrightarrow: "⟶", LongRightArrow: "⟶", Longrightarrow: "⟹", looparrowleft: "↫", looparrowright: "↬", lopar: "⦅", Lopf: "𝕃", lopf: "𝕝", loplus: "⨭", lotimes: "⨴", lowast: "∗", lowbar: "_", LowerLeftArrow: "↙", LowerRightArrow: "↘", loz: "◊", lozenge: "◊", lozf: "⧫", lpar: "(", lparlt: "⦓", lrarr: "⇆", lrcorner: "⌟", lrhar: "⇋", lrhard: "⥭", lrm: "\u200E", lrtri: "⊿", lsaquo: "‹", lscr: "𝓁", Lscr: "ℒ", lsh: "↰", Lsh: "↰", lsim: "≲", lsime: "⪍", lsimg: "⪏", lsqb: "[", lsquo: "‘", lsquor: "‚", Lstrok: "Ł", lstrok: "ł", ltcc: "⪦", ltcir: "⩹", lt: "<", LT: "<", Lt: "≪", ltdot: "⋖", lthree: "⋋", ltimes: "⋉", ltlarr: "⥶", ltquest: "⩻", ltri: "◃", ltrie: "⊴", ltrif: "◂", ltrPar: "⦖", lurdshar: "⥊", luruhar: "⥦", lvertneqq: "≨︀", lvnE: "≨︀", macr: "¯", male: "♂", malt: "✠", maltese: "✠", Map: "⤅", map: "↦", mapsto: "↦", mapstodown: "↧", mapstoleft: "↤", mapstoup: "↥", marker: "▮", mcomma: "⨩", Mcy: "М", mcy: "м", mdash: "—", mDDot: "∺", measuredangle: "∡", MediumSpace: " ", Mellintrf: "ℳ", Mfr: "𝔐", mfr: "𝔪", mho: "℧", micro: "µ", midast: "*", midcir: "⫰", mid: "∣", middot: "·", minusb: "⊟", minus: "−", minusd: "∸", minusdu: "⨪", MinusPlus: "∓", mlcp: "⫛", mldr: "…", mnplus: "∓", models: "⊧", Mopf: "𝕄", mopf: "𝕞", mp: "∓", mscr: "𝓂", Mscr: "ℳ", mstpos: "∾", Mu: "Μ", mu: "μ", multimap: "⊸", mumap: "⊸", nabla: "∇", Nacute: "Ń", nacute: "ń", nang: "∠⃒", nap: "≉", napE: "⩰̸", napid: "≋̸", napos: "ŉ", napprox: "≉", natural: "♮", naturals: "ℕ", natur: "♮", nbsp: " ", nbump: "≎̸", nbumpe: "≏̸", ncap: "⩃", Ncaron: "Ň", ncaron: "ň", Ncedil: "Ņ", ncedil: "ņ", ncong: "≇", ncongdot: "⩭̸", ncup: "⩂", Ncy: "Н", ncy: "н", ndash: "–", nearhk: "⤤", nearr: "↗", neArr: "⇗", nearrow: "↗", ne: "≠", nedot: "≐̸", NegativeMediumSpace: "​", NegativeThickSpace: "​", NegativeThinSpace: "​", NegativeVeryThinSpace: "​", nequiv: "≢", nesear: "⤨", nesim: "≂̸", NestedGreaterGreater: "≫", NestedLessLess: "≪", NewLine: "\n", nexist: "∄", nexists: "∄", Nfr: "𝔑", nfr: "𝔫", ngE: "≧̸", nge: "≱", ngeq: "≱", ngeqq: "≧̸", ngeqslant: "⩾̸", nges: "⩾̸", nGg: "⋙̸", ngsim: "≵", nGt: "≫⃒", ngt: "≯", ngtr: "≯", nGtv: "≫̸", nharr: "↮", nhArr: "⇎", nhpar: "⫲", ni: "∋", nis: "⋼", nisd: "⋺", niv: "∋", NJcy: "Њ", njcy: "њ", nlarr: "↚", nlArr: "⇍", nldr: "‥", nlE: "≦̸", nle: "≰", nleftarrow: "↚", nLeftarrow: "⇍", nleftrightarrow: "↮", nLeftrightarrow: "⇎", nleq: "≰", nleqq: "≦̸", nleqslant: "⩽̸", nles: "⩽̸", nless: "≮", nLl: "⋘̸", nlsim: "≴", nLt: "≪⃒", nlt: "≮", nltri: "⋪", nltrie: "⋬", nLtv: "≪̸", nmid: "∤", NoBreak: "\u2060", NonBreakingSpace: " ", nopf: "𝕟", Nopf: "ℕ", Not: "⫬", not: "¬", NotCongruent: "≢", NotCupCap: "≭", NotDoubleVerticalBar: "∦", NotElement: "∉", NotEqual: "≠", NotEqualTilde: "≂̸", NotExists: "∄", NotGreater: "≯", NotGreaterEqual: "≱", NotGreaterFullEqual: "≧̸", NotGreaterGreater: "≫̸", NotGreaterLess: "≹", NotGreaterSlantEqual: "⩾̸", NotGreaterTilde: "≵", NotHumpDownHump: "≎̸", NotHumpEqual: "≏̸", notin: "∉", notindot: "⋵̸", notinE: "⋹̸", notinva: "∉", notinvb: "⋷", notinvc: "⋶", NotLeftTriangleBar: "⧏̸", NotLeftTriangle: "⋪", NotLeftTriangleEqual: "⋬", NotLess: "≮", NotLessEqual: "≰", NotLessGreater: "≸", NotLessLess: "≪̸", NotLessSlantEqual: "⩽̸", NotLessTilde: "≴", NotNestedGreaterGreater: "⪢̸", NotNestedLessLess: "⪡̸", notni: "∌", notniva: "∌", notnivb: "⋾", notnivc: "⋽", NotPrecedes: "⊀", NotPrecedesEqual: "⪯̸", NotPrecedesSlantEqual: "⋠", NotReverseElement: "∌", NotRightTriangleBar: "⧐̸", NotRightTriangle: "⋫", NotRightTriangleEqual: "⋭", NotSquareSubset: "⊏̸", NotSquareSubsetEqual: "⋢", NotSquareSuperset: "⊐̸", NotSquareSupersetEqual: "⋣", NotSubset: "⊂⃒", NotSubsetEqual: "⊈", NotSucceeds: "⊁", NotSucceedsEqual: "⪰̸", NotSucceedsSlantEqual: "⋡", NotSucceedsTilde: "≿̸", NotSuperset: "⊃⃒", NotSupersetEqual: "⊉", NotTilde: "≁", NotTildeEqual: "≄", NotTildeFullEqual: "≇", NotTildeTilde: "≉", NotVerticalBar: "∤", nparallel: "∦", npar: "∦", nparsl: "⫽⃥", npart: "∂̸", npolint: "⨔", npr: "⊀", nprcue: "⋠", nprec: "⊀", npreceq: "⪯̸", npre: "⪯̸", nrarrc: "⤳̸", nrarr: "↛", nrArr: "⇏", nrarrw: "↝̸", nrightarrow: "↛", nRightarrow: "⇏", nrtri: "⋫", nrtrie: "⋭", nsc: "⊁", nsccue: "⋡", nsce: "⪰̸", Nscr: "𝒩", nscr: "𝓃", nshortmid: "∤", nshortparallel: "∦", nsim: "≁", nsime: "≄", nsimeq: "≄", nsmid: "∤", nspar: "∦", nsqsube: "⋢", nsqsupe: "⋣", nsub: "⊄", nsubE: "⫅̸", nsube: "⊈", nsubset: "⊂⃒", nsubseteq: "⊈", nsubseteqq: "⫅̸", nsucc: "⊁", nsucceq: "⪰̸", nsup: "⊅", nsupE: "⫆̸", nsupe: "⊉", nsupset: "⊃⃒", nsupseteq: "⊉", nsupseteqq: "⫆̸", ntgl: "≹", Ntilde: "Ñ", ntilde: "ñ", ntlg: "≸", ntriangleleft: "⋪", ntrianglelefteq: "⋬", ntriangleright: "⋫", ntrianglerighteq: "⋭", Nu: "Ν", nu: "ν", num: "#", numero: "№", numsp: " ", nvap: "≍⃒", nvdash: "⊬", nvDash: "⊭", nVdash: "⊮", nVDash: "⊯", nvge: "≥⃒", nvgt: ">⃒", nvHarr: "⤄", nvinfin: "⧞", nvlArr: "⤂", nvle: "≤⃒", nvlt: "<⃒", nvltrie: "⊴⃒", nvrArr: "⤃", nvrtrie: "⊵⃒", nvsim: "∼⃒", nwarhk: "⤣", nwarr: "↖", nwArr: "⇖", nwarrow: "↖", nwnear: "⤧", Oacute: "Ó", oacute: "ó", oast: "⊛", Ocirc: "Ô", ocirc: "ô", ocir: "⊚", Ocy: "О", ocy: "о", odash: "⊝", Odblac: "Ő", odblac: "ő", odiv: "⨸", odot: "⊙", odsold: "⦼", OElig: "Œ", oelig: "œ", ofcir: "⦿", Ofr: "𝔒", ofr: "𝔬", ogon: "˛", Ograve: "Ò", ograve: "ò", ogt: "⧁", ohbar: "⦵", ohm: "Ω", oint: "∮", olarr: "↺", olcir: "⦾", olcross: "⦻", oline: "‾", olt: "⧀", Omacr: "Ō", omacr: "ō", Omega: "Ω", omega: "ω", Omicron: "Ο", omicron: "ο", omid: "⦶", ominus: "⊖", Oopf: "𝕆", oopf: "𝕠", opar: "⦷", OpenCurlyDoubleQuote: "“", OpenCurlyQuote: "‘", operp: "⦹", oplus: "⊕", orarr: "↻", Or: "⩔", or: "∨", ord: "⩝", order: "ℴ", orderof: "ℴ", ordf: "ª", ordm: "º", origof: "⊶", oror: "⩖", orslope: "⩗", orv: "⩛", oS: "Ⓢ", Oscr: "𝒪", oscr: "ℴ", Oslash: "Ø", oslash: "ø", osol: "⊘", Otilde: "Õ", otilde: "õ", otimesas: "⨶", Otimes: "⨷", otimes: "⊗", Ouml: "Ö", ouml: "ö", ovbar: "⌽", OverBar: "‾", OverBrace: "⏞", OverBracket: "⎴", OverParenthesis: "⏜", para: "¶", parallel: "∥", par: "∥", parsim: "⫳", parsl: "⫽", part: "∂", PartialD: "∂", Pcy: "П", pcy: "п", percnt: "%", period: ".", permil: "‰", perp: "⊥", pertenk: "‱", Pfr: "𝔓", pfr: "𝔭", Phi: "Φ", phi: "φ", phiv: "ϕ", phmmat: "ℳ", phone: "☎", Pi: "Π", pi: "π", pitchfork: "⋔", piv: "ϖ", planck: "ℏ", planckh: "ℎ", plankv: "ℏ", plusacir: "⨣", plusb: "⊞", pluscir: "⨢", plus: "+", plusdo: "∔", plusdu: "⨥", pluse: "⩲", PlusMinus: "±", plusmn: "±", plussim: "⨦", plustwo: "⨧", pm: "±", Poincareplane: "ℌ", pointint: "⨕", popf: "𝕡", Popf: "ℙ", pound: "£", prap: "⪷", Pr: "⪻", pr: "≺", prcue: "≼", precapprox: "⪷", prec: "≺", preccurlyeq: "≼", Precedes: "≺", PrecedesEqual: "⪯", PrecedesSlantEqual: "≼", PrecedesTilde: "≾", preceq: "⪯", precnapprox: "⪹", precneqq: "⪵", precnsim: "⋨", pre: "⪯", prE: "⪳", precsim: "≾", prime: "′", Prime: "″", primes: "ℙ", prnap: "⪹", prnE: "⪵", prnsim: "⋨", prod: "∏", Product: "∏", profalar: "⌮", profline: "⌒", profsurf: "⌓", prop: "∝", Proportional: "∝", Proportion: "∷", propto: "∝", prsim: "≾", prurel: "⊰", Pscr: "𝒫", pscr: "𝓅", Psi: "Ψ", psi: "ψ", puncsp: " ", Qfr: "𝔔", qfr: "𝔮", qint: "⨌", qopf: "𝕢", Qopf: "ℚ", qprime: "⁗", Qscr: "𝒬", qscr: "𝓆", quaternions: "ℍ", quatint: "⨖", quest: "?", questeq: "≟", quot: "\"", QUOT: "\"", rAarr: "⇛", race: "∽̱", Racute: "Ŕ", racute: "ŕ", radic: "√", raemptyv: "⦳", rang: "⟩", Rang: "⟫", rangd: "⦒", range: "⦥", rangle: "⟩", raquo: "»", rarrap: "⥵", rarrb: "⇥", rarrbfs: "⤠", rarrc: "⤳", rarr: "→", Rarr: "↠", rArr: "⇒", rarrfs: "⤞", rarrhk: "↪", rarrlp: "↬", rarrpl: "⥅", rarrsim: "⥴", Rarrtl: "⤖", rarrtl: "↣", rarrw: "↝", ratail: "⤚", rAtail: "⤜", ratio: "∶", rationals: "ℚ", rbarr: "⤍", rBarr: "⤏", RBarr: "⤐", rbbrk: "❳", rbrace: "}", rbrack: "]", rbrke: "⦌", rbrksld: "⦎", rbrkslu: "⦐", Rcaron: "Ř", rcaron: "ř", Rcedil: "Ŗ", rcedil: "ŗ", rceil: "⌉", rcub: "}", Rcy: "Р", rcy: "р", rdca: "⤷", rdldhar: "⥩", rdquo: "”", rdquor: "”", rdsh: "↳", real: "ℜ", realine: "ℛ", realpart: "ℜ", reals: "ℝ", Re: "ℜ", rect: "▭", reg: "®", REG: "®", ReverseElement: "∋", ReverseEquilibrium: "⇋", ReverseUpEquilibrium: "⥯", rfisht: "⥽", rfloor: "⌋", rfr: "𝔯", Rfr: "ℜ", rHar: "⥤", rhard: "⇁", rharu: "⇀", rharul: "⥬", Rho: "Ρ", rho: "ρ", rhov: "ϱ", RightAngleBracket: "⟩", RightArrowBar: "⇥", rightarrow: "→", RightArrow: "→", Rightarrow: "⇒", RightArrowLeftArrow: "⇄", rightarrowtail: "↣", RightCeiling: "⌉", RightDoubleBracket: "⟧", RightDownTeeVector: "⥝", RightDownVectorBar: "⥕", RightDownVector: "⇂", RightFloor: "⌋", rightharpoondown: "⇁", rightharpoonup: "⇀", rightleftarrows: "⇄", rightleftharpoons: "⇌", rightrightarrows: "⇉", rightsquigarrow: "↝", RightTeeArrow: "↦", RightTee: "⊢", RightTeeVector: "⥛", rightthreetimes: "⋌", RightTriangleBar: "⧐", RightTriangle: "⊳", RightTriangleEqual: "⊵", RightUpDownVector: "⥏", RightUpTeeVector: "⥜", RightUpVectorBar: "⥔", RightUpVector: "↾", RightVectorBar: "⥓", RightVector: "⇀", ring: "˚", risingdotseq: "≓", rlarr: "⇄", rlhar: "⇌", rlm: "\u200F", rmoustache: "⎱", rmoust: "⎱", rnmid: "⫮", roang: "⟭", roarr: "⇾", robrk: "⟧", ropar: "⦆", ropf: "𝕣", Ropf: "ℝ", roplus: "⨮", rotimes: "⨵", RoundImplies: "⥰", rpar: ")", rpargt: "⦔", rppolint: "⨒", rrarr: "⇉", Rrightarrow: "⇛", rsaquo: "›", rscr: "𝓇", Rscr: "ℛ", rsh: "↱", Rsh: "↱", rsqb: "]", rsquo: "’", rsquor: "’", rthree: "⋌", rtimes: "⋊", rtri: "▹", rtrie: "⊵", rtrif: "▸", rtriltri: "⧎", RuleDelayed: "⧴", ruluhar: "⥨", rx: "℞", Sacute: "Ś", sacute: "ś", sbquo: "‚", scap: "⪸", Scaron: "Š", scaron: "š", Sc: "⪼", sc: "≻", sccue: "≽", sce: "⪰", scE: "⪴", Scedil: "Ş", scedil: "ş", Scirc: "Ŝ", scirc: "ŝ", scnap: "⪺", scnE: "⪶", scnsim: "⋩", scpolint: "⨓", scsim: "≿", Scy: "С", scy: "с", sdotb: "⊡", sdot: "⋅", sdote: "⩦", searhk: "⤥", searr: "↘", seArr: "⇘", searrow: "↘", sect: "§", semi: ";", seswar: "⤩", setminus: "∖", setmn: "∖", sext: "✶", Sfr: "𝔖", sfr: "𝔰", sfrown: "⌢", sharp: "♯", SHCHcy: "Щ", shchcy: "щ", SHcy: "Ш", shcy: "ш", ShortDownArrow: "↓", ShortLeftArrow: "←", shortmid: "∣", shortparallel: "∥", ShortRightArrow: "→", ShortUpArrow: "↑", shy: "\xAD", Sigma: "Σ", sigma: "σ", sigmaf: "ς", sigmav: "ς", sim: "∼", simdot: "⩪", sime: "≃", simeq: "≃", simg: "⪞", simgE: "⪠", siml: "⪝", simlE: "⪟", simne: "≆", simplus: "⨤", simrarr: "⥲", slarr: "←", SmallCircle: "∘", smallsetminus: "∖", smashp: "⨳", smeparsl: "⧤", smid: "∣", smile: "⌣", smt: "⪪", smte: "⪬", smtes: "⪬︀", SOFTcy: "Ь", softcy: "ь", solbar: "⌿", solb: "⧄", sol: "/", Sopf: "𝕊", sopf: "𝕤", spades: "♠", spadesuit: "♠", spar: "∥", sqcap: "⊓", sqcaps: "⊓︀", sqcup: "⊔", sqcups: "⊔︀", Sqrt: "√", sqsub: "⊏", sqsube: "⊑", sqsubset: "⊏", sqsubseteq: "⊑", sqsup: "⊐", sqsupe: "⊒", sqsupset: "⊐", sqsupseteq: "⊒", square: "□", Square: "□", SquareIntersection: "⊓", SquareSubset: "⊏", SquareSubsetEqual: "⊑", SquareSuperset: "⊐", SquareSupersetEqual: "⊒", SquareUnion: "⊔", squarf: "▪", squ: "□", squf: "▪", srarr: "→", Sscr: "𝒮", sscr: "𝓈", ssetmn: "∖", ssmile: "⌣", sstarf: "⋆", Star: "⋆", star: "☆", starf: "★", straightepsilon: "ϵ", straightphi: "ϕ", strns: "¯", sub: "⊂", Sub: "⋐", subdot: "⪽", subE: "⫅", sube: "⊆", subedot: "⫃", submult: "⫁", subnE: "⫋", subne: "⊊", subplus: "⪿", subrarr: "⥹", subset: "⊂", Subset: "⋐", subseteq: "⊆", subseteqq: "⫅", SubsetEqual: "⊆", subsetneq: "⊊", subsetneqq: "⫋", subsim: "⫇", subsub: "⫕", subsup: "⫓", succapprox: "⪸", succ: "≻", succcurlyeq: "≽", Succeeds: "≻", SucceedsEqual: "⪰", SucceedsSlantEqual: "≽", SucceedsTilde: "≿", succeq: "⪰", succnapprox: "⪺", succneqq: "⪶", succnsim: "⋩", succsim: "≿", SuchThat: "∋", sum: "∑", Sum: "∑", sung: "♪", sup1: "¹", sup2: "²", sup3: "³", sup: "⊃", Sup: "⋑", supdot: "⪾", supdsub: "⫘", supE: "⫆", supe: "⊇", supedot: "⫄", Superset: "⊃", SupersetEqual: "⊇", suphsol: "⟉", suphsub: "⫗", suplarr: "⥻", supmult: "⫂", supnE: "⫌", supne: "⊋", supplus: "⫀", supset: "⊃", Supset: "⋑", supseteq: "⊇", supseteqq: "⫆", supsetneq: "⊋", supsetneqq: "⫌", supsim: "⫈", supsub: "⫔", supsup: "⫖", swarhk: "⤦", swarr: "↙", swArr: "⇙", swarrow: "↙", swnwar: "⤪", szlig: "ß", Tab: "\t", target: "⌖", Tau: "Τ", tau: "τ", tbrk: "⎴", Tcaron: "Ť", tcaron: "ť", Tcedil: "Ţ", tcedil: "ţ", Tcy: "Т", tcy: "т", tdot: "⃛", telrec: "⌕", Tfr: "𝔗", tfr: "𝔱", there4: "∴", therefore: "∴", Therefore: "∴", Theta: "Θ", theta: "θ", thetasym: "ϑ", thetav: "ϑ", thickapprox: "≈", thicksim: "∼", ThickSpace: "  ", ThinSpace: " ", thinsp: " ", thkap: "≈", thksim: "∼", THORN: "Þ", thorn: "þ", tilde: "˜", Tilde: "∼", TildeEqual: "≃", TildeFullEqual: "≅", TildeTilde: "≈", timesbar: "⨱", timesb: "⊠", times: "×", timesd: "⨰", tint: "∭", toea: "⤨", topbot: "⌶", topcir: "⫱", top: "⊤", Topf: "𝕋", topf: "𝕥", topfork: "⫚", tosa: "⤩", tprime: "‴", trade: "™", TRADE: "™", triangle: "▵", triangledown: "▿", triangleleft: "◃", trianglelefteq: "⊴", triangleq: "≜", triangleright: "▹", trianglerighteq: "⊵", tridot: "◬", trie: "≜", triminus: "⨺", TripleDot: "⃛", triplus: "⨹", trisb: "⧍", tritime: "⨻", trpezium: "⏢", Tscr: "𝒯", tscr: "𝓉", TScy: "Ц", tscy: "ц", TSHcy: "Ћ", tshcy: "ћ", Tstrok: "Ŧ", tstrok: "ŧ", twixt: "≬", twoheadleftarrow: "↞", twoheadrightarrow: "↠", Uacute: "Ú", uacute: "ú", uarr: "↑", Uarr: "↟", uArr: "⇑", Uarrocir: "⥉", Ubrcy: "Ў", ubrcy: "ў", Ubreve: "Ŭ", ubreve: "ŭ", Ucirc: "Û", ucirc: "û", Ucy: "У", ucy: "у", udarr: "⇅", Udblac: "Ű", udblac: "ű", udhar: "⥮", ufisht: "⥾", Ufr: "𝔘", ufr: "𝔲", Ugrave: "Ù", ugrave: "ù", uHar: "⥣", uharl: "↿", uharr: "↾", uhblk: "▀", ulcorn: "⌜", ulcorner: "⌜", ulcrop: "⌏", ultri: "◸", Umacr: "Ū", umacr: "ū", uml: "¨", UnderBar: "_", UnderBrace: "⏟", UnderBracket: "⎵", UnderParenthesis: "⏝", Union: "⋃", UnionPlus: "⊎", Uogon: "Ų", uogon: "ų", Uopf: "𝕌", uopf: "𝕦", UpArrowBar: "⤒", uparrow: "↑", UpArrow: "↑", Uparrow: "⇑", UpArrowDownArrow: "⇅", updownarrow: "↕", UpDownArrow: "↕", Updownarrow: "⇕", UpEquilibrium: "⥮", upharpoonleft: "↿", upharpoonright: "↾", uplus: "⊎", UpperLeftArrow: "↖", UpperRightArrow: "↗", upsi: "υ", Upsi: "ϒ", upsih: "ϒ", Upsilon: "Υ", upsilon: "υ", UpTeeArrow: "↥", UpTee: "⊥", upuparrows: "⇈", urcorn: "⌝", urcorner: "⌝", urcrop: "⌎", Uring: "Ů", uring: "ů", urtri: "◹", Uscr: "𝒰", uscr: "𝓊", utdot: "⋰", Utilde: "Ũ", utilde: "ũ", utri: "▵", utrif: "▴", uuarr: "⇈", Uuml: "Ü", uuml: "ü", uwangle: "⦧", vangrt: "⦜", varepsilon: "ϵ", varkappa: "ϰ", varnothing: "∅", varphi: "ϕ", varpi: "ϖ", varpropto: "∝", varr: "↕", vArr: "⇕", varrho: "ϱ", varsigma: "ς", varsubsetneq: "⊊︀", varsubsetneqq: "⫋︀", varsupsetneq: "⊋︀", varsupsetneqq: "⫌︀", vartheta: "ϑ", vartriangleleft: "⊲", vartriangleright: "⊳", vBar: "⫨", Vbar: "⫫", vBarv: "⫩", Vcy: "В", vcy: "в", vdash: "⊢", vDash: "⊨", Vdash: "⊩", VDash: "⊫", Vdashl: "⫦", veebar: "⊻", vee: "∨", Vee: "⋁", veeeq: "≚", vellip: "⋮", verbar: "|", Verbar: "‖", vert: "|", Vert: "‖", VerticalBar: "∣", VerticalLine: "|", VerticalSeparator: "❘", VerticalTilde: "≀", VeryThinSpace: " ", Vfr: "𝔙", vfr: "𝔳", vltri: "⊲", vnsub: "⊂⃒", vnsup: "⊃⃒", Vopf: "𝕍", vopf: "𝕧", vprop: "∝", vrtri: "⊳", Vscr: "𝒱", vscr: "𝓋", vsubnE: "⫋︀", vsubne: "⊊︀", vsupnE: "⫌︀", vsupne: "⊋︀", Vvdash: "⊪", vzigzag: "⦚", Wcirc: "Ŵ", wcirc: "ŵ", wedbar: "⩟", wedge: "∧", Wedge: "⋀", wedgeq: "≙", weierp: "℘", Wfr: "𝔚", wfr: "𝔴", Wopf: "𝕎", wopf: "𝕨", wp: "℘", wr: "≀", wreath: "≀", Wscr: "𝒲", wscr: "𝓌", xcap: "⋂", xcirc: "◯", xcup: "⋃", xdtri: "▽", Xfr: "𝔛", xfr: "𝔵", xharr: "⟷", xhArr: "⟺", Xi: "Ξ", xi: "ξ", xlarr: "⟵", xlArr: "⟸", xmap: "⟼", xnis: "⋻", xodot: "⨀", Xopf: "𝕏", xopf: "𝕩", xoplus: "⨁", xotime: "⨂", xrarr: "⟶", xrArr: "⟹", Xscr: "𝒳", xscr: "𝓍", xsqcup: "⨆", xuplus: "⨄", xutri: "△", xvee: "⋁", xwedge: "⋀", Yacute: "Ý", yacute: "ý", YAcy: "Я", yacy: "я", Ycirc: "Ŷ", ycirc: "ŷ", Ycy: "Ы", ycy: "ы", yen: "¥", Yfr: "𝔜", yfr: "𝔶", YIcy: "Ї", yicy: "ї", Yopf: "𝕐", yopf: "𝕪", Yscr: "𝒴", yscr: "𝓎", YUcy: "Ю", yucy: "ю", yuml: "ÿ", Yuml: "Ÿ", Zacute: "Ź", zacute: "ź", Zcaron: "Ž", zcaron: "ž", Zcy: "З", zcy: "з", Zdot: "Ż", zdot: "ż", zeetrf: "ℨ", ZeroWidthSpace: "​", Zeta: "Ζ", zeta: "ζ", zfr: "𝔷", Zfr: "ℨ", ZHcy: "Ж", zhcy: "ж", zigrarr: "⇝", zopf: "𝕫", Zopf: "ℤ", Zscr: "𝒵", zscr: "𝓏", zwj: "\u200D", zwnj: "\u200C"
+        Aacute: "Á", aacute: "á", Abreve: "Ă", abreve: "ă", ac: "∾", acd: "∿", acE: "∾̳", Acirc: "Â", acirc: "â", acute: "´", Acy: "А", acy: "а", AElig: "Æ", aelig: "æ", af: "\u2061", Afr: "𝔄", afr: "𝔞", Agrave: "À", agrave: "à", alefsym: "ℵ", aleph: "ℵ", Alpha: "Α", alpha: "α", Amacr: "Ā", amacr: "ā", amalg: "⨿", amp: "&", AMP: "&", andand: "⩕", And: "⩓", and: "∧", andd: "⩜", andslope: "⩘", andv: "⩚", ang: "∠", ange: "⦤", angle: "∠", angmsdaa: "⦨", angmsdab: "⦩", angmsdac: "⦪", angmsdad: "⦫", angmsdae: "⦬", angmsdaf: "⦭", angmsdag: "⦮", angmsdah: "⦯", angmsd: "∡", angrt: "∟", angrtvb: "⊾", angrtvbd: "⦝", angsph: "∢", angst: "Å", angzarr: "⍼", Aogon: "Ą", aogon: "ą", Aopf: "𝔸", aopf: "𝕒", apacir: "⩯", ap: "≈", apE: "⩰", ape: "≊", apid: "≋", apos: "'", ApplyFunction: "\u2061", approx: "≈", approxeq: "≊", Aring: "Å", aring: "å", Ascr: "𝒜", ascr: "𝒶", Assign: "≔", ast: "*", asymp: "≈", asympeq: "≍", Atilde: "Ã", atilde: "ã", Auml: "Ä", auml: "ä", awconint: "∳", awint: "⨑", backcong: "≌", backepsilon: "϶", backprime: "‵", backsim: "∽", backsimeq: "⋍", Backslash: "∖", Barv: "⫧", barvee: "⊽", barwed: "⌅", Barwed: "⌆", barwedge: "⌅", bbrk: "⎵", bbrktbrk: "⎶", bcong: "≌", Bcy: "Б", bcy: "б", bdquo: "„", becaus: "∵", because: "∵", Because: "∵", bemptyv: "⦰", bepsi: "϶", bernou: "ℬ", Bernoullis: "ℬ", Beta: "Β", beta: "β", beth: "ℶ", between: "≬", Bfr: "𝔅", bfr: "𝔟", bigcap: "⋂", bigcirc: "◯", bigcup: "⋃", bigodot: "⨀", bigoplus: "⨁", bigotimes: "⨂", bigsqcup: "⨆", bigstar: "★", bigtriangledown: "▽", bigtriangleup: "△", biguplus: "⨄", bigvee: "⋁", bigwedge: "⋀", bkarow: "⤍", blacklozenge: "⧫", blacksquare: "▪", blacktriangle: "▴", blacktriangledown: "▾", blacktriangleleft: "◂", blacktriangleright: "▸", blank: "␣", blk12: "▒", blk14: "░", blk34: "▓", block: "█", bne: "=⃥", bnequiv: "≡⃥", bNot: "⫭", bnot: "⌐", Bopf: "𝔹", bopf: "𝕓", bot: "⊥", bottom: "⊥", bowtie: "⋈", boxbox: "⧉", boxdl: "┐", boxdL: "╕", boxDl: "╖", boxDL: "╗", boxdr: "┌", boxdR: "╒", boxDr: "╓", boxDR: "╔", boxh: "─", boxH: "═", boxhd: "┬", boxHd: "╤", boxhD: "╥", boxHD: "╦", boxhu: "┴", boxHu: "╧", boxhU: "╨", boxHU: "╩", boxminus: "⊟", boxplus: "⊞", boxtimes: "⊠", boxul: "┘", boxuL: "╛", boxUl: "╜", boxUL: "╝", boxur: "└", boxuR: "╘", boxUr: "╙", boxUR: "╚", boxv: "│", boxV: "║", boxvh: "┼", boxvH: "╪", boxVh: "╫", boxVH: "╬", boxvl: "┤", boxvL: "╡", boxVl: "╢", boxVL: "╣", boxvr: "├", boxvR: "╞", boxVr: "╟", boxVR: "╠", bprime: "‵", breve: "˘", Breve: "˘", brvbar: "¦", bscr: "𝒷", Bscr: "ℬ", bsemi: "⁏", bsim: "∽", bsime: "⋍", bsolb: "⧅", bsol: "\\", bsolhsub: "⟈", bull: "•", bullet: "•", bump: "≎", bumpE: "⪮", bumpe: "≏", Bumpeq: "≎", bumpeq: "≏", Cacute: "Ć", cacute: "ć", capand: "⩄", capbrcup: "⩉", capcap: "⩋", cap: "∩", Cap: "⋒", capcup: "⩇", capdot: "⩀", CapitalDifferentialD: "ⅅ", caps: "∩︀", caret: "⁁", caron: "ˇ", Cayleys: "ℭ", ccaps: "⩍", Ccaron: "Č", ccaron: "č", Ccedil: "Ç", ccedil: "ç", Ccirc: "Ĉ", ccirc: "ĉ", Cconint: "∰", ccups: "⩌", ccupssm: "⩐", Cdot: "Ċ", cdot: "ċ", cedil: "¸", Cedilla: "¸", cemptyv: "⦲", cent: "¢", centerdot: "·", CenterDot: "·", cfr: "𝔠", Cfr: "ℭ", CHcy: "Ч", chcy: "ч", check: "✓", checkmark: "✓", Chi: "Χ", chi: "χ", circ: "ˆ", circeq: "≗", circlearrowleft: "↺", circlearrowright: "↻", circledast: "⊛", circledcirc: "⊚", circleddash: "⊝", CircleDot: "⊙", circledR: "®", circledS: "Ⓢ", CircleMinus: "⊖", CirclePlus: "⊕", CircleTimes: "⊗", cir: "○", cirE: "⧃", cire: "≗", cirfnint: "⨐", cirmid: "⫯", cirscir: "⧂", ClockwiseContourIntegral: "∲", CloseCurlyDoubleQuote: "”", CloseCurlyQuote: "’", clubs: "♣", clubsuit: "♣", colon: ":", Colon: "∷", Colone: "⩴", colone: "≔", coloneq: "≔", comma: ",", commat: "@", comp: "∁", compfn: "∘", complement: "∁", complexes: "ℂ", cong: "≅", congdot: "⩭", Congruent: "≡", conint: "∮", Conint: "∯", ContourIntegral: "∮", copf: "𝕔", Copf: "ℂ", coprod: "∐", Coproduct: "∐", copy: "©", COPY: "©", copysr: "℗", CounterClockwiseContourIntegral: "∳", crarr: "↵", cross: "✗", Cross: "⨯", Cscr: "𝒞", cscr: "𝒸", csub: "⫏", csube: "⫑", csup: "⫐", csupe: "⫒", ctdot: "⋯", cudarrl: "⤸", cudarrr: "⤵", cuepr: "⋞", cuesc: "⋟", cularr: "↶", cularrp: "⤽", cupbrcap: "⩈", cupcap: "⩆", CupCap: "≍", cup: "∪", Cup: "⋓", cupcup: "⩊", cupdot: "⊍", cupor: "⩅", cups: "∪︀", curarr: "↷", curarrm: "⤼", curlyeqprec: "⋞", curlyeqsucc: "⋟", curlyvee: "⋎", curlywedge: "⋏", curren: "¤", curvearrowleft: "↶", curvearrowright: "↷", cuvee: "⋎", cuwed: "⋏", cwconint: "∲", cwint: "∱", cylcty: "⌭", dagger: "†", Dagger: "‡", daleth: "ℸ", darr: "↓", Darr: "↡", dArr: "⇓", dash: "‐", Dashv: "⫤", dashv: "⊣", dbkarow: "⤏", dblac: "˝", Dcaron: "Ď", dcaron: "ď", Dcy: "Д", dcy: "д", ddagger: "‡", ddarr: "⇊", DD: "ⅅ", dd: "ⅆ", DDotrahd: "⤑", ddotseq: "⩷", deg: "°", Del: "∇", Delta: "Δ", delta: "δ", demptyv: "⦱", dfisht: "⥿", Dfr: "𝔇", dfr: "𝔡", dHar: "⥥", dharl: "⇃", dharr: "⇂", DiacriticalAcute: "´", DiacriticalDot: "˙", DiacriticalDoubleAcute: "˝", DiacriticalGrave: "`", DiacriticalTilde: "˜", diam: "⋄", diamond: "⋄", Diamond: "⋄", diamondsuit: "♦", diams: "♦", die: "¨", DifferentialD: "ⅆ", digamma: "ϝ", disin: "⋲", div: "÷", divide: "÷", divideontimes: "⋇", divonx: "⋇", DJcy: "Ђ", djcy: "ђ", dlcorn: "⌞", dlcrop: "⌍", dollar: "$", Dopf: "𝔻", dopf: "𝕕", Dot: "¨", dot: "˙", DotDot: "⃜", doteq: "≐", doteqdot: "≑", DotEqual: "≐", dotminus: "∸", dotplus: "∔", dotsquare: "⊡", doublebarwedge: "⌆", DoubleContourIntegral: "∯", DoubleDot: "¨", DoubleDownArrow: "⇓", DoubleLeftArrow: "⇐", DoubleLeftRightArrow: "⇔", DoubleLeftTee: "⫤", DoubleLongLeftArrow: "⟸", DoubleLongLeftRightArrow: "⟺", DoubleLongRightArrow: "⟹", DoubleRightArrow: "⇒", DoubleRightTee: "⊨", DoubleUpArrow: "⇑", DoubleUpDownArrow: "⇕", DoubleVerticalBar: "∥", DownArrowBar: "⤓", downarrow: "↓", DownArrow: "↓", Downarrow: "⇓", DownArrowUpArrow: "⇵", DownBreve: "̑", downdownarrows: "⇊", downharpoonleft: "⇃", downharpoonright: "⇂", DownLeftRightVector: "⥐", DownLeftTeeVector: "⥞", DownLeftVectorBar: "⥖", DownLeftVector: "↽", DownRightTeeVector: "⥟", DownRightVectorBar: "⥗", DownRightVector: "⇁", DownTeeArrow: "↧", DownTee: "⊤", drbkarow: "⤐", drcorn: "⌟", drcrop: "⌌", Dscr: "𝒟", dscr: "𝒹", DScy: "Ѕ", dscy: "ѕ", dsol: "⧶", Dstrok: "Đ", dstrok: "đ", dtdot: "⋱", dtri: "▿", dtrif: "▾", duarr: "⇵", duhar: "⥯", dwangle: "⦦", DZcy: "Џ", dzcy: "џ", dzigrarr: "⟿", Eacute: "É", eacute: "é", easter: "⩮", Ecaron: "Ě", ecaron: "ě", Ecirc: "Ê", ecirc: "ê", ecir: "≖", ecolon: "≕", Ecy: "Э", ecy: "э", eDDot: "⩷", Edot: "Ė", edot: "ė", eDot: "≑", ee: "ⅇ", efDot: "≒", Efr: "𝔈", efr: "𝔢", eg: "⪚", Egrave: "È", egrave: "è", egs: "⪖", egsdot: "⪘", el: "⪙", Element: "∈", elinters: "⏧", ell: "ℓ", els: "⪕", elsdot: "⪗", Emacr: "Ē", emacr: "ē", empty: "∅", emptyset: "∅", EmptySmallSquare: "◻", emptyv: "∅", EmptyVerySmallSquare: "▫", emsp13: " ", emsp14: " ", emsp: " ", ENG: "Ŋ", eng: "ŋ", ensp: " ", Eogon: "Ę", eogon: "ę", Eopf: "𝔼", eopf: "𝕖", epar: "⋕", eparsl: "⧣", eplus: "⩱", epsi: "ε", Epsilon: "Ε", epsilon: "ε", epsiv: "ϵ", eqcirc: "≖", eqcolon: "≕", eqsim: "≂", eqslantgtr: "⪖", eqslantless: "⪕", Equal: "⩵", equals: "=", EqualTilde: "≂", equest: "≟", Equilibrium: "⇌", equiv: "≡", equivDD: "⩸", eqvparsl: "⧥", erarr: "⥱", erDot: "≓", escr: "ℯ", Escr: "ℰ", esdot: "≐", Esim: "⩳", esim: "≂", Eta: "Η", eta: "η", ETH: "Ð", eth: "ð", Euml: "Ë", euml: "ë", euro: "€", excl: "!", exist: "∃", Exists: "∃", expectation: "ℰ", exponentiale: "ⅇ", ExponentialE: "ⅇ", fallingdotseq: "≒", Fcy: "Ф", fcy: "ф", female: "♀", ffilig: "ﬃ", fflig: "ﬀ", ffllig: "ﬄ", Ffr: "𝔉", ffr: "𝔣", filig: "ﬁ", FilledSmallSquare: "◼", FilledVerySmallSquare: "▪", fjlig: "fj", flat: "♭", fllig: "ﬂ", fltns: "▱", fnof: "ƒ", Fopf: "𝔽", fopf: "𝕗", forall: "∀", ForAll: "∀", fork: "⋔", forkv: "⫙", Fouriertrf: "ℱ", fpartint: "⨍", frac12: "½", frac13: "⅓", frac14: "¼", frac15: "⅕", frac16: "⅙", frac18: "⅛", frac23: "⅔", frac25: "⅖", frac34: "¾", frac35: "⅗", frac38: "⅜", frac45: "⅘", frac56: "⅚", frac58: "⅝", frac78: "⅞", frasl: "⁄", frown: "⌢", fscr: "𝒻", Fscr: "ℱ", gacute: "ǵ", Gamma: "Γ", gamma: "γ", Gammad: "Ϝ", gammad: "ϝ", gap: "⪆", Gbreve: "Ğ", gbreve: "ğ", Gcedil: "Ģ", Gcirc: "Ĝ", gcirc: "ĝ", Gcy: "Г", gcy: "г", Gdot: "Ġ", gdot: "ġ", ge: "≥", gE: "≧", gEl: "⪌", gel: "⋛", geq: "≥", geqq: "≧", geqslant: "⩾", gescc: "⪩", ges: "⩾", gesdot: "⪀", gesdoto: "⪂", gesdotol: "⪄", gesl: "⋛︀", gesles: "⪔", Gfr: "𝔊", gfr: "𝔤", gg: "≫", Gg: "⋙", ggg: "⋙", gimel: "ℷ", GJcy: "Ѓ", gjcy: "ѓ", gla: "⪥", gl: "≷", glE: "⪒", glj: "⪤", gnap: "⪊", gnapprox: "⪊", gne: "⪈", gnE: "≩", gneq: "⪈", gneqq: "≩", gnsim: "⋧", Gopf: "𝔾", gopf: "𝕘", grave: "`", GreaterEqual: "≥", GreaterEqualLess: "⋛", GreaterFullEqual: "≧", GreaterGreater: "⪢", GreaterLess: "≷", GreaterSlantEqual: "⩾", GreaterTilde: "≳", Gscr: "𝒢", gscr: "ℊ", gsim: "≳", gsime: "⪎", gsiml: "⪐", gtcc: "⪧", gtcir: "⩺", gt: ">", GT: ">", Gt: "≫", gtdot: "⋗", gtlPar: "⦕", gtquest: "⩼", gtrapprox: "⪆", gtrarr: "⥸", gtrdot: "⋗", gtreqless: "⋛", gtreqqless: "⪌", gtrless: "≷", gtrsim: "≳", gvertneqq: "≩︀", gvnE: "≩︀", Hacek: "ˇ", hairsp: " ", half: "½", hamilt: "ℋ", HARDcy: "Ъ", hardcy: "ъ", harrcir: "⥈", harr: "↔", hArr: "⇔", harrw: "↭", Hat: "^", hbar: "ℏ", Hcirc: "Ĥ", hcirc: "ĥ", hearts: "♥", heartsuit: "♥", hellip: "…", hercon: "⊹", hfr: "𝔥", Hfr: "ℌ", HilbertSpace: "ℋ", hksearow: "⤥", hkswarow: "⤦", hoarr: "⇿", homtht: "∻", hookleftarrow: "↩", hookrightarrow: "↪", hopf: "𝕙", Hopf: "ℍ", horbar: "―", HorizontalLine: "─", hscr: "𝒽", Hscr: "ℋ", hslash: "ℏ", Hstrok: "Ħ", hstrok: "ħ", HumpDownHump: "≎", HumpEqual: "≏", hybull: "⁃", hyphen: "‐", Iacute: "Í", iacute: "í", ic: "\u2063", Icirc: "Î", icirc: "î", Icy: "И", icy: "и", Idot: "İ", IEcy: "Е", iecy: "е", iexcl: "¡", iff: "⇔", ifr: "𝔦", Ifr: "ℑ", Igrave: "Ì", igrave: "ì", ii: "ⅈ", iiiint: "⨌", iiint: "∭", iinfin: "⧜", iiota: "℩", IJlig: "Ĳ", ijlig: "ĳ", Imacr: "Ī", imacr: "ī", image: "ℑ", ImaginaryI: "ⅈ", imagline: "ℐ", imagpart: "ℑ", imath: "ı", Im: "ℑ", imof: "⊷", imped: "Ƶ", Implies: "⇒", incare: "℅", in: "∈", infin: "∞", infintie: "⧝", inodot: "ı", intcal: "⊺", int: "∫", Int: "∬", integers: "ℤ", Integral: "∫", intercal: "⊺", Intersection: "⋂", intlarhk: "⨗", intprod: "⨼", InvisibleComma: "\u2063", InvisibleTimes: "\u2062", IOcy: "Ё", iocy: "ё", Iogon: "Į", iogon: "į", Iopf: "𝕀", iopf: "𝕚", Iota: "Ι", iota: "ι", iprod: "⨼", iquest: "¿", iscr: "𝒾", Iscr: "ℐ", isin: "∈", isindot: "⋵", isinE: "⋹", isins: "⋴", isinsv: "⋳", isinv: "∈", it: "\u2062", Itilde: "Ĩ", itilde: "ĩ", Iukcy: "І", iukcy: "і", Iuml: "Ï", iuml: "ï", Jcirc: "Ĵ", jcirc: "ĵ", Jcy: "Й", jcy: "й", Jfr: "𝔍", jfr: "𝔧", jmath: "ȷ", Jopf: "𝕁", jopf: "𝕛", Jscr: "𝒥", jscr: "𝒿", Jsercy: "Ј", jsercy: "ј", Jukcy: "Є", jukcy: "є", Kappa: "Κ", kappa: "κ", kappav: "ϰ", Kcedil: "Ķ", kcedil: "ķ", Kcy: "К", kcy: "к", Kfr: "𝔎", kfr: "𝔨", kgreen: "ĸ", KHcy: "Х", khcy: "х", KJcy: "Ќ", kjcy: "ќ", Kopf: "𝕂", kopf: "𝕜", Kscr: "𝒦", kscr: "𝓀", lAarr: "⇚", Lacute: "Ĺ", lacute: "ĺ", laemptyv: "⦴", lagran: "ℒ", Lambda: "Λ", lambda: "λ", lang: "⟨", Lang: "⟪", langd: "⦑", langle: "⟨", lap: "⪅", Laplacetrf: "ℒ", laquo: "«", larrb: "⇤", larrbfs: "⤟", larr: "←", Larr: "↞", lArr: "⇐", larrfs: "⤝", larrhk: "↩", larrlp: "↫", larrpl: "⤹", larrsim: "⥳", larrtl: "↢", latail: "⤙", lAtail: "⤛", lat: "⪫", late: "⪭", lates: "⪭︀", lbarr: "⤌", lBarr: "⤎", lbbrk: "❲", lbrace: "{", lbrack: "[", lbrke: "⦋", lbrksld: "⦏", lbrkslu: "⦍", Lcaron: "Ľ", lcaron: "ľ", Lcedil: "Ļ", lcedil: "ļ", lceil: "⌈", lcub: "{", Lcy: "Л", lcy: "л", ldca: "⤶", ldquo: "“", ldquor: "„", ldrdhar: "⥧", ldrushar: "⥋", ldsh: "↲", le: "≤", lE: "≦", LeftAngleBracket: "⟨", LeftArrowBar: "⇤", leftarrow: "←", LeftArrow: "←", Leftarrow: "⇐", LeftArrowRightArrow: "⇆", leftarrowtail: "↢", LeftCeiling: "⌈", LeftDoubleBracket: "⟦", LeftDownTeeVector: "⥡", LeftDownVectorBar: "⥙", LeftDownVector: "⇃", LeftFloor: "⌊", leftharpoondown: "↽", leftharpoonup: "↼", leftleftarrows: "⇇", leftrightarrow: "↔", LeftRightArrow: "↔", Leftrightarrow: "⇔", leftrightarrows: "⇆", leftrightharpoons: "⇋", leftrightsquigarrow: "↭", LeftRightVector: "⥎", LeftTeeArrow: "↤", LeftTee: "⊣", LeftTeeVector: "⥚", leftthreetimes: "⋋", LeftTriangleBar: "⧏", LeftTriangle: "⊲", LeftTriangleEqual: "⊴", LeftUpDownVector: "⥑", LeftUpTeeVector: "⥠", LeftUpVectorBar: "⥘", LeftUpVector: "↿", LeftVectorBar: "⥒", LeftVector: "↼", lEg: "⪋", leg: "⋚", leq: "≤", leqq: "≦", leqslant: "⩽", lescc: "⪨", les: "⩽", lesdot: "⩿", lesdoto: "⪁", lesdotor: "⪃", lesg: "⋚︀", lesges: "⪓", lessapprox: "⪅", lessdot: "⋖", lesseqgtr: "⋚", lesseqqgtr: "⪋", LessEqualGreater: "⋚", LessFullEqual: "≦", LessGreater: "≶", lessgtr: "≶", LessLess: "⪡", lesssim: "≲", LessSlantEqual: "⩽", LessTilde: "≲", lfisht: "⥼", lfloor: "⌊", Lfr: "𝔏", lfr: "𝔩", lg: "≶", lgE: "⪑", lHar: "⥢", lhard: "↽", lharu: "↼", lharul: "⥪", lhblk: "▄", LJcy: "Љ", ljcy: "љ", llarr: "⇇", ll: "≪", Ll: "⋘", llcorner: "⌞", Lleftarrow: "⇚", llhard: "⥫", lltri: "◺", Lmidot: "Ŀ", lmidot: "ŀ", lmoustache: "⎰", lmoust: "⎰", lnap: "⪉", lnapprox: "⪉", lne: "⪇", lnE: "≨", lneq: "⪇", lneqq: "≨", lnsim: "⋦", loang: "⟬", loarr: "⇽", lobrk: "⟦", longleftarrow: "⟵", LongLeftArrow: "⟵", Longleftarrow: "⟸", longleftrightarrow: "⟷", LongLeftRightArrow: "⟷", Longleftrightarrow: "⟺", longmapsto: "⟼", longrightarrow: "⟶", LongRightArrow: "⟶", Longrightarrow: "⟹", looparrowleft: "↫", looparrowright: "↬", lopar: "⦅", Lopf: "𝕃", lopf: "𝕝", loplus: "⨭", lotimes: "⨴", lowast: "∗", lowbar: "_", LowerLeftArrow: "↙", LowerRightArrow: "↘", loz: "◊", lozenge: "◊", lozf: "⧫", lpar: "(", lparlt: "⦓", lrarr: "⇆", lrcorner: "⌟", lrhar: "⇋", lrhard: "⥭", lrm: "\u200e", lrtri: "⊿", lsaquo: "‹", lscr: "𝓁", Lscr: "ℒ", lsh: "↰", Lsh: "↰", lsim: "≲", lsime: "⪍", lsimg: "⪏", lsqb: "[", lsquo: "‘", lsquor: "‚", Lstrok: "Ł", lstrok: "ł", ltcc: "⪦", ltcir: "⩹", lt: "<", LT: "<", Lt: "≪", ltdot: "⋖", lthree: "⋋", ltimes: "⋉", ltlarr: "⥶", ltquest: "⩻", ltri: "◃", ltrie: "⊴", ltrif: "◂", ltrPar: "⦖", lurdshar: "⥊", luruhar: "⥦", lvertneqq: "≨︀", lvnE: "≨︀", macr: "¯", male: "♂", malt: "✠", maltese: "✠", Map: "⤅", map: "↦", mapsto: "↦", mapstodown: "↧", mapstoleft: "↤", mapstoup: "↥", marker: "▮", mcomma: "⨩", Mcy: "М", mcy: "м", mdash: "—", mDDot: "∺", measuredangle: "∡", MediumSpace: " ", Mellintrf: "ℳ", Mfr: "𝔐", mfr: "𝔪", mho: "℧", micro: "µ", midast: "*", midcir: "⫰", mid: "∣", middot: "·", minusb: "⊟", minus: "−", minusd: "∸", minusdu: "⨪", MinusPlus: "∓", mlcp: "⫛", mldr: "…", mnplus: "∓", models: "⊧", Mopf: "𝕄", mopf: "𝕞", mp: "∓", mscr: "𝓂", Mscr: "ℳ", mstpos: "∾", Mu: "Μ", mu: "μ", multimap: "⊸", mumap: "⊸", nabla: "∇", Nacute: "Ń", nacute: "ń", nang: "∠⃒", nap: "≉", napE: "⩰̸", napid: "≋̸", napos: "ŉ", napprox: "≉", natural: "♮", naturals: "ℕ", natur: "♮", nbsp: " ", nbump: "≎̸", nbumpe: "≏̸", ncap: "⩃", Ncaron: "Ň", ncaron: "ň", Ncedil: "Ņ", ncedil: "ņ", ncong: "≇", ncongdot: "⩭̸", ncup: "⩂", Ncy: "Н", ncy: "н", ndash: "–", nearhk: "⤤", nearr: "↗", neArr: "⇗", nearrow: "↗", ne: "≠", nedot: "≐̸", NegativeMediumSpace: "​", NegativeThickSpace: "​", NegativeThinSpace: "​", NegativeVeryThinSpace: "​", nequiv: "≢", nesear: "⤨", nesim: "≂̸", NestedGreaterGreater: "≫", NestedLessLess: "≪", NewLine: "\u000a", nexist: "∄", nexists: "∄", Nfr: "𝔑", nfr: "𝔫", ngE: "≧̸", nge: "≱", ngeq: "≱", ngeqq: "≧̸", ngeqslant: "⩾̸", nges: "⩾̸", nGg: "⋙̸", ngsim: "≵", nGt: "≫⃒", ngt: "≯", ngtr: "≯", nGtv: "≫̸", nharr: "↮", nhArr: "⇎", nhpar: "⫲", ni: "∋", nis: "⋼", nisd: "⋺", niv: "∋", NJcy: "Њ", njcy: "њ", nlarr: "↚", nlArr: "⇍", nldr: "‥", nlE: "≦̸", nle: "≰", nleftarrow: "↚", nLeftarrow: "⇍", nleftrightarrow: "↮", nLeftrightarrow: "⇎", nleq: "≰", nleqq: "≦̸", nleqslant: "⩽̸", nles: "⩽̸", nless: "≮", nLl: "⋘̸", nlsim: "≴", nLt: "≪⃒", nlt: "≮", nltri: "⋪", nltrie: "⋬", nLtv: "≪̸", nmid: "∤", NoBreak: "\u2060", NonBreakingSpace: " ", nopf: "𝕟", Nopf: "ℕ", Not: "⫬", not: "¬", NotCongruent: "≢", NotCupCap: "≭", NotDoubleVerticalBar: "∦", NotElement: "∉", NotEqual: "≠", NotEqualTilde: "≂̸", NotExists: "∄", NotGreater: "≯", NotGreaterEqual: "≱", NotGreaterFullEqual: "≧̸", NotGreaterGreater: "≫̸", NotGreaterLess: "≹", NotGreaterSlantEqual: "⩾̸", NotGreaterTilde: "≵", NotHumpDownHump: "≎̸", NotHumpEqual: "≏̸", notin: "∉", notindot: "⋵̸", notinE: "⋹̸", notinva: "∉", notinvb: "⋷", notinvc: "⋶", NotLeftTriangleBar: "⧏̸", NotLeftTriangle: "⋪", NotLeftTriangleEqual: "⋬", NotLess: "≮", NotLessEqual: "≰", NotLessGreater: "≸", NotLessLess: "≪̸", NotLessSlantEqual: "⩽̸", NotLessTilde: "≴", NotNestedGreaterGreater: "⪢̸", NotNestedLessLess: "⪡̸", notni: "∌", notniva: "∌", notnivb: "⋾", notnivc: "⋽", NotPrecedes: "⊀", NotPrecedesEqual: "⪯̸", NotPrecedesSlantEqual: "⋠", NotReverseElement: "∌", NotRightTriangleBar: "⧐̸", NotRightTriangle: "⋫", NotRightTriangleEqual: "⋭", NotSquareSubset: "⊏̸", NotSquareSubsetEqual: "⋢", NotSquareSuperset: "⊐̸", NotSquareSupersetEqual: "⋣", NotSubset: "⊂⃒", NotSubsetEqual: "⊈", NotSucceeds: "⊁", NotSucceedsEqual: "⪰̸", NotSucceedsSlantEqual: "⋡", NotSucceedsTilde: "≿̸", NotSuperset: "⊃⃒", NotSupersetEqual: "⊉", NotTilde: "≁", NotTildeEqual: "≄", NotTildeFullEqual: "≇", NotTildeTilde: "≉", NotVerticalBar: "∤", nparallel: "∦", npar: "∦", nparsl: "⫽⃥", npart: "∂̸", npolint: "⨔", npr: "⊀", nprcue: "⋠", nprec: "⊀", npreceq: "⪯̸", npre: "⪯̸", nrarrc: "⤳̸", nrarr: "↛", nrArr: "⇏", nrarrw: "↝̸", nrightarrow: "↛", nRightarrow: "⇏", nrtri: "⋫", nrtrie: "⋭", nsc: "⊁", nsccue: "⋡", nsce: "⪰̸", Nscr: "𝒩", nscr: "𝓃", nshortmid: "∤", nshortparallel: "∦", nsim: "≁", nsime: "≄", nsimeq: "≄", nsmid: "∤", nspar: "∦", nsqsube: "⋢", nsqsupe: "⋣", nsub: "⊄", nsubE: "⫅̸", nsube: "⊈", nsubset: "⊂⃒", nsubseteq: "⊈", nsubseteqq: "⫅̸", nsucc: "⊁", nsucceq: "⪰̸", nsup: "⊅", nsupE: "⫆̸", nsupe: "⊉", nsupset: "⊃⃒", nsupseteq: "⊉", nsupseteqq: "⫆̸", ntgl: "≹", Ntilde: "Ñ", ntilde: "ñ", ntlg: "≸", ntriangleleft: "⋪", ntrianglelefteq: "⋬", ntriangleright: "⋫", ntrianglerighteq: "⋭", Nu: "Ν", nu: "ν", num: "#", numero: "№", numsp: " ", nvap: "≍⃒", nvdash: "⊬", nvDash: "⊭", nVdash: "⊮", nVDash: "⊯", nvge: "≥⃒", nvgt: ">⃒", nvHarr: "⤄", nvinfin: "⧞", nvlArr: "⤂", nvle: "≤⃒", nvlt: "<⃒", nvltrie: "⊴⃒", nvrArr: "⤃", nvrtrie: "⊵⃒", nvsim: "∼⃒", nwarhk: "⤣", nwarr: "↖", nwArr: "⇖", nwarrow: "↖", nwnear: "⤧", Oacute: "Ó", oacute: "ó", oast: "⊛", Ocirc: "Ô", ocirc: "ô", ocir: "⊚", Ocy: "О", ocy: "о", odash: "⊝", Odblac: "Ő", odblac: "ő", odiv: "⨸", odot: "⊙", odsold: "⦼", OElig: "Œ", oelig: "œ", ofcir: "⦿", Ofr: "𝔒", ofr: "𝔬", ogon: "˛", Ograve: "Ò", ograve: "ò", ogt: "⧁", ohbar: "⦵", ohm: "Ω", oint: "∮", olarr: "↺", olcir: "⦾", olcross: "⦻", oline: "‾", olt: "⧀", Omacr: "Ō", omacr: "ō", Omega: "Ω", omega: "ω", Omicron: "Ο", omicron: "ο", omid: "⦶", ominus: "⊖", Oopf: "𝕆", oopf: "𝕠", opar: "⦷", OpenCurlyDoubleQuote: "“", OpenCurlyQuote: "‘", operp: "⦹", oplus: "⊕", orarr: "↻", Or: "⩔", or: "∨", ord: "⩝", order: "ℴ", orderof: "ℴ", ordf: "ª", ordm: "º", origof: "⊶", oror: "⩖", orslope: "⩗", orv: "⩛", oS: "Ⓢ", Oscr: "𝒪", oscr: "ℴ", Oslash: "Ø", oslash: "ø", osol: "⊘", Otilde: "Õ", otilde: "õ", otimesas: "⨶", Otimes: "⨷", otimes: "⊗", Ouml: "Ö", ouml: "ö", ovbar: "⌽", OverBar: "‾", OverBrace: "⏞", OverBracket: "⎴", OverParenthesis: "⏜", para: "¶", parallel: "∥", par: "∥", parsim: "⫳", parsl: "⫽", part: "∂", PartialD: "∂", Pcy: "П", pcy: "п", percnt: "%", period: ".", permil: "‰", perp: "⊥", pertenk: "‱", Pfr: "𝔓", pfr: "𝔭", Phi: "Φ", phi: "φ", phiv: "ϕ", phmmat: "ℳ", phone: "☎", Pi: "Π", pi: "π", pitchfork: "⋔", piv: "ϖ", planck: "ℏ", planckh: "ℎ", plankv: "ℏ", plusacir: "⨣", plusb: "⊞", pluscir: "⨢", plus: "+", plusdo: "∔", plusdu: "⨥", pluse: "⩲", PlusMinus: "±", plusmn: "±", plussim: "⨦", plustwo: "⨧", pm: "±", Poincareplane: "ℌ", pointint: "⨕", popf: "𝕡", Popf: "ℙ", pound: "£", prap: "⪷", Pr: "⪻", pr: "≺", prcue: "≼", precapprox: "⪷", prec: "≺", preccurlyeq: "≼", Precedes: "≺", PrecedesEqual: "⪯", PrecedesSlantEqual: "≼", PrecedesTilde: "≾", preceq: "⪯", precnapprox: "⪹", precneqq: "⪵", precnsim: "⋨", pre: "⪯", prE: "⪳", precsim: "≾", prime: "′", Prime: "″", primes: "ℙ", prnap: "⪹", prnE: "⪵", prnsim: "⋨", prod: "∏", Product: "∏", profalar: "⌮", profline: "⌒", profsurf: "⌓", prop: "∝", Proportional: "∝", Proportion: "∷", propto: "∝", prsim: "≾", prurel: "⊰", Pscr: "𝒫", pscr: "𝓅", Psi: "Ψ", psi: "ψ", puncsp: " ", Qfr: "𝔔", qfr: "𝔮", qint: "⨌", qopf: "𝕢", Qopf: "ℚ", qprime: "⁗", Qscr: "𝒬", qscr: "𝓆", quaternions: "ℍ", quatint: "⨖", quest: "?", questeq: "≟", quot: "\"", QUOT: "\"", rAarr: "⇛", race: "∽̱", Racute: "Ŕ", racute: "ŕ", radic: "√", raemptyv: "⦳", rang: "⟩", Rang: "⟫", rangd: "⦒", range: "⦥", rangle: "⟩", raquo: "»", rarrap: "⥵", rarrb: "⇥", rarrbfs: "⤠", rarrc: "⤳", rarr: "→", Rarr: "↠", rArr: "⇒", rarrfs: "⤞", rarrhk: "↪", rarrlp: "↬", rarrpl: "⥅", rarrsim: "⥴", Rarrtl: "⤖", rarrtl: "↣", rarrw: "↝", ratail: "⤚", rAtail: "⤜", ratio: "∶", rationals: "ℚ", rbarr: "⤍", rBarr: "⤏", RBarr: "⤐", rbbrk: "❳", rbrace: "}", rbrack: "]", rbrke: "⦌", rbrksld: "⦎", rbrkslu: "⦐", Rcaron: "Ř", rcaron: "ř", Rcedil: "Ŗ", rcedil: "ŗ", rceil: "⌉", rcub: "}", Rcy: "Р", rcy: "р", rdca: "⤷", rdldhar: "⥩", rdquo: "”", rdquor: "”", rdsh: "↳", real: "ℜ", realine: "ℛ", realpart: "ℜ", reals: "ℝ", Re: "ℜ", rect: "▭", reg: "®", REG: "®", ReverseElement: "∋", ReverseEquilibrium: "⇋", ReverseUpEquilibrium: "⥯", rfisht: "⥽", rfloor: "⌋", rfr: "𝔯", Rfr: "ℜ", rHar: "⥤", rhard: "⇁", rharu: "⇀", rharul: "⥬", Rho: "Ρ", rho: "ρ", rhov: "ϱ", RightAngleBracket: "⟩", RightArrowBar: "⇥", rightarrow: "→", RightArrow: "→", Rightarrow: "⇒", RightArrowLeftArrow: "⇄", rightarrowtail: "↣", RightCeiling: "⌉", RightDoubleBracket: "⟧", RightDownTeeVector: "⥝", RightDownVectorBar: "⥕", RightDownVector: "⇂", RightFloor: "⌋", rightharpoondown: "⇁", rightharpoonup: "⇀", rightleftarrows: "⇄", rightleftharpoons: "⇌", rightrightarrows: "⇉", rightsquigarrow: "↝", RightTeeArrow: "↦", RightTee: "⊢", RightTeeVector: "⥛", rightthreetimes: "⋌", RightTriangleBar: "⧐", RightTriangle: "⊳", RightTriangleEqual: "⊵", RightUpDownVector: "⥏", RightUpTeeVector: "⥜", RightUpVectorBar: "⥔", RightUpVector: "↾", RightVectorBar: "⥓", RightVector: "⇀", ring: "˚", risingdotseq: "≓", rlarr: "⇄", rlhar: "⇌", rlm: "\u200f", rmoustache: "⎱", rmoust: "⎱", rnmid: "⫮", roang: "⟭", roarr: "⇾", robrk: "⟧", ropar: "⦆", ropf: "𝕣", Ropf: "ℝ", roplus: "⨮", rotimes: "⨵", RoundImplies: "⥰", rpar: ")", rpargt: "⦔", rppolint: "⨒", rrarr: "⇉", Rrightarrow: "⇛", rsaquo: "›", rscr: "𝓇", Rscr: "ℛ", rsh: "↱", Rsh: "↱", rsqb: "]", rsquo: "’", rsquor: "’", rthree: "⋌", rtimes: "⋊", rtri: "▹", rtrie: "⊵", rtrif: "▸", rtriltri: "⧎", RuleDelayed: "⧴", ruluhar: "⥨", rx: "℞", Sacute: "Ś", sacute: "ś", sbquo: "‚", scap: "⪸", Scaron: "Š", scaron: "š", Sc: "⪼", sc: "≻", sccue: "≽", sce: "⪰", scE: "⪴", Scedil: "Ş", scedil: "ş", Scirc: "Ŝ", scirc: "ŝ", scnap: "⪺", scnE: "⪶", scnsim: "⋩", scpolint: "⨓", scsim: "≿", Scy: "С", scy: "с", sdotb: "⊡", sdot: "⋅", sdote: "⩦", searhk: "⤥", searr: "↘", seArr: "⇘", searrow: "↘", sect: "§", semi: ";", seswar: "⤩", setminus: "∖", setmn: "∖", sext: "✶", Sfr: "𝔖", sfr: "𝔰", sfrown: "⌢", sharp: "♯", SHCHcy: "Щ", shchcy: "щ", SHcy: "Ш", shcy: "ш", ShortDownArrow: "↓", ShortLeftArrow: "←", shortmid: "∣", shortparallel: "∥", ShortRightArrow: "→", ShortUpArrow: "↑", shy: "\u00ad", Sigma: "Σ", sigma: "σ", sigmaf: "ς", sigmav: "ς", sim: "∼", simdot: "⩪", sime: "≃", simeq: "≃", simg: "⪞", simgE: "⪠", siml: "⪝", simlE: "⪟", simne: "≆", simplus: "⨤", simrarr: "⥲", slarr: "←", SmallCircle: "∘", smallsetminus: "∖", smashp: "⨳", smeparsl: "⧤", smid: "∣", smile: "⌣", smt: "⪪", smte: "⪬", smtes: "⪬︀", SOFTcy: "Ь", softcy: "ь", solbar: "⌿", solb: "⧄", sol: "/", Sopf: "𝕊", sopf: "𝕤", spades: "♠", spadesuit: "♠", spar: "∥", sqcap: "⊓", sqcaps: "⊓︀", sqcup: "⊔", sqcups: "⊔︀", Sqrt: "√", sqsub: "⊏", sqsube: "⊑", sqsubset: "⊏", sqsubseteq: "⊑", sqsup: "⊐", sqsupe: "⊒", sqsupset: "⊐", sqsupseteq: "⊒", square: "□", Square: "□", SquareIntersection: "⊓", SquareSubset: "⊏", SquareSubsetEqual: "⊑", SquareSuperset: "⊐", SquareSupersetEqual: "⊒", SquareUnion: "⊔", squarf: "▪", squ: "□", squf: "▪", srarr: "→", Sscr: "𝒮", sscr: "𝓈", ssetmn: "∖", ssmile: "⌣", sstarf: "⋆", Star: "⋆", star: "☆", starf: "★", straightepsilon: "ϵ", straightphi: "ϕ", strns: "¯", sub: "⊂", Sub: "⋐", subdot: "⪽", subE: "⫅", sube: "⊆", subedot: "⫃", submult: "⫁", subnE: "⫋", subne: "⊊", subplus: "⪿", subrarr: "⥹", subset: "⊂", Subset: "⋐", subseteq: "⊆", subseteqq: "⫅", SubsetEqual: "⊆", subsetneq: "⊊", subsetneqq: "⫋", subsim: "⫇", subsub: "⫕", subsup: "⫓", succapprox: "⪸", succ: "≻", succcurlyeq: "≽", Succeeds: "≻", SucceedsEqual: "⪰", SucceedsSlantEqual: "≽", SucceedsTilde: "≿", succeq: "⪰", succnapprox: "⪺", succneqq: "⪶", succnsim: "⋩", succsim: "≿", SuchThat: "∋", sum: "∑", Sum: "∑", sung: "♪", sup1: "¹", sup2: "²", sup3: "³", sup: "⊃", Sup: "⋑", supdot: "⪾", supdsub: "⫘", supE: "⫆", supe: "⊇", supedot: "⫄", Superset: "⊃", SupersetEqual: "⊇", suphsol: "⟉", suphsub: "⫗", suplarr: "⥻", supmult: "⫂", supnE: "⫌", supne: "⊋", supplus: "⫀", supset: "⊃", Supset: "⋑", supseteq: "⊇", supseteqq: "⫆", supsetneq: "⊋", supsetneqq: "⫌", supsim: "⫈", supsub: "⫔", supsup: "⫖", swarhk: "⤦", swarr: "↙", swArr: "⇙", swarrow: "↙", swnwar: "⤪", szlig: "ß", Tab: "\u0009", target: "⌖", Tau: "Τ", tau: "τ", tbrk: "⎴", Tcaron: "Ť", tcaron: "ť", Tcedil: "Ţ", tcedil: "ţ", Tcy: "Т", tcy: "т", tdot: "⃛", telrec: "⌕", Tfr: "𝔗", tfr: "𝔱", there4: "∴", therefore: "∴", Therefore: "∴", Theta: "Θ", theta: "θ", thetasym: "ϑ", thetav: "ϑ", thickapprox: "≈", thicksim: "∼", ThickSpace: "  ", ThinSpace: " ", thinsp: " ", thkap: "≈", thksim: "∼", THORN: "Þ", thorn: "þ", tilde: "˜", Tilde: "∼", TildeEqual: "≃", TildeFullEqual: "≅", TildeTilde: "≈", timesbar: "⨱", timesb: "⊠", times: "×", timesd: "⨰", tint: "∭", toea: "⤨", topbot: "⌶", topcir: "⫱", top: "⊤", Topf: "𝕋", topf: "𝕥", topfork: "⫚", tosa: "⤩", tprime: "‴", trade: "™", TRADE: "™", triangle: "▵", triangledown: "▿", triangleleft: "◃", trianglelefteq: "⊴", triangleq: "≜", triangleright: "▹", trianglerighteq: "⊵", tridot: "◬", trie: "≜", triminus: "⨺", TripleDot: "⃛", triplus: "⨹", trisb: "⧍", tritime: "⨻", trpezium: "⏢", Tscr: "𝒯", tscr: "𝓉", TScy: "Ц", tscy: "ц", TSHcy: "Ћ", tshcy: "ћ", Tstrok: "Ŧ", tstrok: "ŧ", twixt: "≬", twoheadleftarrow: "↞", twoheadrightarrow: "↠", Uacute: "Ú", uacute: "ú", uarr: "↑", Uarr: "↟", uArr: "⇑", Uarrocir: "⥉", Ubrcy: "Ў", ubrcy: "ў", Ubreve: "Ŭ", ubreve: "ŭ", Ucirc: "Û", ucirc: "û", Ucy: "У", ucy: "у", udarr: "⇅", Udblac: "Ű", udblac: "ű", udhar: "⥮", ufisht: "⥾", Ufr: "𝔘", ufr: "𝔲", Ugrave: "Ù", ugrave: "ù", uHar: "⥣", uharl: "↿", uharr: "↾", uhblk: "▀", ulcorn: "⌜", ulcorner: "⌜", ulcrop: "⌏", ultri: "◸", Umacr: "Ū", umacr: "ū", uml: "¨", UnderBar: "_", UnderBrace: "⏟", UnderBracket: "⎵", UnderParenthesis: "⏝", Union: "⋃", UnionPlus: "⊎", Uogon: "Ų", uogon: "ų", Uopf: "𝕌", uopf: "𝕦", UpArrowBar: "⤒", uparrow: "↑", UpArrow: "↑", Uparrow: "⇑", UpArrowDownArrow: "⇅", updownarrow: "↕", UpDownArrow: "↕", Updownarrow: "⇕", UpEquilibrium: "⥮", upharpoonleft: "↿", upharpoonright: "↾", uplus: "⊎", UpperLeftArrow: "↖", UpperRightArrow: "↗", upsi: "υ", Upsi: "ϒ", upsih: "ϒ", Upsilon: "Υ", upsilon: "υ", UpTeeArrow: "↥", UpTee: "⊥", upuparrows: "⇈", urcorn: "⌝", urcorner: "⌝", urcrop: "⌎", Uring: "Ů", uring: "ů", urtri: "◹", Uscr: "𝒰", uscr: "𝓊", utdot: "⋰", Utilde: "Ũ", utilde: "ũ", utri: "▵", utrif: "▴", uuarr: "⇈", Uuml: "Ü", uuml: "ü", uwangle: "⦧", vangrt: "⦜", varepsilon: "ϵ", varkappa: "ϰ", varnothing: "∅", varphi: "ϕ", varpi: "ϖ", varpropto: "∝", varr: "↕", vArr: "⇕", varrho: "ϱ", varsigma: "ς", varsubsetneq: "⊊︀", varsubsetneqq: "⫋︀", varsupsetneq: "⊋︀", varsupsetneqq: "⫌︀", vartheta: "ϑ", vartriangleleft: "⊲", vartriangleright: "⊳", vBar: "⫨", Vbar: "⫫", vBarv: "⫩", Vcy: "В", vcy: "в", vdash: "⊢", vDash: "⊨", Vdash: "⊩", VDash: "⊫", Vdashl: "⫦", veebar: "⊻", vee: "∨", Vee: "⋁", veeeq: "≚", vellip: "⋮", verbar: "|", Verbar: "‖", vert: "|", Vert: "‖", VerticalBar: "∣", VerticalLine: "|", VerticalSeparator: "❘", VerticalTilde: "≀", VeryThinSpace: " ", Vfr: "𝔙", vfr: "𝔳", vltri: "⊲", vnsub: "⊂⃒", vnsup: "⊃⃒", Vopf: "𝕍", vopf: "𝕧", vprop: "∝", vrtri: "⊳", Vscr: "𝒱", vscr: "𝓋", vsubnE: "⫋︀", vsubne: "⊊︀", vsupnE: "⫌︀", vsupne: "⊋︀", Vvdash: "⊪", vzigzag: "⦚", Wcirc: "Ŵ", wcirc: "ŵ", wedbar: "⩟", wedge: "∧", Wedge: "⋀", wedgeq: "≙", weierp: "℘", Wfr: "𝔚", wfr: "𝔴", Wopf: "𝕎", wopf: "𝕨", wp: "℘", wr: "≀", wreath: "≀", Wscr: "𝒲", wscr: "𝓌", xcap: "⋂", xcirc: "◯", xcup: "⋃", xdtri: "▽", Xfr: "𝔛", xfr: "𝔵", xharr: "⟷", xhArr: "⟺", Xi: "Ξ", xi: "ξ", xlarr: "⟵", xlArr: "⟸", xmap: "⟼", xnis: "⋻", xodot: "⨀", Xopf: "𝕏", xopf: "𝕩", xoplus: "⨁", xotime: "⨂", xrarr: "⟶", xrArr: "⟹", Xscr: "𝒳", xscr: "𝓍", xsqcup: "⨆", xuplus: "⨄", xutri: "△", xvee: "⋁", xwedge: "⋀", Yacute: "Ý", yacute: "ý", YAcy: "Я", yacy: "я", Ycirc: "Ŷ", ycirc: "ŷ", Ycy: "Ы", ycy: "ы", yen: "¥", Yfr: "𝔜", yfr: "𝔶", YIcy: "Ї", yicy: "ї", Yopf: "𝕐", yopf: "𝕪", Yscr: "𝒴", yscr: "𝓎", YUcy: "Ю", yucy: "ю", yuml: "ÿ", Yuml: "Ÿ", Zacute: "Ź", zacute: "ź", Zcaron: "Ž", zcaron: "ž", Zcy: "З", zcy: "з", Zdot: "Ż", zdot: "ż", zeetrf: "ℨ", ZeroWidthSpace: "​", Zeta: "Ζ", zeta: "ζ", zfr: "𝔷", Zfr: "ℨ", ZHcy: "Ж", zhcy: "ж", zigrarr: "⇝", zopf: "𝕫", Zopf: "ℤ", Zscr: "𝒵", zscr: "𝓏", zwj: "\u200d", zwnj: "\u200c"
     };
 
     var HEXCHARCODE = /^#[xX]([A-Fa-f0-9]+)$/;
