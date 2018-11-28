@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.5.1-ember-native-class-polyfill-3-5+f1af53df
+ * @version   3.5.1-ember-native-class-polyfill-3-5+f56b8abf
  */
 
 /*globals process */
@@ -2889,58 +2889,38 @@ enifed('@ember/engine/lib/engine-parent', ['exports', 'ember-utils'], function (
     engine[ENGINE_PARENT] = parent;
   }
 });
-enifed("@ember/error/index", ["exports", "ember-babel"], function (exports, _emberBabel) {
-    "use strict";
+enifed("@ember/error/index", ["exports"], function (exports) {
+  "use strict";
 
-    /**
-     @module @ember/error
-    */
-    function ExtendBuiltin(klass) {
-        function ExtendableBuiltin() {
-            klass.apply(this, arguments);
-        }
-        ExtendableBuiltin.prototype = Object.create(klass.prototype);
-        ExtendableBuiltin.prototype.constructor = ExtendableBuiltin;
-        return ExtendableBuiltin;
+  exports.default = EmberError;
+  /**
+    A subclass of the JavaScript Error object for use in Ember.
+  
+    @class Error
+    @namespace Ember
+    @extends Error
+    @constructor
+    @public
+  */
+  function EmberError(message) {
+    if (!(this instanceof EmberError)) {
+      return new EmberError(message);
     }
-    /**
-      A subclass of the JavaScript Error object for use in Ember.
-    
-      @class EmberError
-      @extends Error
-      @constructor
-      @public
-    */
 
-    var EmberError = function (_ExtendBuiltin) {
-        (0, _emberBabel.inherits)(EmberError, _ExtendBuiltin);
+    var error = Error.call(this, message);
 
-        function EmberError(message) {
-            (0, _emberBabel.classCallCheck)(this, EmberError);
+    this.stack = error.stack;
+    this.description = error.description;
+    this.fileName = error.fileName;
+    this.lineNumber = error.lineNumber;
+    this.message = error.message;
+    this.name = error.name;
+    this.number = error.number;
+    this.code = error.code;
+  }
 
-            var _this = (0, _emberBabel.possibleConstructorReturn)(this, _ExtendBuiltin.call(this));
-
-            if (!(_this instanceof EmberError)) {
-                var _ret;
-
-                return _ret = new EmberError(message), (0, _emberBabel.possibleConstructorReturn)(_this, _ret);
-            }
-            var error = Error.call(_this, message);
-            _this.stack = error.stack;
-            _this.description = error.description;
-            _this.fileName = error.fileName;
-            _this.lineNumber = error.lineNumber;
-            _this.message = error.message;
-            _this.name = error.name;
-            _this.number = error.number;
-            _this.code = error.code;
-            return _this;
-        }
-
-        return EmberError;
-    }(ExtendBuiltin(Error));
-
-    exports.default = EmberError;
+  EmberError.prototype = Object.create(Error.prototype);
+  EmberError.prototype.constructor = EmberError;
 });
 enifed('@ember/instrumentation/index', ['exports', 'ember-environment'], function (exports, _emberEnvironment) {
     'use strict';
@@ -46007,7 +45987,7 @@ enifed('ember/index', ['exports', 'require', 'ember-environment', 'node-module',
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.5.1-ember-native-class-polyfill-3-5+f1af53df";
+  exports.default = "3.5.1-ember-native-class-polyfill-3-5+f56b8abf";
 });
 /*global enifed, module */
 enifed('node-module', ['exports'], function(_exports) {
