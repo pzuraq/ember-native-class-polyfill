@@ -1,6 +1,6 @@
 {
   "name": "ember-native-class-polyfill",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Polyfill for Ember native classes",
   "keywords": [
     "ember-addon"
