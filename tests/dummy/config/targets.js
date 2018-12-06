@@ -10,6 +10,10 @@ if (process.env.INCLUDE_IE) {
   browsers.push('ie 11');
 }
 
+if (process.env.INCLUDE_ANDROID) {
+  browsers.push('last 2 Android versions');
+}
+
 module.exports = {
   browsers
 };

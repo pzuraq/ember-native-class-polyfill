@@ -49,6 +49,10 @@ jobs:
     - env: INCLUDE_IE=true EMBER_TRY_SCENARIO=ember-3.5
     - env: INCLUDE_IE=true EMBER_TRY_SCENARIO=ember-release
     - env: INCLUDE_IE=true EMBER_TRY_SCENARIO=ember-beta
+    - env: INCLUDE_ANDROID=true EMBER_TRY_SCENARIO=ember-lts-3.4
+    - env: INCLUDE_ANDROID=true EMBER_TRY_SCENARIO=ember-3.5
+    - env: INCLUDE_ANDROID=true EMBER_TRY_SCENARIO=ember-release
+    - env: INCLUDE_ANDROID=true EMBER_TRY_SCENARIO=ember-beta
 
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
