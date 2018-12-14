@@ -5,7 +5,7 @@ const extractTrueVersion = require('./lib/extract-true-version');
 const semver = require('semver');
 const path = require('path');
 
-const supportedVersions = ['3.5.1', '3.4.6'];
+const supportedVersions = ['3.5.1', '3.4.7'];
 
 module.exports = {
   name: require('./package').name,

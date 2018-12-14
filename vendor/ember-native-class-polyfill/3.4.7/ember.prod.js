@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.4.6-ember-native-class-polyfill-3-4+e100421f
+ * @version   3.4.7-ember-native-class-polyfill-3-4+110c3903
  */
 
 /*globals process */
@@ -14943,6 +14943,7 @@ enifed('backburner', ['exports'], function (exports) {
             this._timerTimeoutId = null;
             this._timers = [];
             this._autorun = null;
+            this._autorunStack = null;
             this.queueNames = queueNames;
             this.options = options || {};
             if (typeof this.options.defaultQueue === 'string') {
@@ -14960,6 +14961,7 @@ enifed('backburner', ['exports'], function (exports) {
                     return;
                 }
                 this._autorun = null;
+                this._autorunStack = null;
                 this._end(true /* fromAutorun */);
             };
             let builder = this.options._buildPlatform || buildPlatform;
@@ -15137,7 +15139,8 @@ enifed('backburner', ['exports'], function (exports) {
         debounce() {
             debounceCount++;
             let [target, method, args, wait, isImmediate = false] = parseDebounceArgs(...arguments);
-            let index = findTimerItem(target, method, this._timers);
+            let _timers = this._timers;
+            let index = findTimerItem(target, method, _timers);
             let timerId;
             if (index === -1) {
                 timerId = this._later(target, method, isImmediate ? DISABLE_SCHEDULE : args, wait);
@@ -15145,13 +15148,21 @@ enifed('backburner', ['exports'], function (exports) {
                     this._join(target, method, args);
                 }
             } else {
-                let executeAt = this._platform.now() + wait || this._timers[index];
-                this._timers[index] = executeAt;
+                let executeAt = this._platform.now() + wait;
                 let argIndex = index + 4;
-                if (this._timers[argIndex] !== DISABLE_SCHEDULE) {
-                    this._timers[argIndex] = args;
+                if (_timers[argIndex] === DISABLE_SCHEDULE) {
+                    args = DISABLE_SCHEDULE;
                 }
-                timerId = this._timers[index + 1];
+                timerId = _timers[index + 1];
+                let i = binarySearch(executeAt, _timers);
+                if (index + TIMERS_OFFSET === i) {
+                    _timers[index] = executeAt;
+                    _timers[argIndex] = args;
+                } else {
+                    let stack = this._timers[index + 5];
+                    this._timers.splice(i, 0, executeAt, timerId, target, method, args, stack);
+                    this._timers.splice(index, TIMERS_OFFSET);
+                }
                 if (index === 0) {
                     this._reinstallTimerTimeout();
                 }
@@ -15195,6 +15206,7 @@ enifed('backburner', ['exports'], function (exports) {
         getDebugInfo() {
             if (this.DEBUG) {
                 return {
+                    autorun: this._autorunStack,
                     counters: this.counters,
                     timers: getQueueItems(this._timers, TIMERS_OFFSET, 2),
                     instanceStack: [this.currentInstance, ...this.instanceStack].map(deferredActionQueue => deferredActionQueue && deferredActionQueue._getDebugInfo(this.DEBUG))
@@ -15264,6 +15276,7 @@ enifed('backburner', ['exports'], function (exports) {
             if (this._autorun !== null) {
                 this._platform.clearNext(this._autorun);
                 this._autorun = null;
+                this._autorunStack = null;
             }
         }
         _later(target, method, args, wait) {
@@ -15286,7 +15299,7 @@ enifed('backburner', ['exports'], function (exports) {
             for (let i = 1; i < this._timers.length; i += TIMERS_OFFSET) {
                 if (this._timers[i] === timer) {
                     this._timers.splice(i - 1, TIMERS_OFFSET);
-                    if (i === 0) {
+                    if (i === 1) {
                         this._reinstallTimerTimeout();
                     }
                     return true;
@@ -15366,6 +15379,7 @@ enifed('backburner', ['exports'], function (exports) {
         _ensureInstance() {
             let currentInstance = this.currentInstance;
             if (currentInstance === null) {
+                this._autorunStack = this.DEBUG ? new Error() : undefined;
                 currentInstance = this.begin();
                 this._scheduleAutorun();
             }
@@ -42516,7 +42530,7 @@ enifed('ember/index', ['exports', 'require', 'ember-environment', 'node-module',
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.4.6-ember-native-class-polyfill-3-4+e100421f";
+  exports.default = "3.4.7-ember-native-class-polyfill-3-4+110c3903";
 });
 /*global enifed, module */
 enifed('node-module', ['exports'], function(_exports) {
