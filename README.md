@@ -14,6 +14,16 @@ Installation
 ember install ember-native-class-polyfill
 ```
 
+Version Support
+------------------------------------------------------------------------------
+
+This polyfill currently supports the latest LTS versions of Ember 3.4 and 3.5.
+
+If used with a more recent version of Ember in an app, it will not include the
+polyfill, and will warn the user. If included in an addon and used with a more
+recent version of Ember it will not include the polyfill and it will _not_ warn
+the user, allowing addon authors to safely include the polyfill and support
+3.4+.
 
 Usage
 ------------------------------------------------------------------------------
