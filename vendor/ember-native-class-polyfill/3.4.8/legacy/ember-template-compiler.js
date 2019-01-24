@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.4.7-ember-native-class-polyfill-3-4+110c3903
+ * @version   3.4.8-ember-native-class-polyfill-3-4+f251ea1c
  */
 
 /*globals process */
@@ -1598,6 +1598,9 @@ enifed('@glimmer/compiler', ['exports', 'ember-babel', 'node-module', '@glimmer/
         };
 
         JavaScriptCompiler.prototype.attrSplat = function (to) {
+            // consume (and disregard) the value pushed for the
+            // ...attributes attribute
+            this.popValue();
             this.push([_wireFormat.Ops.AttrSplat, to]);
         };
 
@@ -7764,7 +7767,7 @@ enifed('ember-utils', ['exports'], function (exports) {
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.4.7-ember-native-class-polyfill-3-4+110c3903";
+  exports.default = "3.4.8-ember-native-class-polyfill-3-4+f251ea1c";
 });
 enifed("handlebars", ["exports"], function (exports) {
   "use strict";

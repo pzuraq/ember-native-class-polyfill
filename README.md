@@ -25,6 +25,20 @@ recent version of Ember it will not include the polyfill and it will _not_ warn
 the user, allowing addon authors to safely include the polyfill and support
 3.4+.
 
+**IMPORTANT**: We only ship the _latest_ patch version of these Ember versions,
+so if you have a less recent version of Ember, it _will_ be overwritten. If for
+some reason you want to pin your patch version of Ember, you should also pin the
+patch version of this polyfill:
+
+```json
+{
+  "dependencies": {
+    "ember-source": "3.4.8",
+    "ember-native-class-polyfill":"1.0.6"
+  }
+}
+```
+
 Usage
 ------------------------------------------------------------------------------
 

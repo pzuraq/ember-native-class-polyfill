@@ -6,7 +6,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   3.4.7-ember-native-class-polyfill-3-4+110c3903
+ * @version   3.4.8-ember-native-class-polyfill-3-4+f251ea1c
  */
 
 /*globals process */
@@ -6897,8 +6897,8 @@ enifed('@glimmer/encoder', ['exports', 'ember-babel'], function (exports, _ember
             this.typePos = this.buffer.length - 1;
             for (var i = 2; i < arguments.length; i++) {
                 var op = arguments[i];
-                if (typeof op === 'number' && op > 65535 /* MAX_SIZE */) {
-                        throw new Error('Operand over 16-bits. Got ' + op + '.');
+                if (typeof op === 'number' && op > 4294967295 /* MAX_SIZE */) {
+                        throw new Error('Operand over 32-bits. Got ' + op + '.');
                     }
                 this.buffer.push(op);
             }
@@ -6927,8 +6927,8 @@ enifed('@glimmer/encoder', ['exports', 'ember-babel'], function (exports, _ember
 
     exports.InstructionEncoder = InstructionEncoder;
 });
-enifed('@glimmer/low-level', ['exports', 'ember-babel'], function (exports, _emberBabel) {
-    'use strict';
+enifed("@glimmer/low-level", ["exports", "ember-babel"], function (exports, _emberBabel) {
+    "use strict";
 
     exports.Stack = exports.Storage = undefined;
 
@@ -6995,16 +6995,8 @@ enifed('@glimmer/low-level', ['exports', 'ember-babel'], function (exports, _emb
             this.vec[pos] = value;
         };
 
-        Stack.prototype.writeSmi = function writeSmi(pos, value) {
-            this.vec[pos] = encodeSmi(value);
-        };
-
         Stack.prototype.getRaw = function getRaw(pos) {
             return this.vec[pos];
-        };
-
-        Stack.prototype.getSmi = function getSmi(pos) {
-            return decodeSmi(this.vec[pos]);
         };
 
         Stack.prototype.reset = function reset() {
@@ -7017,24 +7009,6 @@ enifed('@glimmer/low-level', ['exports', 'ember-babel'], function (exports, _emb
 
         return Stack;
     }();
-
-    function decodeSmi(smi) {
-        switch (smi & 7) {
-            case 0 /* NUMBER */:
-                return smi >> 3;
-            case 4 /* NEGATIVE */:
-                return -(smi >> 3);
-            default:
-                throw new Error('unreachable');
-        }
-    }
-    function encodeSmi(primitive) {
-        if (primitive < 0) {
-            return Math.abs(primitive) << 3 | 4 /* NEGATIVE */;
-        } else {
-            return primitive << 3 | 0 /* NUMBER */;
-        }
-    }
 
     exports.Storage = Storage;
     exports.Stack = Stack;
@@ -8890,7 +8864,7 @@ enifed('@glimmer/opcode-compiler', ['exports', '@ember/polyfills', 'ember-babel'
 
             if (capabilities.createArgs) {
                 this.pushFrame();
-                this.compileArgs(null, hash, null, synthetic);
+                this.compileArgs(params, hash, null, synthetic);
             }
             this.beginComponentTransaction();
             if (capabilities.dynamicScope) {
@@ -9092,7 +9066,7 @@ enifed('@glimmer/opcode-compiler', ['exports', '@ember/polyfills', 'ember-babel'
         };
 
         OpcodeBuilder.prototype.sizeImmediate = function sizeImmediate(shifted, primitive) {
-            if (shifted >= 65535 /* MAX_SIZE */ || shifted < 0) {
+            if (shifted >= 4294967295 /* MAX_SIZE */ || shifted < 0) {
                 return this.constants.number(primitive) << 3 | 5 /* BIG_NUM */;
             }
             return shifted;
@@ -9829,10 +9803,12 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
         return Opcode;
     }();
 
-    function encodeTableInfo(size, scopeSize, state) {
-        return size | scopeSize << 16 | state << 30;
+    function encodeTableInfo(scopeSize, state) {
+
+        return state | scopeSize << 2;
     }
     function changeState(info, newState) {
+
         return info | newState << 30;
     }
     var PAGE_SIZE = 0x100000;
@@ -9846,9 +9822,9 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
      *
      * The table 32-bit aligned and has the following layout:
      *
-     * | ... | hp (u32) |       info (u32)          |
-     * | ... |  Handle  | Size | Scope Size | State |
-     * | ... | 32-bits  | 16b  |    14b     |  2b   |
+     * | ... | hp (u32) |       info (u32)   | size (u32) |
+     * | ... |  Handle  | Scope Size | State | Size       |
+     * | ... | 32bits   | 30bits     | 2bits | 32bit      |
      *
      * With this information we effectively have the ability to
      * control when we want to free memory. That being said you
@@ -9870,13 +9846,13 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
                     table = serializedHeap.table,
                     handle = serializedHeap.handle;
 
-                this.heap = new Uint16Array(buffer);
+                this.heap = new Uint32Array(buffer);
                 this.table = table;
                 this.offset = this.heap.length;
                 this.handle = handle;
                 this.capacity = 0;
             } else {
-                this.heap = new Uint16Array(PAGE_SIZE);
+                this.heap = new Uint32Array(PAGE_SIZE);
                 this.table = [];
             }
         }
@@ -9889,7 +9865,7 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
         Heap.prototype.sizeCheck = function sizeCheck() {
             if (this.capacity === 0) {
                 var heap = slice(this.heap, 0, this.offset);
-                this.heap = new Uint16Array(heap.length + PAGE_SIZE);
+                this.heap = new Uint32Array(heap.length + PAGE_SIZE);
                 this.heap.set(heap, 0);
                 this.capacity = PAGE_SIZE;
             }
@@ -9905,18 +9881,15 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
         };
 
         Heap.prototype.malloc = function malloc() {
-            this.table.push(this.offset, 0);
+            // push offset, info, size
+            this.table.push(this.offset, 0, 0);
             var handle = this.handle;
-            this.handle += 2 /* ENTRY_SIZE */;
+            this.handle += 3 /* ENTRY_SIZE */;
             return handle;
         };
 
         Heap.prototype.finishMalloc = function finishMalloc(handle, scopeSize) {
-            var start = this.table[handle];
-            var finish = this.offset;
-            var instructionSize = finish - start;
-            var info = encodeTableInfo(instructionSize, scopeSize, 0 /* Allocated */);
-            this.table[handle + 1 /* INFO_OFFSET */] = info;
+            this.table[handle + 1 /* INFO_OFFSET */] = encodeTableInfo(scopeSize, 0 /* Allocated */);
         };
 
         Heap.prototype.size = function size() {
@@ -9928,9 +9901,9 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
         };
 
         Heap.prototype.gethandle = function gethandle(address) {
-            this.table.push(address, encodeTableInfo(0, 0, 3 /* Pointer */));
+            this.table.push(address, encodeTableInfo(0, 3 /* Pointer */), 0);
             var handle = this.handle;
-            this.handle += 2 /* ENTRY_SIZE */;
+            this.handle += 3 /* ENTRY_SIZE */;
             return handle;
         };
 
@@ -9940,7 +9913,7 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
 
         Heap.prototype.scopesizeof = function scopesizeof(handle) {
             var info = this.table[handle + 1 /* INFO_OFFSET */];
-            return (info & 1073676288 /* SCOPE_MASK */) >> 16;
+            return info >> 2;
         };
 
         Heap.prototype.free = function free(handle) {
@@ -9948,41 +9921,10 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
             this.table[handle + 1 /* INFO_OFFSET */] = changeState(info, 1 /* Freed */);
         };
 
-        Heap.prototype.compact = function compact() {
-            var compactedSize = 0;
-            var table = this.table,
-                length = this.table.length,
-                heap = this.heap;
-
-            for (var i = 0; i < length; i += 2 /* ENTRY_SIZE */) {
-                var offset = table[i];
-                var info = table[i + 1 /* INFO_OFFSET */];
-                var size = info & 65535 /* SIZE_MASK */;
-                var state = info & 3221225472 /* STATE_MASK */ >> 30;
-                if (state === 2 /* Purged */) {
-                        continue;
-                    } else if (state === 1 /* Freed */) {
-                        // transition to "already freed" aka "purged"
-                        // a good improvement would be to reuse
-                        // these slots
-                        table[i + 1 /* INFO_OFFSET */] = changeState(info, 2 /* Purged */);
-                        compactedSize += size;
-                    } else if (state === 0 /* Allocated */) {
-                        for (var j = offset; j <= i + size; j++) {
-                            heap[j - compactedSize] = heap[j];
-                        }
-                        table[i] = offset - compactedSize;
-                    } else if (state === 3 /* Pointer */) {
-                        table[i] = offset - compactedSize;
-                    }
-            }
-            this.offset = this.offset - compactedSize;
-        };
-
         Heap.prototype.pushPlaceholder = function pushPlaceholder(valueFunc) {
             this.sizeCheck();
             var address = this.offset++;
-            this.heap[address] = 65535 /* MAX_SIZE */;
+            this.heap[address] = 2147483647 /* MAX_SIZE */;
             this.placeholders.push([address, valueFunc]);
         };
 
@@ -10072,7 +10014,7 @@ enifed('@glimmer/program', ['exports', 'ember-babel', '@glimmer/util'], function
         if (arr.slice !== undefined) {
             return arr.slice(start, end);
         }
-        var ret = new Uint16Array(end);
+        var ret = new Uint32Array(end);
         for (; start < end; start++) {
             ret[start] = arr[start];
         }
@@ -11432,7 +11374,7 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
         var stack = vm.stack;
         var block = stack.pop();
         if (block) {
-            stack.pushSmi(block.compile());
+            stack.push(block.compile());
         } else {
             stack.pushNull();
         }
@@ -13613,19 +13555,19 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
 
 
         LowLevelVM.prototype.pushFrame = function pushFrame() {
-            this.stack.pushSmi(this.ra);
-            this.stack.pushSmi(this.stack.fp);
+            this.stack.push(this.ra);
+            this.stack.push(this.stack.fp);
             this.stack.fp = this.stack.sp - 1;
         };
 
         LowLevelVM.prototype.popFrame = function popFrame() {
             this.stack.sp = this.stack.fp - 1;
-            this.ra = this.stack.getSmi(0);
-            this.stack.fp = this.stack.getSmi(1);
+            this.ra = this.stack.get(0);
+            this.stack.fp = this.stack.get(1);
         };
 
         LowLevelVM.prototype.pushSmallFrame = function pushSmallFrame() {
-            this.stack.pushSmi(this.ra);
+            this.stack.push(this.ra);
         };
 
         LowLevelVM.prototype.popSmallFrame = function popSmallFrame() {
@@ -14170,8 +14112,7 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
         return NewElementBuilder.forInitialRender(env, cursor);
     }
 
-    var HI = 0x80000000;
-    var MASK = 0x7fffffff;
+    var MAX_SMI = 0xfffffff;
 
     var InnerStack = function () {
         function InnerStack() {
@@ -14213,29 +14154,21 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
             } else {
                 var idx = this.js.length;
                 this.js.push(value);
-                this.inner.writeRaw(pos, idx | HI);
+                this.inner.writeRaw(pos, ~idx);
             }
         };
 
-        InnerStack.prototype.writeSmi = function writeSmi(pos, value) {
-            this.inner.writeSmi(pos, value);
-        };
-
-        InnerStack.prototype.writeImmediate = function writeImmediate(pos, value) {
+        InnerStack.prototype.writeRaw = function writeRaw(pos, value) {
             this.inner.writeRaw(pos, value);
         };
 
         InnerStack.prototype.get = function get(pos) {
             var value = this.inner.getRaw(pos);
-            if (value & HI) {
-                return this.js[value & MASK];
+            if (value < 0) {
+                return this.js[~value];
             } else {
                 return decodeImmediate(value);
             }
-        };
-
-        InnerStack.prototype.getSmi = function getSmi(pos) {
-            return this.inner.getSmi(pos);
         };
 
         InnerStack.prototype.reset = function reset() {
@@ -14277,20 +14210,12 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
             this.stack.write(++this.sp, value);
         };
 
-        EvaluationStack.prototype.pushSmi = function pushSmi(value) {
-            this.stack.writeSmi(++this.sp, value);
-        };
-
-        EvaluationStack.prototype.pushImmediate = function pushImmediate(value) {
-            this.stack.writeImmediate(++this.sp, encodeImmediate(value));
-        };
-
         EvaluationStack.prototype.pushEncodedImmediate = function pushEncodedImmediate(value) {
-            this.stack.writeImmediate(++this.sp, value);
+            this.stack.writeRaw(++this.sp, value);
         };
 
         EvaluationStack.prototype.pushNull = function pushNull() {
-            this.stack.writeImmediate(++this.sp, 19 /* Null */);
+            this.stack.write(++this.sp, null);
         };
 
         EvaluationStack.prototype.dup = function dup() {
@@ -14312,7 +14237,7 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
         };
 
         EvaluationStack.prototype.popSmi = function popSmi() {
-            return this.stack.getSmi(this.sp--);
+            return this.stack.get(this.sp--);
         };
 
         EvaluationStack.prototype.peek = function peek() {
@@ -14321,22 +14246,10 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
             return this.stack.get(this.sp - offset);
         };
 
-        EvaluationStack.prototype.peekSmi = function peekSmi() {
-            var offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-            return this.stack.getSmi(this.sp - offset);
-        };
-
         EvaluationStack.prototype.get = function get(offset) {
             var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.fp;
 
             return this.stack.get(base + offset);
-        };
-
-        EvaluationStack.prototype.getSmi = function getSmi(offset) {
-            var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.fp;
-
-            return this.stack.getSmi(base + offset);
         };
 
         EvaluationStack.prototype.set = function set(value, offset) {
@@ -14381,8 +14294,7 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
                 // not an integer
                 if (value % 1 !== 0) return false;
                 var abs = Math.abs(value);
-                // too big
-                if (abs > HI) return false;
+                if (abs > MAX_SMI) return false;
                 return true;
             default:
                 return false;
@@ -14390,8 +14302,11 @@ enifed('@glimmer/runtime', ['exports', 'ember-babel', '@glimmer/util', '@glimmer
     }
     function encodeSmi(primitive) {
         if (primitive < 0) {
+            var abs = Math.abs(primitive);
+            if (abs > MAX_SMI) throw new Error('not smi');
             return Math.abs(primitive) << 3 | 4 /* NEGATIVE */;
         } else {
+            if (primitive > MAX_SMI) throw new Error('not smi');
             return primitive << 3 | 0 /* NUMBER */;
         }
     }
@@ -45982,7 +45897,7 @@ enifed('ember/index', ['exports', 'require', 'ember-environment', 'node-module',
 enifed("ember/version", ["exports"], function (exports) {
   "use strict";
 
-  exports.default = "3.4.7-ember-native-class-polyfill-3-4+110c3903";
+  exports.default = "3.4.8-ember-native-class-polyfill-3-4+f251ea1c";
 });
 /*global enifed, module */
 enifed('node-module', ['exports'], function(_exports) {
