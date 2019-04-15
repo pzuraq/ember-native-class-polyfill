@@ -38,7 +38,6 @@ module.exports = {
 
       let emberCliBabel = this.addons.find(a => a.name === 'ember-cli-babel');
       let needsLegacyBuild = [
-        'transform-template-literals',
         'transform-literals',
         'transform-arrow-functions',
         'transform-destructuring',
